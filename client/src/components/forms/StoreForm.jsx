@@ -57,8 +57,8 @@ const StoreForm = () => {
 		slug: overrides.slug ?? existingStore?.slug ?? "",
 		storeName: overrides.storeName ?? existingStore?.storeName ?? "",
 		whatsapp: overrides.whatsapp ?? existingStore?.whatsapp ?? "",
-		facebook: overrides.facebook || undefined,
-		instagram: overrides.instagram || undefined,
+		facebook: overrides.facebook ?? existingStore?.facebook ?? "",
+		instagram: overrides.instagram ?? existingStore?.instagram ?? "",
 		customDomain: overrides.customDomain ?? existingStore?.customDomain ?? "",
 		logo: overrides.logo ?? existingStore?.logo ?? "",
 		colorMain:

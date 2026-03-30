@@ -234,16 +234,6 @@ const Hero = () => {
 									{tagline}
 								</span>
 							</div>
-
-							<h1
-								className="hero-display font-semibold leading-none"
-								style={{
-									fontSize: "clamp(2rem, 5vw, 4.5rem)",
-									letterSpacing: "-0.01em",
-								}}
-							>
-								<SplitText text="originales" baseDelay={700} />
-							</h1>
 						</div>
 
 						<div
