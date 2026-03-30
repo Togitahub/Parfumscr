@@ -1,0 +1,330 @@
+import { NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@apollo/client/react";
+import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
+import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
+import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
+import { BsInstagram, BsWhatsapp, BsEnvelope, BsHeart } from "react-icons/bs";
+
+import { useStore } from "../../hooks/StoreContext";
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const NAV_LINKS = [
+	{ label: "Inicio", to: "/" },
+	{ label: "Acerca de", to: "/about" },
+	{ label: "Contacto", to: "/contact" },
+];
+
+const SOCIAL = [
+	{
+		icon: <BsInstagram className="w-4 h-4" />,
+		label: "Instagram",
+		href: "https://instagram.com",
+	},
+	{
+		icon: <BsWhatsapp className="w-4 h-4" />,
+		label: "WhatsApp",
+		href: "https://wa.me/50600000000",
+	},
+	{
+		icon: <BsEnvelope className="w-4 h-4" />,
+		label: "Email",
+		href: "mailto:info@parfums.cr",
+	},
+];
+
+// ── Ornamental divider ────────────────────────────────────────────────────────
+
+const OrnamentalDivider = () => (
+	<div className="flex items-center gap-3 opacity-20">
+		<div className="flex-1 h-px bg-first" />
+		<svg width="28" height="10" viewBox="0 0 28 10" fill="none">
+			<path
+				d="M14 1 L18 5 L14 9 L10 5 Z"
+				stroke="var(--color-second)"
+				strokeWidth="0.8"
+				fill="none"
+			/>
+			<circle cx="3" cy="5" r="1.5" fill="var(--color-second)" opacity="0.6" />
+			<circle cx="25" cy="5" r="1.5" fill="var(--color-second)" opacity="0.6" />
+			<line
+				x1="6"
+				y1="5"
+				x2="9"
+				y2="5"
+				stroke="var(--color-second)"
+				strokeWidth="0.6"
+				opacity="0.5"
+			/>
+			<line
+				x1="19"
+				y1="5"
+				x2="22"
+				y2="5"
+				stroke="var(--color-second)"
+				strokeWidth="0.6"
+				opacity="0.5"
+			/>
+		</svg>
+		<div className="flex-1 h-px bg-first" />
+	</div>
+);
+
+// ── Column heading ────────────────────────────────────────────────────────────
+
+const ColHeading = ({ children }) => (
+	<p
+		className="text-[10px] font-semibold uppercase tracking-[0.25em] mb-4"
+		style={{ color: "var(--color-second)", fontFamily: "'Cinzel', serif" }}
+	>
+		{children}
+	</p>
+);
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+const Footer = () => {
+	const navigate = useNavigate();
+
+	const { data: brandsData } = useQuery(GET_BRANDS);
+	const { data: categoriesData } = useQuery(GET_CATEGORIES);
+	const { data: segmentsData } = useQuery(GET_SEGMENTS);
+
+	const brands = (brandsData?.getBrands ?? []).slice(0, 6);
+	const categories = categoriesData?.getCategories ?? [];
+	const segments = segmentsData?.getSegments ?? [];
+
+	const { store } = useStore();
+
+	const year = new Date().getFullYear();
+
+	if (!store) return null;
+
+	return (
+		<footer className="relative overflow-hidden border-t border-first/8">
+			{/* ── Grain texture ── */}
+			<div
+				className="absolute inset-0 opacity-[0.025] pointer-events-none"
+				style={{
+					backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+					backgroundSize: "180px",
+				}}
+			/>
+
+			{/* ── Radial glow ── */}
+			<div
+				className="absolute inset-0 pointer-events-none"
+				style={{
+					background: `radial-gradient(ellipse 70% 50% at 50% 100%, color-mix(in srgb, var(--color-second) 4%, transparent), transparent 70%)`,
+				}}
+			/>
+
+			<div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12">
+				{/* ── Brand block ── */}
+				<div className="pt-16 pb-10 flex flex-col items-center gap-5 text-center">
+					{/* Logo mark */}
+					<NavLink to="/" className="group flex flex-col items-center gap-3">
+						<div
+							className="w-14 h-14 rounded-full border flex items-center justify-center transition-all duration-500 group-hover:shadow-[0_0_24px_color-mix(in_srgb,var(--color-second)_25%,transparent)]"
+							style={{
+								borderColor:
+									"color-mix(in srgb, var(--color-second) 35%, transparent)",
+								background:
+									"color-mix(in srgb, var(--color-second) 6%, transparent)",
+							}}
+						>
+							<span
+								style={{
+									fontFamily: "'Cinzel', serif",
+									fontSize: "1.4rem",
+									color: "var(--color-second)",
+									fontWeight: 600,
+									letterSpacing: "0.05em",
+								}}
+							>
+								P
+							</span>
+						</div>
+
+						<div className="flex flex-col gap-0.5">
+							<span
+								className="text-2xl font-light tracking-[0.18em] text-first"
+								style={{ fontFamily: "'Cormorant Garamond', serif" }}
+							>
+								PARFUMS
+							</span>
+							<span
+								className="text-[9px] tracking-[0.3em] uppercase"
+								style={{
+									color:
+										"color-mix(in srgb, var(--color-second) 70%, transparent)",
+									fontFamily: "'Cinzel', serif",
+								}}
+							>
+								Fragancias Originales
+							</span>
+						</div>
+					</NavLink>
+
+					{/* Tagline */}
+					<p
+						className="text-sm font-light max-w-xs leading-relaxed"
+						style={{
+							fontFamily: "'Cormorant Garamond', serif",
+							fontSize: "1rem",
+							color: "color-mix(in srgb, var(--color-first) 45%, transparent)",
+							fontStyle: "italic",
+						}}
+					>
+						Cada fragancia, una historia. Cada historia, tuya.
+					</p>
+
+					{/* Social icons */}
+					<div className="flex items-center gap-3 mt-1">
+						{SOCIAL.map(({ icon, label, href }) => (
+							<a
+								key={label}
+								href={href}
+								aria-label={label}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="w-9 h-9 rounded-full border border-first/10 flex items-center justify-center transition-all duration-300 hover:border-second/40 hover:text-second text-first/40 hover:shadow-[0_0_12px_color-mix(in_srgb,var(--color-second)_20%,transparent)]"
+							>
+								{icon}
+							</a>
+						))}
+					</div>
+				</div>
+
+				{/* ── Ornamental divider ── */}
+				<OrnamentalDivider />
+
+				{/* ── Link columns ── */}
+				<div className="py-12 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
+					{/* Navegación */}
+					<div>
+						<ColHeading>Navegación</ColHeading>
+						<ul className="flex flex-col gap-2.5">
+							{NAV_LINKS.map(({ label, to }) => (
+								<li key={to}>
+									<NavLink
+										to={to}
+										className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide"
+										style={{
+											fontFamily: "'Cormorant Garamond', serif",
+											fontSize: "0.95rem",
+										}}
+									>
+										{label}
+									</NavLink>
+								</li>
+							))}
+						</ul>
+					</div>
+
+					{/* Marcas */}
+					<div>
+						<ColHeading>Marcas</ColHeading>
+						<ul className="flex flex-col gap-2.5">
+							{brands.length > 0 ? (
+								brands.map((b) => (
+									<li key={b.id}>
+										<button
+											onClick={() => navigate(`/brand/${b.id}`)}
+											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
+											style={{
+												fontFamily: "'Cormorant Garamond', serif",
+												fontSize: "0.95rem",
+											}}
+										>
+											{b.name}
+										</button>
+									</li>
+								))
+							) : (
+								<li className="text-xs text-first/20 italic">Cargando...</li>
+							)}
+						</ul>
+					</div>
+
+					{/* Categorías */}
+					<div>
+						<ColHeading>Categorías</ColHeading>
+						<ul className="flex flex-col gap-2.5">
+							{categories.length > 0 ? (
+								categories.map((c) => (
+									<li key={c.id}>
+										<button
+											onClick={() => navigate(`/category/${c.id}`)}
+											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
+											style={{
+												fontFamily: "'Cormorant Garamond', serif",
+												fontSize: "0.95rem",
+											}}
+										>
+											{c.name}
+										</button>
+									</li>
+								))
+							) : (
+								<li className="text-xs text-first/20 italic">Cargando...</li>
+							)}
+						</ul>
+					</div>
+
+					{/* Segmentos */}
+					<div>
+						<ColHeading>Segmentos</ColHeading>
+						<ul className="flex flex-col gap-2.5">
+							{segments.length > 0 ? (
+								segments.map((s) => (
+									<li key={s.id}>
+										<button
+											onClick={() => navigate(`/segment/${s.id}`)}
+											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
+											style={{
+												fontFamily: "'Cormorant Garamond', serif",
+												fontSize: "0.95rem",
+											}}
+										>
+											{s.name}
+										</button>
+									</li>
+								))
+							) : (
+								<li className="text-xs text-first/20 italic">Cargando...</li>
+							)}
+						</ul>
+					</div>
+				</div>
+
+				{/* ── Ornamental divider ── */}
+				<OrnamentalDivider />
+
+				{/* ── Bottom bar ── */}
+				<div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+					<p
+						className="text-xs text-first/25 tracking-widest"
+						style={{ fontFamily: "'Cinzel', serif" }}
+					>
+						© {year} Parfums — Todos los derechos reservados
+					</p>
+
+					<p
+						className="text-[11px] text-first/20 flex items-center gap-1.5 tracking-wide"
+						style={{ fontFamily: "'Cormorant Garamond', serif" }}
+					>
+						Hecho con{" "}
+						<BsHeart
+							className="w-3 h-3"
+							style={{ color: "var(--color-second)", opacity: 0.6 }}
+						/>
+						en Costa Rica
+					</p>
+				</div>
+			</div>
+		</footer>
+	);
+};
+
+export default Footer;
