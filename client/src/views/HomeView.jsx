@@ -5,12 +5,14 @@ import {
 	BsGlobe,
 	BsCheck,
 	BsStar,
+	BsHeart,
 } from "react-icons/bs";
 
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 
-import { GET_STORES } from "../graphql/store/StoreQueries";
+import { GET_STORE_PRODUCTS, GET_STORES } from "../graphql/store/StoreQueries";
+import { OrnamentalDivider } from "../components/design/Footer";
 
 const FEATURES = [
 	{
@@ -253,10 +255,57 @@ const PlanCard = ({ plan, index }) => {
 	);
 };
 
+const StoreCard = ({ store, i }) => {
+	const navigate = useNavigate();
+
+	const { data: storeProductsData } = useQuery(GET_STORE_PRODUCTS, {
+		variables: { storeId: store.id },
+	});
+	const storeProducts = storeProductsData?.getStoreProducts ?? [];
+	const storeProductsLength = storeProducts.length ?? 0;
+
+	return (
+		<button
+			onClick={() =>
+				navigate(
+					(window.location.href = store.customDomain
+						? `https://${store.customDomain}`
+						: `https://${store.slug}.parfumscr.com`),
+				)
+			}
+			className="group flex items-center gap-4 p-5 rounded-2xl border-2 border-second/50 text-left transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
+			style={{
+				background: "var(--color-main)",
+				animation: "fadeUp 0.5s ease both",
+				animationDelay: `${i * 70}ms`,
+			}}
+		>
+			{/* Info */}
+			<div className="flex flex-col gap-1 flex-1 min-w-0">
+				<p className="text-base font-semibold text-first truncate group-hover:text-second transition-colors duration-200">
+					{store.storeName}
+				</p>
+				<p className="text-xs text-first/35 truncate">
+					{store.slug}.parfumscr.com
+				</p>
+				<p className="text-xs text-first/35 truncate">
+					{storeProductsLength}{" "}
+					{storeProductsLength > 1 ? "Productos" : "Producto"}
+				</p>
+			</div>
+
+			<span className="text-first/20 group-hover:text-second transition-colors duration-200 shrink-0">
+				→
+			</span>
+		</button>
+	);
+};
+
 const HomeView = () => {
 	const { data: storesData } = useQuery(GET_STORES);
 	const stores = storesData?.getStores ?? [];
-	const navigate = useNavigate();
+
+	const year = new Date().getFullYear();
 
 	return (
 		<div className="min-h-screen flex flex-col">
@@ -327,60 +376,7 @@ const HomeView = () => {
 
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 							{stores.map((store, i) => (
-								<button
-									key={store.id}
-									onClick={() => navigate(`/store?slug=${store.slug}`)}
-									// Para producción usar
-									// window.location.href = store.customDomain ? `https://${store.customDomain}` : `https://${store.slug}.tudominio.com`;
-									className="group flex items-center gap-4 p-5 rounded-2xl border border-first/10 text-left transition-all duration-300 hover:border-first/25 hover:shadow-lg hover:shadow-black/10 cursor-pointer"
-									style={{
-										background: "var(--color-main)",
-										animation: "fadeUp 0.5s ease both",
-										animationDelay: `${i * 70}ms`,
-									}}
-								>
-									{/* Logo */}
-									<div
-										className="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center overflow-hidden border"
-										style={{
-											borderColor: `color-mix(in srgb, ${store.colorSecond} 30%, transparent)`,
-											background: `color-mix(in srgb, ${store.colorSecond} 8%, transparent)`,
-										}}
-									>
-										{store.logo ? (
-											<img
-												src={store.logo}
-												alt={store.storeName}
-												className="w-full h-full object-cover"
-											/>
-										) : (
-											<span
-												style={{
-													fontFamily: "'Cinzel', serif",
-													fontSize: "1.3rem",
-													color: store.colorSecond,
-													fontWeight: 600,
-												}}
-											>
-												{store.storeName[0]}
-											</span>
-										)}
-									</div>
-
-									{/* Info */}
-									<div className="flex flex-col gap-1 flex-1 min-w-0">
-										<p className="text-base font-semibold text-first truncate group-hover:text-second transition-colors duration-200">
-											{store.storeName}
-										</p>
-										<p className="text-xs text-first/35 truncate">
-											{store.slug}.parfumscr.com
-										</p>
-									</div>
-
-									<span className="text-first/20 group-hover:text-second transition-colors duration-200 shrink-0">
-										→
-									</span>
-								</button>
+								<StoreCard key={store.id} store={store} i={i} />
 							))}
 						</div>
 					</div>
@@ -477,6 +473,31 @@ const HomeView = () => {
 					>
 						¿Tienes dudas? Escríbenos y te asesoramos sin compromiso.
 					</p>
+
+					{/* ── Ornamental divider ── */}
+					<OrnamentalDivider />
+
+					{/* ── Bottom bar ── */}
+					<div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+						<p
+							className="text-xs text-first/25 tracking-widest"
+							style={{ fontFamily: "'Cinzel', serif" }}
+						>
+							© {year} Parfumscr — Todos los derechos reservados
+						</p>
+
+						<p
+							className="text-[11px] text-first/20 flex items-center gap-1.5 tracking-wide"
+							style={{ fontFamily: "'Cormorant Garamond', serif" }}
+						>
+							Hecho con{" "}
+							<BsHeart
+								className="w-3 h-3"
+								style={{ color: "var(--color-second)" }}
+							/>
+							en Costa Rica
+						</p>
+					</div>
 				</div>
 			</section>
 		</div>

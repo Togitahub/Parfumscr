@@ -4,7 +4,7 @@ import { useStore } from "../../hooks/StoreContext";
 
 // ── Ornamental divider ────────────────────────────────────────────────────────
 
-const OrnamentalDivider = () => (
+export const OrnamentalDivider = () => (
 	<div className="flex items-center gap-3 opacity-20">
 		<div className="flex-1 h-px bg-first" />
 		<svg width="28" height="10" viewBox="0 0 28 10" fill="none">

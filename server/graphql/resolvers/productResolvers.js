@@ -176,15 +176,23 @@ const productResolvers = {
 			if (!product) throw new Error("Product not found");
 
 			if (product.isDecant) {
-				// Verificar si quedan otros decants del mismo padre
 				const siblingsCount = await Product.countDocuments({
 					linkedProduct: product.linkedProduct,
 					isDecant: true,
 					_id: { $ne: id },
 				});
 
-				// Si es el último decant, eliminar la imagen de Cloudinary
 				if (siblingsCount === 0) {
+					const publicId = extractPublicId(product.images?.[0]);
+					if (publicId) await deleteImage(publicId);
+				}
+			} else {
+				const decantsCount = await Product.countDocuments({
+					linkedProduct: id,
+					isDecant: true,
+				});
+
+				if (decantsCount === 0) {
 					const publicId = extractPublicId(product.images?.[0]);
 					if (publicId) await deleteImage(publicId);
 				}

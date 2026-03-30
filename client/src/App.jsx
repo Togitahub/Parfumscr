@@ -42,7 +42,7 @@ const App = () => {
 					<Route path="/about" element={<AboutView />} />
 					<Route path="/product/:id" element={<ProductView />} />
 					<Route
-						path="/brand/:id"
+						path="/store/brand/:id"
 						element={<EntityView type="brand" />}
 					/>
 					<Route

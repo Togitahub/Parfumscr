@@ -9,6 +9,9 @@ import {
 	BsX,
 	BsChevronDown,
 	BsSpeedometer2,
+	BsInstagram,
+	BsFacebook,
+	BsWhatsapp,
 } from "react-icons/bs";
 
 import { useAuth } from "../../hooks/AuthContext";
@@ -19,7 +22,6 @@ import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
 import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
 import { GET_NOTES } from "../../graphql/note/NoteQueries";
 
-import ThemeChanger from "../interface/ThemeChanger";
 import Button from "../common/Button";
 
 // ── Hook: cierra al hacer click fuera ────────────────────────────────────────
@@ -227,25 +229,6 @@ const IconLink = ({ to, icon, label, badge }) => (
 	</NavLink>
 );
 
-// ── Mobile menu item ─────────────────────────────────────────────────────────
-
-const MobileSection = ({ title, items, onItemClick }) => (
-	<div className="flex flex-col gap-1">
-		<p className="text-[10px] font-semibold uppercase tracking-widest text-first/30 px-2 pt-2 pb-1">
-			{title}
-		</p>
-		{items.map((item) => (
-			<button
-				key={item.id}
-				onClick={() => onItemClick(item)}
-				className="text-left px-3 py-2 rounded-lg text-sm text-first/70 hover:text-first hover:bg-first/5 transition-colors cursor-pointer"
-			>
-				{item.name}
-			</button>
-		))}
-	</div>
-);
-
 // ── NavBar principal ─────────────────────────────────────────────────────────
 
 const NavBar = () => {
@@ -285,7 +268,7 @@ const NavBar = () => {
 	const closeMobile = useCallback(() => setMobileOpen(false), []);
 
 	const handleBrandClick = (brand) => {
-		navigate(`/brand/${brand.id}`);
+		navigate(`/store/brand/${brand.id}`);
 		closeMobile();
 	};
 	const handleCategoryClick = (cat) => {
@@ -298,6 +281,24 @@ const NavBar = () => {
 	};
 
 	if (!store) return null;
+
+	const SOCIAL = [
+		{
+			icon: <BsInstagram className="w-4 h-4" />,
+			label: "Instagram",
+			href: store?.instagram || "https://instagram.com",
+		},
+		{
+			icon: <BsFacebook className="w-4 h-4" />,
+			label: "Facebook",
+			href: store?.facebook || "https://facebook.com",
+		},
+		{
+			icon: <BsWhatsapp className="w-4 h-4" />,
+			label: "WhatsApp",
+			href: store?.whatsapp ? `https://wa.me/${store.whatsapp}` : "#",
+		},
+	];
 
 	return (
 		<>
@@ -328,7 +329,7 @@ const NavBar = () => {
 									P
 								</div>
 								<span className="nav-logo-text font-semibold text-base text-first tracking-tight hidden sm:block">
-									Parfums
+									Parfumscr
 								</span>
 							</>
 						)}
@@ -359,39 +360,28 @@ const NavBar = () => {
 								onItemClick={handleSegmentClick}
 							/>
 							<NotesDropdown items={notes} loading={loadingNotes} />
-
-							{/* ── Separador ── */}
-							<div className="w-px h-4 bg-first/10 mx-1" />
-
-							<NavLink
-								to="/about"
-								className={({ isActive }) =>
-									[
-										"px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-										isActive
-											? "text-second bg-second/8"
-											: "text-first/60 hover:text-first hover:bg-first/5",
-									].join(" ")
-								}
-							>
-								Acerca de
-							</NavLink>
-
-							<NavLink
-								to="/contact"
-								className={({ isActive }) =>
-									[
-										"px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-										isActive
-											? "text-second bg-second/8"
-											: "text-first/60 hover:text-first hover:bg-first/5",
-									].join(" ")
-								}
-							>
-								Contacto
-							</NavLink>
 						</nav>
 					)}
+
+					{/* Redes Sociale de la Store */}
+					{store && (
+						<div className="hidden md:flex items-center gap-3 mt-1">
+							{SOCIAL.map(({ icon, label, href }) => (
+								<a
+									key={label}
+									href={href}
+									aria-label={label}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="w-9 h-9 rounded-full border border-first/10 flex items-center justify-center transition-all duration-300 hover:border-second/40 hover:text-second text-first/40 hover:shadow-[0_0_12px_color-mix(in_srgb,var(--color-second)_20%,transparent)]"
+								>
+									{icon}
+								</a>
+							))}
+						</div>
+					)}
+
+					<div className="w-px h-5 bg-first/10 hidden lg:block" />
 
 					{/* ── Acciones derecha ── */}
 					<div className="flex items-center gap-1 ml-auto">
@@ -476,76 +466,69 @@ const NavBar = () => {
 					mobileOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0",
 				].join(" ")}
 			>
+				{store && (
+					<div className="px-2 flex items-center mt-1">
+						{SOCIAL.map(({ icon, label, href }) => (
+							<a
+								key={label}
+								href={href}
+								aria-label={label}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="w-9 h-9 flex items-center justify-center text-first/40"
+							>
+								{icon}
+							</a>
+						))}
+					</div>
+				)}
 				<div className="max-w-7xl mx-auto px-4 py-4 overflow-y-auto max-h-[calc(80vh-4rem)] flex flex-col gap-4">
 					{/* Links principales */}
-					<div className="flex flex-col gap-1">
-						{!isAdmin && (
-							<div>
-								<NavLink
-									to="/about"
-									onClick={closeMobile}
-									className="px-3 py-2.5 rounded-lg text-sm font-medium text-first/70 hover:text-first hover:bg-first/5 transition-colors"
-								>
-									Acerca de
-								</NavLink>
-								<NavLink
-									to="/contact"
-									onClick={closeMobile}
-									className="px-3 py-2.5 rounded-lg text-sm font-medium text-first/70 hover:text-first hover:bg-first/5 transition-colors"
-								>
-									Contacto
-								</NavLink>
-							</div>
-						)}
-						{isAdmin && (
-							<NavLink
-								to="/admin"
-								onClick={closeMobile}
-								className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-second hover:bg-second/8 transition-colors"
-							>
-								<BsSpeedometer2 className="w-3.5 h-3.5" />
-								Dashboard
-							</NavLink>
-						)}
-					</div>
+					{isAdmin && (
+						<NavLink
+							to="/admin"
+							onClick={closeMobile}
+							className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-second hover:bg-second/8 transition-colors"
+						>
+							<BsSpeedometer2 className="w-3.5 h-3.5" />
+							Dashboard
+						</NavLink>
+					)}
 
 					<div className="h-px bg-first/8" />
 
 					{/* Catálogo */}
-					{brands.length > 0 && (
-						<MobileSection
-							title="Marcas"
-							items={brands}
-							onItemClick={handleBrandClick}
-						/>
-					)}
-					{categories.length > 0 && (
-						<MobileSection
-							title="Categorías"
-							items={categories}
-							onItemClick={handleCategoryClick}
-						/>
-					)}
-					{segments.length > 0 && (
-						<MobileSection
-							title="Segmentos"
-							items={segments}
-							onItemClick={handleSegmentClick}
-						/>
-					)}
+					<Dropdown
+						label="Marcas"
+						items={brands}
+						loading={loadingBrands}
+						onItemClick={handleBrandClick}
+					/>
+					<Dropdown
+						label="Categorías"
+						items={categories}
+						loading={loadingCats}
+						onItemClick={handleCategoryClick}
+					/>
+					<Dropdown
+						label="Segmentos"
+						items={segments}
+						loading={loadingSegs}
+						onItemClick={handleSegmentClick}
+					/>
 
 					{/* Notas en chips */}
 					{notes.length > 0 && (
 						<div className="flex flex-col gap-2">
 							<p className="text-[10px] font-semibold uppercase tracking-widest text-first/30 px-2">
-								Notas olfativas
+								Aromas
 							</p>
 							<div className="flex flex-wrap gap-1.5 px-1">
 								{notes.map((note) => (
 									<button
 										key={note.id}
 										onClick={() => {
-											navigate(`/note/${note.id}`);
+											navigate(`/store/note/${note.id}`);
 											closeMobile();
 										}}
 										className="px-2.5 py-1 rounded-full text-xs font-medium border border-first/10 text-first/60 hover:text-second hover:border-second/30 hover:bg-second/8 transition-all cursor-pointer"
