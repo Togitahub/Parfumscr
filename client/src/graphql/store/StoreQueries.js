@@ -12,6 +12,8 @@ export const GET_MY_STORE = gql`
 			colorSecond
 			logo
 			whatsapp
+			facebook
+			instagram
 			active
 			heroTagline
 			heroDescription

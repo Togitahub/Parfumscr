@@ -1,32 +1,6 @@
-import { BsInstagram, BsWhatsapp, BsEnvelope, BsHeart } from "react-icons/bs";
+import { BsInstagram, BsWhatsapp, BsHeart, BsFacebook } from "react-icons/bs";
 
 import { useStore } from "../../hooks/StoreContext";
-
-// ── Data ──────────────────────────────────────────────────────────────────────
-
-const NAV_LINKS = [
-	{ label: "Inicio", to: "/" },
-	{ label: "Acerca de", to: "/about" },
-	{ label: "Contacto", to: "/contact" },
-];
-
-const SOCIAL = [
-	{
-		icon: <BsInstagram className="w-4 h-4" />,
-		label: "Instagram",
-		href: "https://instagram.com",
-	},
-	{
-		icon: <BsWhatsapp className="w-4 h-4" />,
-		label: "WhatsApp",
-		href: "https://wa.me/50600000000",
-	},
-	{
-		icon: <BsEnvelope className="w-4 h-4" />,
-		label: "Email",
-		href: "mailto:info@parfums.cr",
-	},
-];
 
 // ── Ornamental divider ────────────────────────────────────────────────────────
 
@@ -65,21 +39,28 @@ const OrnamentalDivider = () => (
 	</div>
 );
 
-// ── Column heading ────────────────────────────────────────────────────────────
-
-const ColHeading = ({ children }) => (
-	<p
-		className="text-[10px] font-semibold uppercase tracking-[0.25em] mb-4"
-		style={{ color: "var(--color-second)", fontFamily: "'Cinzel', serif" }}
-	>
-		{children}
-	</p>
-);
-
 // ── Footer ────────────────────────────────────────────────────────────────────
 
 const Footer = () => {
 	const { store } = useStore();
+
+	const SOCIAL = [
+		{
+			icon: <BsInstagram className="w-4 h-4" />,
+			label: "Instagram",
+			href: store?.instagram || "https://instagram.com",
+		},
+		{
+			icon: <BsFacebook className="w-4 h-4" />,
+			label: "Facebook",
+			href: store?.facebook || "https://facebook.com",
+		},
+		{
+			icon: <BsWhatsapp className="w-4 h-4" />,
+			label: "WhatsApp",
+			href: store?.whatsapp ? `https://wa.me/${store.whatsapp}` : "#",
+		},
+	];
 
 	const year = new Date().getFullYear();
 

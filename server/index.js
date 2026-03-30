@@ -97,6 +97,8 @@ app.get("/api/store-config", async (req, res) => {
 			colorSecond: store.colorSecond,
 			logo: store.logo,
 			whatsapp: store.whatsapp,
+			facebook: store.facebook,
+			instagram: store.instagram,
 			heroTagline: store.heroTagline,
 			heroDescription: store.heroDescription,
 			heroBadge1: store.heroBadge1,

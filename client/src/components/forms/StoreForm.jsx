@@ -57,6 +57,8 @@ const StoreForm = () => {
 		slug: overrides.slug ?? existingStore?.slug ?? "",
 		storeName: overrides.storeName ?? existingStore?.storeName ?? "",
 		whatsapp: overrides.whatsapp ?? existingStore?.whatsapp ?? "",
+		facebook: form.facebook.trim() || undefined,
+		instagram: form.instagram.trim() || undefined,
 		customDomain: overrides.customDomain ?? existingStore?.customDomain ?? "",
 		logo: overrides.logo ?? existingStore?.logo ?? "",
 		colorMain:
@@ -106,6 +108,8 @@ const StoreForm = () => {
 						storeName: form.storeName.trim(),
 						customDomain: form.customDomain.trim() || undefined,
 						whatsapp: form.whatsapp.trim() || undefined,
+						facebook: form.facebook.trim() || undefined,
+						instagram: form.instagram.trim() || undefined,
 						logo: form.logo || undefined,
 						colorMain: form.colorMain,
 						colorFirst: form.colorFirst,
@@ -184,6 +188,23 @@ const StoreForm = () => {
 				value={form.whatsapp}
 				onChange={handleChange}
 				hint="Número al que se enviarán los pedidos"
+			/>
+
+			<Input
+				label="Facebook"
+				name="facebook"
+				placeholder="https://facebook.com/tu-pagina"
+				value={form.facebook}
+				onChange={handleChange}
+				hint="URL completa de tu página de Facebook"
+			/>
+			<Input
+				label="Instagram"
+				name="instagram"
+				placeholder="https://instagram.com/tu-usuario"
+				value={form.instagram}
+				onChange={handleChange}
+				hint="URL completa de tu perfil de Instagram"
 			/>
 
 			{/* Dominio personalizado — solo en edición */}

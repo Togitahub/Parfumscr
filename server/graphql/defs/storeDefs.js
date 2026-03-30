@@ -12,6 +12,8 @@ const storeDefs = gql`
 		colorSecond: String!
 		logo: String
 		whatsapp: String
+		facebook: String
+		instagram: String
 		active: Boolean!
 		heroTagline: String
 		heroDescription: String
@@ -40,6 +42,8 @@ const storeDefs = gql`
 			slug: String!
 			storeName: String!
 			whatsapp: String
+			facebook: String
+			instagram: String
 			logo: String
 			colorMain: String
 			colorFirst: String
@@ -50,6 +54,8 @@ const storeDefs = gql`
 			storeName: String
 			customDomain: String
 			whatsapp: String
+			facebook: String
+			instagram: String
 			logo: String
 			colorMain: String
 			colorFirst: String

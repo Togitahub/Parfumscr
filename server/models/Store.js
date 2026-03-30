@@ -43,6 +43,14 @@ const StoreSchema = new mongoose.Schema(
 			type: String,
 			default: null,
 		},
+		facebook: {
+			type: String,
+			default: null,
+		},
+		instagram: {
+			type: String,
+			default: null,
+		},
 		active: {
 			type: Boolean,
 			default: true,

@@ -5,6 +5,8 @@ export const CREATE_STORE = gql`
 		$slug: String!
 		$storeName: String!
 		$whatsapp: String
+		$facebook: String
+		$instagram: String
 		$logo: String
 		$colorMain: String
 		$colorFirst: String
@@ -14,6 +16,8 @@ export const CREATE_STORE = gql`
 			slug: $slug
 			storeName: $storeName
 			whatsapp: $whatsapp
+			facebook: $facebook
+			instagram: $instagram
 			logo: $logo
 			colorMain: $colorMain
 			colorFirst: $colorFirst
@@ -31,6 +35,8 @@ export const UPDATE_STORE = gql`
 		$storeName: String
 		$customDomain: String
 		$whatsapp: String
+		$facebook: String
+		$instagram: String
 		$logo: String
 		$colorMain: String
 		$colorFirst: String
@@ -40,6 +46,8 @@ export const UPDATE_STORE = gql`
 			storeName: $storeName
 			customDomain: $customDomain
 			whatsapp: $whatsapp
+			facebook: $facebook
+			instagram: $instagram
 			logo: $logo
 			colorMain: $colorMain
 			colorFirst: $colorFirst

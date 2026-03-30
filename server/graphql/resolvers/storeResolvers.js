@@ -1,6 +1,8 @@
 import Store from "../../models/Store.js";
 import StoreProduct from "../../models/StoreProduct.js";
 
+import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
+
 const PRODUCT_POPULATE = {
 	path: "product",
 	populate: [
@@ -57,6 +59,11 @@ const storeResolvers = {
 					_id: { $ne: store._id },
 				});
 				if (domainTaken) throw new Error("Domain already in use");
+			}
+
+			if (args.logo && store.logo && args.logo !== store.logo) {
+				const publicId = extractPublicId(store.logo);
+				if (publicId) await deleteImage(publicId);
 			}
 
 			return await Store.findByIdAndUpdate(store._id, args, { new: true });

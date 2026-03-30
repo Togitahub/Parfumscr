@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
+import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
+
 import { sendResetPasswordEmail } from "../../config/nodemailer.js";
 
 const userResolvers = {
@@ -73,10 +75,14 @@ const userResolvers = {
 
 			const targetUser = await User.findById(id);
 			if (!targetUser) throw new Error("User not found");
-			
+
 			if (targetUser.role === "ADMIN") {
 				const store = await Store.findOne({ owner: id });
 				if (store) {
+					if (store.logo) {
+						const publicId = extractPublicId(store.logo);
+						if (publicId) await deleteImage(publicId);
+					}
 					await StoreProduct.deleteMany({ store: store._id });
 					await Store.findByIdAndDelete(store._id);
 				}
