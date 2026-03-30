@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { BsSearch, BsX, BsPlus, BsTrash } from "react-icons/bs";
 import { useToast } from "../../hooks/ToastContext";
@@ -15,7 +15,7 @@ import Button from "../common/Button";
 const StoreCatalog = ({ storeId }) => {
 	const toast = useToast();
 	const [search, setSearch] = useState("");
-	const [editing, setEditing] = useState({}); // { [productId]: { price, stock } }
+	const [editing, setEditing] = useState({});
 
 	const { data: allData, loading: loadingAll } = useQuery(GET_PRODUCTS);
 	const { data: storeData, loading: loadingStore } = useQuery(
@@ -40,6 +40,23 @@ const StoreCatalog = ({ storeId }) => {
 			refetchQueries: [{ query: GET_STORE_PRODUCTS, variables: { storeId } }],
 		},
 	);
+
+	useEffect(() => {
+		if (!storeData?.getStoreProducts) return;
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setEditing((prev) => {
+			const next = { ...prev };
+			storeData.getStoreProducts.forEach((sp) => {
+				if (!next[sp.product.id]) {
+					next[sp.product.id] = {
+						price: sp.price != null ? String(sp.price) : "",
+						stock: sp.stock != null ? String(sp.stock) : "",
+					};
+				}
+			});
+			return next;
+		});
+	}, [storeData]);
 
 	const allProducts = useMemo(() => allData?.getProducts ?? [], [allData]);
 	const storeProductIds = new Set(
@@ -184,7 +201,11 @@ const StoreCatalog = ({ storeId }) => {
 										<label className="text-xs text-first/40">Precio (₡)</label>
 										<input
 											type="number"
-											placeholder={`Global: ${product.price}`}
+											placeholder={`Actual: ${
+												storeData?.getStoreProducts?.find(
+													(sp) => sp.product.id === product.id,
+												)?.price ?? product.price
+											}`}
 											value={editValues.price}
 											onChange={(e) =>
 												setEditing((prev) => ({
@@ -216,7 +237,11 @@ const StoreCatalog = ({ storeId }) => {
 										<label className="text-xs text-first/40">Stock</label>
 										<input
 											type="number"
-											placeholder={`Global: ${product.stock}`}
+											placeholder={`Actual: ${
+												storeData?.getStoreProducts?.find(
+													(sp) => sp.product.id === product.id,
+												)?.stock ?? product.stock
+											}`}
 											value={editValues.stock}
 											onChange={(e) =>
 												setEditing((prev) => ({

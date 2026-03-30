@@ -48,6 +48,10 @@ const storeDefs = gql`
 			colorMain: String
 			colorFirst: String
 			colorSecond: String
+			heroTagline: String
+			heroDescription: String
+			heroBadge1: String
+			heroBadge2: String
 		): Store!
 
 		updateStore(

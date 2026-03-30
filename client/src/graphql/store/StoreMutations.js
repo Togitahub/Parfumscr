@@ -11,6 +11,10 @@ export const CREATE_STORE = gql`
 		$colorMain: String
 		$colorFirst: String
 		$colorSecond: String
+		$heroTagline: String
+		$heroDescription: String
+		$heroBadge1: String
+		$heroBadge2: String
 	) {
 		createStore(
 			slug: $slug
@@ -22,6 +26,10 @@ export const CREATE_STORE = gql`
 			colorMain: $colorMain
 			colorFirst: $colorFirst
 			colorSecond: $colorSecond
+			heroTagline: $heroTagline
+			heroDescription: $heroDescription
+			heroBadge1: $heroBadge1
+			heroBadge2: $heroBadge2
 		) {
 			id
 			slug
@@ -41,6 +49,10 @@ export const UPDATE_STORE = gql`
 		$colorMain: String
 		$colorFirst: String
 		$colorSecond: String
+		$heroTagline: String
+		$heroDescription: String
+		$heroBadge1: String
+		$heroBadge2: String
 	) {
 		updateStore(
 			storeName: $storeName
@@ -52,6 +64,10 @@ export const UPDATE_STORE = gql`
 			colorMain: $colorMain
 			colorFirst: $colorFirst
 			colorSecond: $colorSecond
+			heroTagline: $heroTagline
+			heroDescription: $heroDescription
+			heroBadge1: $heroBadge1
+			heroBadge2: $heroBadge2
 		) {
 			id
 			slug

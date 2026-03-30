@@ -57,8 +57,8 @@ const StoreForm = () => {
 		slug: overrides.slug ?? existingStore?.slug ?? "",
 		storeName: overrides.storeName ?? existingStore?.storeName ?? "",
 		whatsapp: overrides.whatsapp ?? existingStore?.whatsapp ?? "",
-		facebook: form.facebook.trim() || undefined,
-		instagram: form.instagram.trim() || undefined,
+		facebook: overrides.facebook || undefined,
+		instagram: overrides.instagram || undefined,
 		customDomain: overrides.customDomain ?? existingStore?.customDomain ?? "",
 		logo: overrides.logo ?? existingStore?.logo ?? "",
 		colorMain:
@@ -131,10 +131,16 @@ const StoreForm = () => {
 						slug: form.slug.trim().toLowerCase(),
 						storeName: form.storeName.trim(),
 						whatsapp: form.whatsapp.trim() || undefined,
+						facebook: form.facebook.trim() || undefined,
+						instagram: form.instagram.trim() || undefined,
 						logo: form.logo || undefined,
 						colorMain: form.colorMain,
 						colorFirst: form.colorFirst,
 						colorSecond: form.colorSecond,
+						heroTagline: form.heroTagline.trim() || undefined,
+						heroDescription: form.heroDescription.trim() || undefined,
+						heroBadge1: form.heroBadge1.trim() || undefined,
+						heroBadge2: form.heroBadge2.trim() || undefined,
 					},
 				});
 				toast.success("Tienda creada");
