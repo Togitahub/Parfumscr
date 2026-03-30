@@ -298,28 +298,32 @@ const ProductList = ({
 										{/* Admin action overlay */}
 										{showAdminActions && (
 											<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 z-20">
-												<Button
-													iconOnly
-													size="xs"
-													variant="secondary"
-													icon={<BsPencil />}
-													onClick={(e) => {
-														e.stopPropagation();
-														onEdit?.(product);
-													}}
-													aria-label="Editar producto"
-												/>
-												<Button
-													iconOnly
-													size="xs"
-													variant="danger"
-													icon={<BsTrash />}
-													onClick={(e) => {
-														e.stopPropagation();
-														onDelete?.(product);
-													}}
-													aria-label="Eliminar producto"
-												/>
+												{onEdit && (
+													<Button
+														iconOnly
+														size="xs"
+														variant="secondary"
+														icon={<BsPencil />}
+														onClick={(e) => {
+															e.stopPropagation();
+															onEdit?.(product);
+														}}
+														aria-label="Editar producto"
+													/>
+												)}
+												{onDelete && (
+													<Button
+														iconOnly
+														size="xs"
+														variant="danger"
+														icon={<BsTrash />}
+														onClick={(e) => {
+															e.stopPropagation();
+															onDelete?.(product);
+														}}
+														aria-label="Eliminar producto"
+													/>
+												)}
 												<Button
 													iconOnly
 													size="xs"

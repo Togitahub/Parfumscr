@@ -236,6 +236,8 @@ const ProductView = () => {
 	const { store } = useStore();
 	const { user, isAuthenticated } = useAuth();
 
+	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
+
 	const [selectedDecant, setSelectedDecant] = useState(null);
 	const [qty, setQty] = useState(1);
 
@@ -528,79 +530,81 @@ const ProductView = () => {
 						</div>
 
 						{/* Quantity + CTA */}
-						<div className="flex flex-col gap-3">
-							{/* Qty row */}
-							{!hasDecants && !isOutOfStock && (
-								<div className="flex items-center gap-3">
-									<span className="text-xs text-first/40 font-medium uppercase tracking-wider">
-										Cantidad
-									</span>
-									<div className="flex items-center gap-2 rounded-xl border border-first/10 px-3 py-1.5">
-										<button
-											onClick={() => setQty((q) => Math.max(1, q - 1))}
-											className="w-6 h-6 flex items-center justify-center text-first/40 hover:text-first transition-colors cursor-pointer text-lg leading-none"
-										>
-											−
-										</button>
-										<span className="text-sm font-semibold text-first tabular-nums w-6 text-center">
-											{qty}
+						{!isAdmin && (
+							<div className="flex flex-col gap-3">
+								{/* Qty row */}
+								{!hasDecants && !isOutOfStock && (
+									<div className="flex items-center gap-3">
+										<span className="text-xs text-first/40 font-medium uppercase tracking-wider">
+											Cantidad
 										</span>
-										<button
-											onClick={() =>
-												setQty((q) => Math.min(product.stock, q + 1))
-											}
-											className="w-6 h-6 flex items-center justify-center text-first/40 hover:text-first transition-colors cursor-pointer text-lg leading-none"
-										>
-											+
-										</button>
+										<div className="flex items-center gap-2 rounded-xl border border-first/10 px-3 py-1.5">
+											<button
+												onClick={() => setQty((q) => Math.max(1, q - 1))}
+												className="w-6 h-6 flex items-center justify-center text-first/40 hover:text-first transition-colors cursor-pointer text-lg leading-none"
+											>
+												−
+											</button>
+											<span className="text-sm font-semibold text-first tabular-nums w-6 text-center">
+												{qty}
+											</span>
+											<button
+												onClick={() =>
+													setQty((q) => Math.min(product.stock, q + 1))
+												}
+												className="w-6 h-6 flex items-center justify-center text-first/40 hover:text-first transition-colors cursor-pointer text-lg leading-none"
+											>
+												+
+											</button>
+										</div>
 									</div>
+								)}
+
+								{/* Action buttons */}
+								<div className="flex gap-2">
+									<Button
+										fullWidth
+										size="lg"
+										icon={<BsCart3 />}
+										onClick={handleAddToCart}
+										loading={addingCart}
+										disabled={isOutOfStock}
+									>
+										Agregar al carrito
+									</Button>
+
+									{/* Favorite */}
+									<button
+										onClick={handleToggleFavorite}
+										disabled={togglingFav}
+										aria-label={
+											isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
+										}
+										className={[
+											"w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0",
+											isFavorite
+												? "border-error/40 bg-error/8 text-error"
+												: "border-first/12 text-first/30 hover:border-error/30 hover:text-error hover:bg-error/5",
+										].join(" ")}
+									>
+										{isFavorite ? (
+											<BsHeartFill className="w-4 h-4" />
+										) : (
+											<BsHeart className="w-4 h-4" />
+										)}
+									</button>
+
+									{/* WhatsApp */}
+									<button
+										onClick={handleWhatsApp}
+										aria-label="Consultar por WhatsApp"
+										className="w-12 h-12 rounded-xl border border-first/12 flex items-center justify-center text-first/30 hover:text-[#25D366] hover:border-[#25D366]/30 hover:bg-[#25D366]/5 transition-all duration-200 cursor-pointer shrink-0"
+									>
+										<BsWhatsapp className="w-4 h-4" />
+									</button>
 								</div>
-							)}
-
-							{/* Action buttons */}
-							<div className="flex gap-2">
-								<Button
-									fullWidth
-									size="lg"
-									icon={<BsCart3 />}
-									onClick={handleAddToCart}
-									loading={addingCart}
-									disabled={isOutOfStock}
-								>
-									Agregar al carrito
-								</Button>
-
-								{/* Favorite */}
-								<button
-									onClick={handleToggleFavorite}
-									disabled={togglingFav}
-									aria-label={
-										isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
-									}
-									className={[
-										"w-12 h-12 rounded-xl border flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0",
-										isFavorite
-											? "border-error/40 bg-error/8 text-error"
-											: "border-first/12 text-first/30 hover:border-error/30 hover:text-error hover:bg-error/5",
-									].join(" ")}
-								>
-									{isFavorite ? (
-										<BsHeartFill className="w-4 h-4" />
-									) : (
-										<BsHeart className="w-4 h-4" />
-									)}
-								</button>
-
-								{/* WhatsApp */}
-								<button
-									onClick={handleWhatsApp}
-									aria-label="Consultar por WhatsApp"
-									className="w-12 h-12 rounded-xl border border-first/12 flex items-center justify-center text-first/30 hover:text-[#25D366] hover:border-[#25D366]/30 hover:bg-[#25D366]/5 transition-all duration-200 cursor-pointer shrink-0"
-								>
-									<BsWhatsapp className="w-4 h-4" />
-								</button>
 							</div>
-						</div>
+						)}
 
 						{/* Info table */}
 						<div className="rounded-xl overflow-hidden">

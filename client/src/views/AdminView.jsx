@@ -356,7 +356,7 @@ const ProductsSection = () => {
 					categories={categories}
 					segments={segments}
 					notes={notes}
-					onEdit={handleEdit}
+					onEdit={isSuperAdmin ? handleEdit : undefined}
 					onDelete={isSuperAdmin ? handleDelete : undefined}
 					onAddDecant={(product) => setDecantTarget(product)}
 					showAdminActions

@@ -1,4 +1,6 @@
+import StoreProduct from "../../models/StoreProduct.js";
 import Favorites from "../../models/Favorites.js";
+import Store from "../../models/Store.js";
 import User from "../../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -71,6 +73,14 @@ const userResolvers = {
 
 			const targetUser = await User.findById(id);
 			if (!targetUser) throw new Error("User not found");
+			
+			if (targetUser.role === "ADMIN") {
+				const store = await Store.findOne({ owner: id });
+				if (store) {
+					await StoreProduct.deleteMany({ store: store._id });
+					await Store.findByIdAndDelete(store._id);
+				}
+			}
 
 			await Favorites.deleteMany({ user: id });
 			await User.findByIdAndDelete(id);

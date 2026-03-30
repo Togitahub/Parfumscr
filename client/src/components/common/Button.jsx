@@ -29,7 +29,7 @@ const variants = {
 	danger:
 		"bg-error text-main hover:opacity-85 active:opacity-70 border border-transparent shadow-sm",
 	ghost:
-		"bg-transparent text-first hover:bg-first/10 active:bg-first/20 border border-transparent",
+		"bg-transparent text-second hover:bg-first/10 active:bg-first/20 border border-transparent",
 	outline:
 		"bg-transparent text-first border border-first hover:bg-first/10 active:bg-first/20",
 	link: "bg-transparent text-second hover:underline underline-offset-2 border border-transparent p-0 h-auto shadow-none",

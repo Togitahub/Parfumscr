@@ -12,13 +12,16 @@ import {
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
+import { useStore } from "../hooks/StoreContext";
 import { useToast } from "../hooks/ToastContext";
-import { GET_USER_CART } from "../graphql/cart/CartQueries";
+
 import {
 	ADD_ITEM_TO_CART,
 	REMOVE_ITEM_FROM_CART,
 	CLEAR_CART,
 } from "../graphql/cart/CartMutations";
+import { GET_USER_CART } from "../graphql/cart/CartQueries";
+import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
@@ -227,6 +230,7 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 
 const CartView = () => {
 	const { user } = useAuth();
+	const { store } = useStore();
 
 	const toast = useToast();
 	const navigate = useNavigate();
@@ -237,6 +241,11 @@ const CartView = () => {
 	const { data, loading } = useQuery(GET_USER_CART, {
 		variables: { userId: user?.id },
 		skip: !user?.id,
+	});
+
+	const { data: storeProductsData } = useQuery(GET_STORE_PRODUCTS, {
+		variables: { storeId: store?.storeId },
+		skip: !store?.storeId,
 	});
 
 	const [addItem] = useMutation(ADD_ITEM_TO_CART, {
@@ -253,7 +262,19 @@ const CartView = () => {
 
 	// ── Derived data ──────────────────────────────────────────────────────────
 
-	const cartItems = data?.getUserCart?.items ?? [];
+	const rawCartItems = data?.getUserCart?.items ?? [];
+	const cartItems = rawCartItems.map((item) => {
+		const storeProduct = storeProductsData?.getStoreProducts?.find(
+			(sp) => sp.product.id === item.product.id,
+		);
+		return {
+			...item,
+			product: {
+				...item.product,
+				price: storeProduct?.price ?? item.product.price,
+			},
+		};
+	});
 	const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 	const totalPrice = cartItems.reduce(
 		(acc, i) => acc + i.product.price * i.quantity,

@@ -40,9 +40,9 @@ const App = () => {
 					<Route path="/store" element={<StoreView />} />
 					<Route path="/auth" element={<AuthView />} />
 					<Route path="/about" element={<AboutView />} />
-					<Route path="/store/product/:id" element={<ProductView />} />
+					<Route path="/product/:id" element={<ProductView />} />
 					<Route
-						path="/store/brand/:id"
+						path="/brand/:id"
 						element={<EntityView type="brand" />}
 					/>
 					<Route

@@ -285,7 +285,7 @@ const NavBar = () => {
 	const closeMobile = useCallback(() => setMobileOpen(false), []);
 
 	const handleBrandClick = (brand) => {
-		navigate(`/store/brand/${brand.id}`);
+		navigate(`/brand/${brand.id}`);
 		closeMobile();
 	};
 	const handleCategoryClick = (cat) => {
@@ -412,8 +412,6 @@ const NavBar = () => {
 								Dashboard
 							</NavLink>
 						)}
-
-						<ThemeChanger />
 
 						{isAuthenticated ? (
 							<>

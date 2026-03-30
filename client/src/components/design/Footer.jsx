@@ -1,8 +1,3 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { useQuery } from "@apollo/client/react";
-import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
-import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
-import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
 import { BsInstagram, BsWhatsapp, BsEnvelope, BsHeart } from "react-icons/bs";
 
 import { useStore } from "../../hooks/StoreContext";
@@ -84,16 +79,6 @@ const ColHeading = ({ children }) => (
 // ── Footer ────────────────────────────────────────────────────────────────────
 
 const Footer = () => {
-	const navigate = useNavigate();
-
-	const { data: brandsData } = useQuery(GET_BRANDS);
-	const { data: categoriesData } = useQuery(GET_CATEGORIES);
-	const { data: segmentsData } = useQuery(GET_SEGMENTS);
-
-	const brands = (brandsData?.getBrands ?? []).slice(0, 6);
-	const categories = categoriesData?.getCategories ?? [];
-	const segments = segmentsData?.getSegments ?? [];
-
 	const { store } = useStore();
 
 	const year = new Date().getFullYear();
@@ -122,49 +107,24 @@ const Footer = () => {
 			<div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12">
 				{/* ── Brand block ── */}
 				<div className="pt-16 pb-10 flex flex-col items-center gap-5 text-center">
-					{/* Logo mark */}
-					<NavLink to="/" className="group flex flex-col items-center gap-3">
-						<div
-							className="w-14 h-14 rounded-full border flex items-center justify-center transition-all duration-500 group-hover:shadow-[0_0_24px_color-mix(in_srgb,var(--color-second)_25%,transparent)]"
+					<div className="flex flex-col gap-0.5">
+						<span
+							className="text-2xl font-light tracking-[0.18em] text-first"
+							style={{ fontFamily: "'Cormorant Garamond', serif" }}
+						>
+							{store?.storeName}
+						</span>
+						<span
+							className="text-[9px] tracking-[0.3em] uppercase"
 							style={{
-								borderColor:
-									"color-mix(in srgb, var(--color-second) 35%, transparent)",
-								background:
-									"color-mix(in srgb, var(--color-second) 6%, transparent)",
+								color:
+									"color-mix(in srgb, var(--color-second) 70%, transparent)",
+								fontFamily: "'Cinzel', serif",
 							}}
 						>
-							<span
-								style={{
-									fontFamily: "'Cinzel', serif",
-									fontSize: "1.4rem",
-									color: "var(--color-second)",
-									fontWeight: 600,
-									letterSpacing: "0.05em",
-								}}
-							>
-								P
-							</span>
-						</div>
-
-						<div className="flex flex-col gap-0.5">
-							<span
-								className="text-2xl font-light tracking-[0.18em] text-first"
-								style={{ fontFamily: "'Cormorant Garamond', serif" }}
-							>
-								PARFUMS
-							</span>
-							<span
-								className="text-[9px] tracking-[0.3em] uppercase"
-								style={{
-									color:
-										"color-mix(in srgb, var(--color-second) 70%, transparent)",
-									fontFamily: "'Cinzel', serif",
-								}}
-							>
-								Fragancias Originales
-							</span>
-						</div>
-					</NavLink>
+							Fragancias Originales
+						</span>
+					</div>
 
 					{/* Tagline */}
 					<p
@@ -176,7 +136,7 @@ const Footer = () => {
 							fontStyle: "italic",
 						}}
 					>
-						Cada fragancia, una historia. Cada historia, tuya.
+						{store?.heroDescription}
 					</p>
 
 					{/* Social icons */}
@@ -193,108 +153,6 @@ const Footer = () => {
 								{icon}
 							</a>
 						))}
-					</div>
-				</div>
-
-				{/* ── Ornamental divider ── */}
-				<OrnamentalDivider />
-
-				{/* ── Link columns ── */}
-				<div className="py-12 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
-					{/* Navegación */}
-					<div>
-						<ColHeading>Navegación</ColHeading>
-						<ul className="flex flex-col gap-2.5">
-							{NAV_LINKS.map(({ label, to }) => (
-								<li key={to}>
-									<NavLink
-										to={to}
-										className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide"
-										style={{
-											fontFamily: "'Cormorant Garamond', serif",
-											fontSize: "0.95rem",
-										}}
-									>
-										{label}
-									</NavLink>
-								</li>
-							))}
-						</ul>
-					</div>
-
-					{/* Marcas */}
-					<div>
-						<ColHeading>Marcas</ColHeading>
-						<ul className="flex flex-col gap-2.5">
-							{brands.length > 0 ? (
-								brands.map((b) => (
-									<li key={b.id}>
-										<button
-											onClick={() => navigate(`/brand/${b.id}`)}
-											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
-											style={{
-												fontFamily: "'Cormorant Garamond', serif",
-												fontSize: "0.95rem",
-											}}
-										>
-											{b.name}
-										</button>
-									</li>
-								))
-							) : (
-								<li className="text-xs text-first/20 italic">Cargando...</li>
-							)}
-						</ul>
-					</div>
-
-					{/* Categorías */}
-					<div>
-						<ColHeading>Categorías</ColHeading>
-						<ul className="flex flex-col gap-2.5">
-							{categories.length > 0 ? (
-								categories.map((c) => (
-									<li key={c.id}>
-										<button
-											onClick={() => navigate(`/category/${c.id}`)}
-											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
-											style={{
-												fontFamily: "'Cormorant Garamond', serif",
-												fontSize: "0.95rem",
-											}}
-										>
-											{c.name}
-										</button>
-									</li>
-								))
-							) : (
-								<li className="text-xs text-first/20 italic">Cargando...</li>
-							)}
-						</ul>
-					</div>
-
-					{/* Segmentos */}
-					<div>
-						<ColHeading>Segmentos</ColHeading>
-						<ul className="flex flex-col gap-2.5">
-							{segments.length > 0 ? (
-								segments.map((s) => (
-									<li key={s.id}>
-										<button
-											onClick={() => navigate(`/segment/${s.id}`)}
-											className="text-sm text-first/45 hover:text-second transition-colors duration-200 tracking-wide text-left cursor-pointer"
-											style={{
-												fontFamily: "'Cormorant Garamond', serif",
-												fontSize: "0.95rem",
-											}}
-										>
-											{s.name}
-										</button>
-									</li>
-								))
-							) : (
-								<li className="text-xs text-first/20 italic">Cargando...</li>
-							)}
-						</ul>
 					</div>
 				</div>
 
