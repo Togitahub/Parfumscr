@@ -74,7 +74,7 @@ const EntityView = ({ type }) => {
 	const navigate = useNavigate();
 
 	const toast = useToast();
-	const store = useStore();
+	const { store } = useStore();
 	const { user, isAuthenticated } = useAuth();
 
 	const config = CONFIG[type];
