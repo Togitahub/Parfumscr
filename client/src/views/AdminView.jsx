@@ -415,7 +415,7 @@ const UsersSection = () => {
 
 	const { data, loading } = useQuery(GET_USERS);
 
-	const { toggleUserActive } = useMutation(TOGGLE_USER_ACTIVE, {
+	const [toggleUserActive] = useMutation(TOGGLE_USER_ACTIVE, {
 		refetchQueries: [{ query: GET_USERS }],
 	});
 
