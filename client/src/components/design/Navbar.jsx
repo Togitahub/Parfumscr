@@ -160,7 +160,7 @@ const NotesDropdown = ({ items = [], loading }) => {
 };
 
 // Agrega este componente dentro del archivo, antes del NavBar principal
-const ProfileDropdown = ({ user, onLogout }) => {
+const ProfileDropdown = ({ user, onLogout, onProfile }) => {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 	useClickOutside(ref, () => setOpen(false));
@@ -189,6 +189,15 @@ const ProfileDropdown = ({ user, onLogout }) => {
 						<p className="text-xs text-first/40 truncate">{user?.email}</p>
 					</div>
 					<div className="py-1.5">
+						<button
+							onClick={() => {
+								setOpen(false);
+								onProfile();
+							}}
+							className="w-full text-left px-4 py-2 text-sm text-first/70 hover:text-first hover:bg-first/8 transition-colors duration-150 cursor-pointer"
+						>
+							Editar perfil
+						</button>
 						<button
 							onClick={() => {
 								setOpen(false);
@@ -359,7 +368,11 @@ const NavBar = () => {
 								loading={loadingSegs}
 								onItemClick={handleSegmentClick}
 							/>
-							<NotesDropdown items={notes} loading={loadingNotes} />
+							<NotesDropdown
+								items={notes}
+								loading={loadingNotes}
+								onProfile={() => navigate("/profile")}
+							/>
 						</nav>
 					)}
 
@@ -419,7 +432,11 @@ const NavBar = () => {
 										/>
 									</>
 								)}
-								<ProfileDropdown user={user} onLogout={logout} />
+								<ProfileDropdown
+									user={user}
+									onLogout={logout}
+									onProfile={() => navigate("/profile")}
+								/>
 							</>
 						) : (
 							<Button

@@ -11,6 +11,7 @@ import ProductView from "./views/ProductView";
 import EntityView from "./views/EntityView";
 import FavoritesView from "./views/FavoritesView";
 import StoreView from "./views/StoreView";
+import ProfileView from "./views/ProfileView";
 
 import NavBar from "./components/design/Navbar";
 import Footer from "./components/design/Footer";
@@ -21,6 +22,7 @@ import LandingNavbar from "./components/design/LandingNavbar";
 
 import { useAuth } from "./hooks/AuthContext";
 import { useStore } from "./hooks/StoreContext";
+
 
 const App = () => {
 	const { user } = useAuth();
@@ -61,6 +63,7 @@ const App = () => {
 						<Route path="/store/orders" element={<OrdersView />} />
 						<Route path="/store/orders/:id" element={<OrderView />} />
 						<Route path="/store/favorites" element={<FavoritesView />} />
+						<Route path="/profile" element={<ProfileView />} />
 					</Route>
 
 					{/* ── Protegidas (admin) ── */}

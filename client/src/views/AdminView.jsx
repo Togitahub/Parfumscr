@@ -506,6 +506,8 @@ const AdminView = () => {
 	const { user } = useAuth();
 	const isSuperAdmin = user?.role === "SUPER_ADMIN";
 
+	const toast = useToast();
+
 	const tabs = isSuperAdmin ? SUPER_ADMIN_TABS : ADMIN_TABS;
 	const [activeTab, setActiveTab] = useState(tabs[0].key);
 
@@ -524,7 +526,22 @@ const AdminView = () => {
 	const categories = categoriesData?.getCategories ?? [];
 	const segments = segmentsData?.getSegments ?? [];
 	const notes = notesData?.getNotes ?? [];
+	const myStoreExists = myStoreData?.getMyStore;
 	const myStoreId = myStoreData?.getMyStore?.id;
+
+	const copyMyStoreLink = () => {
+		const link = myStoreExists?.customDomain
+			? `https://${myStoreExists?.customDomain}`
+			: `https://${myStoreExists.slug}.parfumscr.com`;
+
+		navigator.clipboard
+			.writeText(link)
+			.then(() =>
+				toast
+					.success("Enlace copiado")
+					.catch((err) => toast.error("Error al copiar el texto", err.message)),
+			);
+	};
 
 	const renderContent = () => {
 		switch (activeTab) {
@@ -597,6 +614,21 @@ const AdminView = () => {
 			case "store":
 				return (
 					<div className="flex flex-col gap-10">
+						<div className="flex gap-2">
+							<Button
+								variant="secondary"
+								onClick={() =>
+									(window.location.href = myStoreExists?.customDomain
+										? `https://${myStoreExists?.customDomain}`
+										: `https://${myStoreExists.slug}.parfumscr.com`)
+								}
+							>
+								Ver Tienda
+							</Button>
+							<Button variant="outline" onClick={copyMyStoreLink}>
+								Copiar Enlace
+							</Button>
+						</div>
 						<StoreForm />
 						{myStoreId && <StoreCatalog storeId={myStoreId} />}
 					</div>

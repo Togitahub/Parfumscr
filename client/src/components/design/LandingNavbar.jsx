@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/AuthContext";
 import Button from "../common/Button";
 import ThemeChanger from "../interface/ThemeChanger";
 
-import { FaSignOutAlt } from "react-icons/fa";
+import { FaSignOutAlt, FaUser } from "react-icons/fa";
 
 const LandingNavbar = () => {
 	const { isAuthenticated, logout } = useAuth();
@@ -28,14 +28,20 @@ const LandingNavbar = () => {
 				<div className="flex items-center gap-2">
 					<ThemeChanger />
 					{isAuthenticated ? (
-						<Button
-							size="xs"
-							iconOnly="true"
-							icon={<FaSignOutAlt />}
-							onClick={logout}
-						>
-							Cerrar Sesión
-						</Button>
+						<div className="flex gap-2">
+							<Button
+								size="xs"
+								iconOnly="true"
+								icon={<FaUser />}
+								onClick={() => navigate("/profile")}
+							/>
+							<Button
+								size="xs"
+								iconOnly="true"
+								icon={<FaSignOutAlt />}
+								onClick={logout}
+							/>
+						</div>
 					) : (
 						<Button size="sm" onClick={() => navigate("/auth")}>
 							Iniciar sesión
