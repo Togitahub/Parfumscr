@@ -138,11 +138,22 @@ const userResolvers = {
 				resetTokenExpiry: { $gt: Date.now() },
 			});
 			if (!user) throw new Error("Invalid or expired token");
-			user.password = await bcrypt.hash(newPassword, 10);
+			user.password = newPassword; // el pre("save") hook lo hashea
 			user.resetToken = undefined;
 			user.resetTokenExpiry = undefined;
 			await user.save();
 			return { success: true, message: "Password updated successfully" };
+		},
+
+		changePassword: async (_, { currentPassword, newPassword }, { user }) => {
+			if (!user) throw new Error("Not authenticated");
+			const found = await User.findById(user._id);
+			if (!found) throw new Error("User not found");
+			const valid = await bcrypt.compare(currentPassword, found.password);
+			if (!valid) throw new Error("Contraseña actual incorrecta");
+			found.password = newPassword;
+			await found.save();
+			return { success: true, message: "Password updated" };
 		},
 	},
 };

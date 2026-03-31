@@ -631,21 +631,23 @@ const AdminView = () => {
 			case "store":
 				return (
 					<div className="flex flex-col gap-10">
-						<div className="flex gap-2">
-							<Button
-								variant="secondary"
-								onClick={() =>
-									(window.location.href = myStoreExists?.customDomain
-										? `https://${myStoreExists?.customDomain}`
-										: `https://${myStoreExists.slug}.parfumscr.com`)
-								}
-							>
-								Ver Tienda
-							</Button>
-							<Button variant="outline" onClick={copyMyStoreLink}>
-								Copiar Enlace
-							</Button>
-						</div>
+						{myStoreExists && (
+							<div className="flex gap-2">
+								<Button
+									variant="secondary"
+									onClick={() =>
+										(window.location.href = myStoreExists?.customDomain
+											? `https://${myStoreExists?.customDomain}`
+											: `https://${myStoreExists.slug}.parfumscr.com`)
+									}
+								>
+									Ver Tienda
+								</Button>
+								<Button variant="outline" onClick={copyMyStoreLink}>
+									Copiar Enlace
+								</Button>
+							</div>
+						)}
 						<StoreForm />
 						{myStoreId && <StoreCatalog storeId={myStoreId} />}
 					</div>

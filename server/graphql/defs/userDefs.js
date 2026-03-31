@@ -49,6 +49,10 @@ const userDefs = gql`
 		toggleUserActive(id: ID!, active: Boolean!): User!
 		requestPasswordReset(email: String!): MessageResponse!
 		resetPassword(token: String!, newPassword: String!): MessageResponse!
+		changePassword(
+			currentPassword: String!
+			newPassword: String!
+		): MessageResponse!
 	}
 `;
 
