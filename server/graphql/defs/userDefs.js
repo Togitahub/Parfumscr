@@ -8,6 +8,7 @@ const userDefs = gql`
 		role: String!
 		phone: String
 		address: String
+		active: Boolean
 	}
 
 	type AuthResponse {
@@ -45,6 +46,7 @@ const userDefs = gql`
 			address: String
 		): User!
 		deleteUser(id: ID!): DeleteResponse!
+		toggleUserActive(id: ID!, active: Boolean!): User!
 		requestPasswordReset(email: String!): MessageResponse!
 		resetPassword(token: String!, newPassword: String!): MessageResponse!
 	}

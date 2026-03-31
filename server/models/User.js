@@ -30,6 +30,10 @@ const UserSchema = new mongoose.Schema(
 			type: String,
 			required: false,
 		},
+		active: {
+			type: Boolean,
+			default: true,
+		},
 		resetToken: String,
 		resetTokenExpiry: Date,
 	},

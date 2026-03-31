@@ -67,6 +67,7 @@ const UserList = ({
 	loading = false,
 	onEdit,
 	onDelete,
+	onToggleActive,
 	className = "",
 }) => {
 	const [search, setSearch] = useState("");
@@ -203,7 +204,12 @@ const UserList = ({
 				>
 					{paginated.map((user, i) => (
 						<AnimatedItem key={user.id} index={i}>
-							<UserCard user={user} onEdit={onEdit} onDelete={onDelete} />
+							<UserCard
+								user={user}
+								onEdit={onEdit}
+								onDelete={onDelete}
+								onToggleActive={onToggleActive}
+							/>
 						</AnimatedItem>
 					))}
 				</div>

@@ -44,6 +44,7 @@ const userResolvers = {
 			if (!user) throw new Error("Invalid credentials");
 			const valid = await bcrypt.compare(password, user.password);
 			if (!valid) throw new Error("Invalid credentials");
+			if (!user.active) throw new Error("Account suspended");
 
 			const isDefaultAdmin =
 				user.role === "SUPER_ADMIN" && email === process.env.ADMIN_EMAIL;
@@ -92,6 +93,15 @@ const userResolvers = {
 			await User.findByIdAndDelete(id);
 
 			return { success: true, message: "User deleted" };
+		},
+
+		toggleUserActive: async (_, { id, active }, { user }) => {
+			if (!user || user.role !== "SUPER_ADMIN") throw new Error("Unauthorized");
+			const target = await User.findById(id);
+			if (!target) throw new Error("User not found");
+			if (target.role === "SUPER_ADMIN")
+				throw new Error("Cannot suspend a Super Admin");
+			return await User.findByIdAndUpdate(id, { active }, { new: true });
 		},
 
 		requestPasswordReset: async (_, { email }) => {

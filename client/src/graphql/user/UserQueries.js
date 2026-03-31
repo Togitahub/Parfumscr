@@ -9,6 +9,7 @@ export const GET_USERS = gql`
 			role
 			phone
 			address
+			active
 		}
 	}
 `;
@@ -22,6 +23,7 @@ export const GET_USER = gql`
 			role
 			phone
 			address
+			active
 		}
 	}
 `;

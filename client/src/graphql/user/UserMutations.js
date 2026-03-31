@@ -80,6 +80,16 @@ export const DELETE_USER = gql`
 	}
 `;
 
+export const TOGGLE_USER_ACTIVE = gql`
+	mutation ToggleUserActive($id: ID!, $active: Boolean!) {
+		toggleUserActive(id: $id, active: $active) {
+			id
+			name
+			active
+		}
+	}
+`;
+
 export const REQUEST_PASSWORD_RESET = gql`
 	mutation RequestPasswordReset($email: String!) {
 		requestPasswordReset(email: $email) {

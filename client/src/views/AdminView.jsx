@@ -60,7 +60,7 @@ import {
 	DELETE_NOTE,
 } from "../graphql/note/NoteMutations";
 import { GET_USERS } from "../graphql/user/UserQueries";
-import { DELETE_USER } from "../graphql/user/UserMutations";
+import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
 import { GET_MY_STORE } from "../graphql/store/StoreQueries";
 
 // Components
@@ -414,6 +414,11 @@ const UsersSection = () => {
 	const [deleteTarget, setDeleteTarget] = useState(null);
 
 	const { data, loading } = useQuery(GET_USERS);
+
+	const { toggleUserActive } = useMutation(TOGGLE_USER_ACTIVE, {
+		refetchQueries: [{ query: GET_USERS }],
+	});
+
 	const [deleteUser, { loading: deleting }] = useMutation(DELETE_USER, {
 		refetchQueries: [{ query: GET_USERS }],
 	});
@@ -447,6 +452,17 @@ const UsersSection = () => {
 		setEditUser(null);
 	};
 
+	const handleToggleActive = async (user) => {
+		try {
+			await toggleUserActive({
+				variables: { id: user.id, active: !user.active },
+			});
+			toast.success(user.active ? "Cuenta suspendida" : "Cuenta reactivada");
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4">
 			{/* Header */}
@@ -470,6 +486,7 @@ const UsersSection = () => {
 				loading={loading}
 				onEdit={handleEdit}
 				onDelete={handleDelete}
+				onToggleActive={handleToggleActive}
 			/>
 
 			{/* Create / Edit modal */}

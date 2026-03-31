@@ -7,6 +7,8 @@ import {
 	BsShieldFill,
 	BsPencil,
 	BsTrash,
+	BsSlashCircle,
+	BsCheckCircle,
 } from "react-icons/bs";
 import Badge from "../common/Badge";
 import Button from "../common/Button";
@@ -74,6 +76,7 @@ const UserCard = ({
 	user,
 	onEdit,
 	onDelete,
+	onToggleActive,
 	variant = "default",
 	className = "",
 }) => {
@@ -166,6 +169,24 @@ const UserCard = ({
 								className="hover:text-error!"
 							/>
 						)}
+						{onToggleActive && (
+							<Button
+								iconOnly
+								variant="ghost"
+								size="sm"
+								icon={user.active ? <BsSlashCircle /> : <BsCheckCircle />}
+								onClick={(e) => {
+									e.stopPropagation();
+									onToggleActive(user);
+								}}
+								aria-label={
+									user.active ? "Suspender cuenta" : "Reactivar cuenta"
+								}
+								className={
+									user.active ? "hover:text-error!" : "hover:text-success!"
+								}
+							/>
+						)}
 					</div>
 				)}
 			</div>
@@ -205,6 +226,12 @@ const UserCard = ({
 						</div>
 					)}
 				</div>
+			)}
+
+			{!user.active && (
+				<Badge variant="error" size="sm">
+					Suspendida
+				</Badge>
 			)}
 
 			{/* ── Compact: solo email ── */}
