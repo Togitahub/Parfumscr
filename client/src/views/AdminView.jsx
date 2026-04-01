@@ -8,7 +8,7 @@
  *   - Marcas (CRUD)
  *   - Categorías (CRUD)
  *   - Segmentos (CRUD)
- *   - Notas olfativas (CRUD)
+ *   - Acordes olfativos (CRUD)
  *
  * SUPER_ADMIN (todo lo anterior +):
  *   - Usuarios (CRUD completo)
@@ -88,7 +88,7 @@ const ADMIN_TABS = [
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
-	{ key: "notes", label: "Notas", icon: <BsDroplet /> },
+	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
 	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 ];
 
@@ -97,7 +97,7 @@ const SUPER_ADMIN_TABS = [
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
-	{ key: "notes", label: "Notas", icon: <BsDroplet /> },
+	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
 	{ key: "users", label: "Usuarios", icon: <BsPeople /> },
 ];
 
@@ -123,11 +123,11 @@ const EntityTable = ({ items = [], loading, onEdit, onDelete }) => {
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
+		<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
 			{items.map((item, i) => (
 				<div
 					key={item.id}
-					className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl border border-first/8 bg-main hover:border-first/20 transition-all duration-150 group"
+					className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl border border-first/15 bg-main hover:border-first/25 transition-all duration-150 group"
 					style={{
 						animation: "fadeUp 0.35s ease both",
 						animationDelay: `${Math.min(i * 40, 300)}ms`,
@@ -613,7 +613,7 @@ const AdminView = () => {
 			case "notes":
 				return (
 					<EntitySection
-						title="Notas olfativas"
+						title="Acordes olfativos"
 						items={notes}
 						loading={loadingNotes}
 						createMutation={CREATE_NOTE}

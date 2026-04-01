@@ -139,7 +139,7 @@ export const FilterProvider = ({ children, pageSize = 12 }) => {
 				);
 			}
 
-			// 5. Notas olfativas (el producto debe tener TODAS las notas seleccionadas)
+			// 5. Acordes olfativos (el producto debe tener TODOS los acordes seleccionados)
 			if (mergedFilters.noteIds.length > 0) {
 				result = result.filter((p) =>
 					mergedFilters.noteIds.every((noteId) =>

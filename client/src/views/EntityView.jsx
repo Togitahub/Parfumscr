@@ -136,6 +136,7 @@ const EntityView = ({ type }) => {
 				...p,
 				price: storeProduct?.price ?? p.price,
 				stock: storeProduct?.stock ?? p.stock,
+				discount: storeProduct?.discount ?? p.discount ?? 0,
 			};
 		});
 

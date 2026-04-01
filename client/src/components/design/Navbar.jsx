@@ -74,7 +74,7 @@ const Dropdown = ({ label, items = [], loading, onItemClick }) => {
 					) : items.length === 0 ? (
 						<p className="px-4 py-3 text-xs text-first/30">Sin elementos</p>
 					) : (
-						<div className="py-1.5">
+						<div className="py-1.5 max-h-70 overflow-y-auto nav-notes-scroll">
 							{items.map((item) => (
 								<button
 									key={item.id}
@@ -82,7 +82,7 @@ const Dropdown = ({ label, items = [], loading, onItemClick }) => {
 										onItemClick(item);
 										setOpen(false);
 									}}
-									className="w-full text-left px-4 py-2 text-sm text-first/70 hover:text-first hover:bg-second/8 transition-colors duration-150 cursor-pointer"
+									className="w-full text-left px-4 py-2 border-b border-b-first/30 text-sm text-first/70 hover:text-first hover:bg-second/8 transition-colors duration-150 cursor-pointer"
 								>
 									{item.name}
 								</button>
@@ -95,7 +95,7 @@ const Dropdown = ({ label, items = [], loading, onItemClick }) => {
 	);
 };
 
-// ── Dropdown de Notas (scroll + columnas) ────────────────────────────────────
+// ── Dropdown de Acordes (scroll + columnas) ────────────────────────────────────
 
 const NotesDropdown = ({ items = [], loading }) => {
 	const [open, setOpen] = useState(false);
@@ -115,7 +115,7 @@ const NotesDropdown = ({ items = [], loading }) => {
 						: "text-first/60 hover:text-first hover:bg-first/5",
 				].join(" ")}
 			>
-				Notas
+				Acordes
 				<BsChevronDown
 					className={[
 						"w-3 h-3 transition-transform duration-200",
@@ -131,11 +131,11 @@ const NotesDropdown = ({ items = [], loading }) => {
 							<span className="w-4 h-4 rounded-full border-2 border-second/20 border-t-second animate-spin" />
 						</div>
 					) : items.length === 0 ? (
-						<p className="px-4 py-3 text-xs text-first/30">Sin notas</p>
+						<p className="px-4 py-3 text-xs text-first/30">Sin acordes</p>
 					) : (
 						<div className="p-3 max-h-72 overflow-y-auto nav-notes-scroll">
 							<p className="text-[10px] font-semibold uppercase tracking-widest text-first/30 px-1 pb-2">
-								Notas olfativas
+								Acordes Olfativos
 							</p>
 							<div className="flex flex-wrap gap-1.5">
 								{items.map((note) => (
@@ -534,11 +534,11 @@ const NavBar = () => {
 						onItemClick={handleSegmentClick}
 					/>
 
-					{/* Notas en chips */}
+					{/* Acordes en chips */}
 					{notes.length > 0 && (
 						<div className="flex flex-col gap-2">
 							<p className="text-[10px] font-semibold uppercase tracking-widest text-first/30 px-2">
-								Aromas
+								Acordes
 							</p>
 							<div className="flex flex-wrap gap-1.5 px-1">
 								{notes.map((note) => (

@@ -83,12 +83,13 @@ export const UPDATE_STORE = gql`
 `;
 
 export const ADD_PRODUCT_TO_STORE = gql`
-	mutation AddProductToStore($productId: ID!, $price: Float, $stock: Int) {
-		addProductToStore(productId: $productId, price: $price, stock: $stock) {
+	mutation AddProductToStore($productId: ID!, $price: Float, $stock: Int, $discount: Float) {
+		addProductToStore(productId: $productId, price: $price, stock: $stock, discount: $discount) {
 			id
 			active
 			price
 			stock
+			discount
 			product {
 				id
 				name
@@ -98,11 +99,12 @@ export const ADD_PRODUCT_TO_STORE = gql`
 `;
 
 export const UPDATE_STORE_PRODUCT = gql`
-	mutation UpdateStoreProduct($productId: ID!, $price: Float, $stock: Int) {
-		updateStoreProduct(productId: $productId, price: $price, stock: $stock) {
+	mutation UpdateStoreProduct($productId: ID!, $price: Float, $stock: Int, $discount: Float) {
+		updateStoreProduct(productId: $productId, price: $price, stock: $stock, discount: $discount) {
 			id
 			price
 			stock
+			discount
 			product {
 				id
 				name

@@ -2,9 +2,9 @@ import User from "../models/User.js";
 
 const createAdmin = async () => {
 	try {
-		const userCount = await User.countDocuments();
+		const superadmin = await User.findOne({ role: "SUPER_ADMIN" });
 
-		if (userCount > 0) {
+		if (superadmin) {
 			console.log("Admin already exists, skipping admin creation");
 			return;
 		}

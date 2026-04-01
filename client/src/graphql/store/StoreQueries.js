@@ -30,6 +30,7 @@ export const GET_STORE_PRODUCTS = gql`
 			active
 			price
 			stock
+			discount
 			product {
 				id
 				name

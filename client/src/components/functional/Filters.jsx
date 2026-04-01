@@ -264,9 +264,9 @@ const Filters = ({
 					</Section>
 				)}
 
-				{/* Notas olfativas — chips multi-select */}
+				{/* Acordes olfativos — chips multi-select */}
 				{notes.length > 0 && (
-					<Section title="Notas olfativas" defaultOpen={false}>
+					<Section title="Acordes olfativos" defaultOpen={false}>
 						<div className="flex flex-wrap gap-1.5 pt-1">
 							{notes.map((n) => (
 								<ChipOption
@@ -280,7 +280,7 @@ const Filters = ({
 						{filters.noteIds.length > 0 && (
 							<p className="text-xs text-first/35 mt-1">
 								Mostrando perfumes con{" "}
-								<span className="text-second font-medium">todas</span> las notas
+								<span className="text-second font-medium">todos</span> los acordes
 								seleccionadas
 							</p>
 						)}

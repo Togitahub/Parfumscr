@@ -181,6 +181,11 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 				{/* Unit price */}
 				<p className="text-xs text-first/35 mt-1 tabular-nums">
 					{formatPrice(product.price)} c/u
+					{product.originalPrice && (
+						<span className="line-through text-first/20 ml-1.5">
+							{formatPrice(product.originalPrice)}
+						</span>
+					)}
 				</p>
 			</div>
 
@@ -267,11 +272,18 @@ const CartView = () => {
 		const storeProduct = storeProductsData?.getStoreProducts?.find(
 			(sp) => sp.product.id === item.product.id,
 		);
+		const basePrice = storeProduct?.price ?? item.product.price;
+		const discount = storeProduct?.discount ?? item.product.discount ?? 0;
+		const effectivePrice =
+			discount > 0 ? basePrice * (1 - discount / 100) : basePrice;
+
 		return {
 			...item,
 			product: {
 				...item.product,
-				price: storeProduct?.price ?? item.product.price,
+				price: effectivePrice,
+				originalPrice: discount > 0 ? basePrice : null,
+				discount,
 			},
 		};
 	});

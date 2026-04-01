@@ -7,7 +7,7 @@ const orderResolvers = {
 			if (!context.user) throw new Error("Not authenticated");
 			if (
 				context.user.id !== userId &&
-				!["ADMIN", "SUPERADMIN"].includes(context.user.role)
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
 			)
 				throw new Error("Not authorized");
 			return await Order.find({ user: userId }).sort({ createdAt: -1 });
@@ -19,7 +19,7 @@ const orderResolvers = {
 			if (!order) throw new Error("Order not found");
 			if (
 				order.user.toString() !== context.user.id &&
-				!["ADMIN", "SUPERADMIN"].includes(context.user.role)
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
 			)
 				throw new Error("Not authorized");
 			return order;

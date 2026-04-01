@@ -51,6 +51,7 @@ const StoreCatalog = ({ storeId }) => {
 					next[sp.product.id] = {
 						price: sp.price != null ? String(sp.price) : "",
 						stock: sp.stock != null ? String(sp.stock) : "",
+						discount: sp.discount != null ? String(sp.discount) : "",
 					};
 				}
 			});
@@ -80,6 +81,7 @@ const StoreCatalog = ({ storeId }) => {
 					productId,
 					price: values?.price ? parseFloat(values.price) : undefined,
 					stock: values?.stock ? parseInt(values.stock) : undefined,
+					discount: values?.discount ? parseFloat(values.discount) : undefined,
 				},
 			});
 			toast.success("Producto agregado a tu tienda");
@@ -262,6 +264,50 @@ const StoreCatalog = ({ storeId }) => {
 																	? parseFloat(editValues.price)
 																	: undefined,
 															stock: parseInt(editValues.stock),
+														},
+													});
+												}
+											}}
+											className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
+										/>
+									</div>
+									<div className="flex flex-col gap-1 flex-1">
+										<label className="text-xs text-first/40">
+											Descuento (%)
+										</label>
+										<input
+											type="number"
+											min="0"
+											max="100"
+											placeholder={`Actual: ${
+												storeData?.getStoreProducts?.find(
+													(sp) => sp.product.id === product.id,
+												)?.discount ?? 0
+											}%`}
+											value={editValues.discount}
+											onChange={(e) =>
+												setEditing((prev) => ({
+													...prev,
+													[product.id]: {
+														...editValues,
+														discount: e.target.value,
+													},
+												}))
+											}
+											onBlur={() => {
+												if (editValues.discount !== "") {
+													updateStoreProduct({
+														variables: {
+															productId: product.id,
+															price:
+																editValues.price !== ""
+																	? parseFloat(editValues.price)
+																	: undefined,
+															stock:
+																editValues.stock !== ""
+																	? parseInt(editValues.stock)
+																	: undefined,
+															discount: parseFloat(editValues.discount),
 														},
 													});
 												}

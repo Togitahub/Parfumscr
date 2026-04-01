@@ -28,6 +28,7 @@ const storeDefs = gql`
 		product: Product!
 		price: Float
 		stock: Int
+		discount: Float
 		active: Boolean!
 	}
 
@@ -70,8 +71,18 @@ const storeDefs = gql`
 			heroBadge2: String
 		): Store!
 
-		addProductToStore(productId: ID!, price: Float, stock: Int): StoreProduct!
-		updateStoreProduct(productId: ID!, price: Float, stock: Int): StoreProduct!
+		addProductToStore(
+			productId: ID!
+			price: Float
+			stock: Int
+			discount: Float
+		): StoreProduct!
+		updateStoreProduct(
+			productId: ID!
+			price: Float
+			stock: Int
+			discount: Float
+		): StoreProduct!
 		removeProductFromStore(productId: ID!): DeleteResponse!
 		toggleStoreProduct(productId: ID!, active: Boolean!): StoreProduct!
 	}

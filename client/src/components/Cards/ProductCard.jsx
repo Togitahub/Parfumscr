@@ -61,7 +61,7 @@ const ProductCard = ({
 	const isCompact = variant === "compact";
 	const isFeatured = variant === "featured";
 
-	const handleCardClick = () => navigate(`/product/${id}`);
+	const handleCardClick = () => navigate(`/store/product/${id}`);
 	const handleFavorite = (e) => {
 		e.stopPropagation();
 		onToggleFavorite?.(id);
@@ -133,14 +133,18 @@ const ProductCard = ({
 				<div className="pc-img-gradient absolute inset-x-0 bottom-0 h-1/2 pointer-events-none" />
 
 				{/* Top badges */}
-				<div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-					{!isDecant && <span className="pc-pill pc-pill--decant">Perfume</span>}
-					{isDecant && <span className="pc-pill pc-pill--decant">Decant</span>}
-					{hasDiscount && (
-						<span className="pc-pill pc-pill--discount">-{discount}%</span>
+				<div className="absolute top-3 left-3 flex gap-1.5 z-10">
+					{!isDecant && (
+						<span className="pc-pill pc-pill--decant">Perfume</span>
 					)}
+					{isDecant && <span className="pc-pill pc-pill--decant">Decant</span>}
 					{isOutOfStock && (
 						<span className="pc-pill pc-pill--stock">Agotado</span>
+					)}
+					{hasDiscount && (
+						<span className="pc-pill pc-pill--discount">
+							{discount}% Descuento
+						</span>
 					)}
 				</div>
 

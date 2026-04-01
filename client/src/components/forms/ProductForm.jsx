@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useRef } from "react";
+
 import Button from "../common/Button";
 import Input from "../common/Input";
 import Select from "../common/Select";
@@ -6,17 +9,18 @@ import ImageUploader from "../common/ImageUploader";
 import { useState } from "react";
 import { useToast } from "../../hooks/ToastContext";
 import { BsPlus, BsTrash, BsFlask } from "react-icons/bs";
-import { GET_NOTES } from "../../graphql/note/NoteQueries";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
-import { GET_PRODUCTS } from "../../graphql/product/ProductQueries";
+
 import {
 	CREATE_PRODUCT,
 	UPDATE_PRODUCT,
 } from "../../graphql/product/ProductMutations";
+
+import { GET_NOTES } from "../../graphql/note/NoteQueries";
+import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
+import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
+import { GET_PRODUCTS } from "../../graphql/product/ProductQueries";
 import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
-import { useEffect } from "react";
-import { useRef } from "react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -61,6 +65,90 @@ const buildInitialDecants = (product) => {
 
 const EMPTY_DECANT = { size: "", price: "", stock: "" };
 
+const BrandCombobox = ({
+	form,
+	handleChange,
+	errors,
+	brandOptions,
+	setForm,
+	setErrors,
+}) => {
+	const [brandOpen, setBrandOpen] = useState(false);
+
+	return (
+		<>
+			{/* Marca con combobox */}
+			<div className="flex flex-col gap-1 w-full">
+				<label className="text-sm font-medium text-first/80 select-none">
+					Marca <span className="text-error ml-1">*</span>
+				</label>
+				<div className="relative">
+					<input
+						type="text"
+						name="brand"
+						placeholder="Buscar o escribir marca..."
+						value={form.brand}
+						onChange={(e) => {
+							handleChange(e);
+							setBrandOpen(true);
+						}}
+						onFocus={() => setBrandOpen(true)}
+						onBlur={() => setTimeout(() => setBrandOpen(false), 150)}
+						className={[
+							"w-full h-10 text-sm px-3 rounded-md border bg-main text-first",
+							"transition-all duration-150 focus:outline-none focus:ring-2",
+							"placeholder:text-first/30",
+							errors.brand
+								? "border-error focus:ring-error/30 focus:border-error"
+								: "border-first/20 focus:ring-second/30 focus:border-second",
+						].join(" ")}
+					/>
+					{brandOpen && brandOptions.length > 0 && (
+						<div className="absolute z-20 top-full mt-1 w-full rounded-xl border border-first/15 bg-main shadow-xl overflow-hidden">
+							<div className="max-h-52 overflow-y-auto">
+								{brandOptions
+									.filter((b) =>
+										b.label.toLowerCase().includes(form.brand.toLowerCase()),
+									)
+									.map((b) => (
+										<button
+											key={b.value}
+											type="button"
+											onMouseDown={() => {
+												setForm((prev) => ({ ...prev, brand: b.label }));
+												if (errors.brand)
+													setErrors((prev) => ({ ...prev, brand: "" }));
+												setBrandOpen(false);
+											}}
+											className={[
+												"w-full text-left px-4 py-2 text-sm transition-colors duration-100 cursor-pointer",
+												form.brand === b.label
+													? "bg-second/10 text-second font-medium"
+													: "text-first/70 hover:bg-first/6 hover:text-first",
+											].join(" ")}
+										>
+											{b.label}
+										</button>
+									))}
+								{brandOptions.filter((b) =>
+									b.label.toLowerCase().includes(form.brand.toLowerCase()),
+								).length === 0 && (
+									<p className="px-4 py-3 text-xs text-first/35 italic">
+										Se creará "{form.brand}" como nueva marca
+									</p>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+				{errors.brand && (
+					<p className="text-error font-medium text-sm">{errors.brand}</p>
+				)}
+			</div>
+		</>
+	);
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 /**
@@ -81,6 +169,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 	const [decants, setDecants] = useState(() => buildInitialDecants(product));
 	const [errors, setErrors] = useState({});
 
+	const { data: brandsData } = useQuery(GET_BRANDS);
 	const { data: catData } = useQuery(GET_CATEGORIES);
 	const { data: segData } = useQuery(GET_SEGMENTS);
 	const { data: noteData } = useQuery(GET_NOTES);
@@ -98,6 +187,9 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 	const loading = loadingCreate || loadingUpdate;
 
 	// ── Select options ────────────────────────────────────────────────────────
+
+	const brandOptions =
+		brandsData?.getBrands?.map((b) => ({ value: b.id, label: b.name })) ?? [];
 
 	const categoryOptions =
 		catData?.getCategories?.map((c) => ({ value: c.id, label: c.name })) ?? [];
@@ -295,14 +387,13 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 						error={errors.name}
 						required
 					/>
-					<Input
-						label="Marca"
-						name="brand"
-						placeholder="Ej: Dior"
-						value={form.brand}
-						onChange={handleChange}
-						error={errors.brand}
-						required
+					<BrandCombobox
+						form={form}
+						handleChange={handleChange}
+						errors={errors}
+						brandOptions={brandOptions}
+						setForm={setForm}
+						setErrors={setErrors}
 					/>
 				</div>
 
@@ -330,7 +421,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 				{noteOptions.length > 0 && (
 					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium text-first/80 select-none">
-							Notas olfativas
+							Acordes olfativos
 						</label>
 						<div className="flex flex-wrap gap-2">
 							{noteOptions.map((note) => {

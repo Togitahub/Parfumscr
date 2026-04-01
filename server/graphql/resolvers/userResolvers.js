@@ -101,6 +101,12 @@ const userResolvers = {
 			if (!target) throw new Error("User not found");
 			if (target.role === "SUPER_ADMIN")
 				throw new Error("Cannot suspend a Super Admin");
+
+			// Si es ADMIN, propagar el estado a su store
+			if (target.role === "ADMIN") {
+				await Store.findOneAndUpdate({ owner: id }, { active });
+			}
+
 			return await User.findByIdAndUpdate(id, { active }, { new: true });
 		},
 

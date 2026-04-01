@@ -196,7 +196,7 @@ const InfoRow = ({ icon, label, value, to, navigate }) => (
 
 const LinkedProductBanner = ({ product, navigate }) => (
 	<button
-		onClick={() => navigate(`/product/${product.id}`)}
+		onClick={() => navigate(`/store/product/${product.id}`)}
 		className="w-full flex items-center gap-3 p-3 rounded-xl border border-first/10 hover:border-second/30 hover:bg-second/4 transition-all duration-200 cursor-pointer text-left group"
 	>
 		{product.images?.[0] && (
@@ -643,7 +643,7 @@ const ProductView = () => {
 							<div className="flex flex-col gap-2">
 								<p className="text-xs font-semibold uppercase tracking-widest text-first/40 flex items-center gap-2">
 									<BsDroplet className="w-3.5 h-3.5" />
-									Notas olfativas
+									Acordes Olfativos
 								</p>
 								<div className="flex flex-wrap gap-1.5">
 									{product.notes.map((note) => (
@@ -711,7 +711,7 @@ const ProductView = () => {
 							{decants.map((d, i) => (
 								<button
 									key={d.id}
-									onClick={() => navigate(`/product/${d.id}`)}
+									onClick={() => navigate(`/store/product/${d.id}`)}
 									className="flex flex-col gap-2 p-4 rounded-xl border border-first/8 hover:border-second/30 hover:bg-second/4 transition-all duration-200 cursor-pointer text-left group"
 									style={{
 										animation: "fadeUp 0.4s ease both",

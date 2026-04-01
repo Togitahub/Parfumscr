@@ -384,9 +384,9 @@ body {
 	border: 1px solid color-mix(in srgb, var(--color-second) 30%, transparent);
 }
 .pc-pill--discount {
-	background: color-mix(in srgb, var(--color-error) 18%, transparent);
-	color: var(--color-error);
-	border: 1px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+	background: color-mix(in srgb, var(--color-succes) 18%, transparent);
+	color: var(--color-success);
+	border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
 }
 .pc-pill--stock {
 	background: color-mix(in srgb, var(--color-first) 8%, transparent);
@@ -522,7 +522,7 @@ body {
 	animation: navDropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Scroll personalizado para el panel de notas */
+/* Scroll personalizado para el panel de acordes */
 .nav-notes-scroll {
 	scrollbar-width: thin;
 	scrollbar-color: color-mix(in srgb, var(--color-first) 15%, transparent)

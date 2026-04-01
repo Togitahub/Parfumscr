@@ -58,6 +58,7 @@ const StoreView = () => {
 		...sp.product,
 		price: sp.price ?? sp.product.price,
 		stock: sp.stock ?? sp.product.stock,
+		discount: sp.discount ?? sp.product.discount ?? 0,
 	}));
 
 	const brands = brandsData?.getBrands ?? [];

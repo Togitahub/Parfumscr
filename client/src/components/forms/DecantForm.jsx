@@ -251,7 +251,7 @@ const DecantForm = ({ product, onSuccess, onCancel }) => {
 			{decants.length > 0 && (
 				<p className="text-xs text-first/35 leading-relaxed">
 					Los decants heredarán automáticamente la imagen, categoría, segmento,
-					notas olfativas y descripción de{" "}
+					acordes olfativos y descripción de{" "}
 					<span className="text-first/60 font-medium">
 						{fullProduct?.name ?? product.name}
 					</span>

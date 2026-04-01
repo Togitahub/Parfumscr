@@ -16,7 +16,7 @@ const brandResolvers = {
 
 	Mutation: {
 		createBrand: async (_, { name }, context) => {
-			if (!context.user || !["ADMIN", "SUPERADMIN"].includes(context.user.role))
+			if (!context.user || !["ADMIN", "SUPER_ADMIN"].includes(context.user.role))
 				throw new Error("Not authorized");
 			return await Brand.create({ name });
 		},

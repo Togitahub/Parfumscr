@@ -23,6 +23,9 @@ const storeResolvers = {
 		},
 
 		getStoreProducts: async (_, { storeId }) => {
+			const store = await Store.findById(storeId);
+			if (!store || !store.active) return [];
+
 			return await StoreProduct.find({
 				store: storeId,
 				active: true,
@@ -69,7 +72,11 @@ const storeResolvers = {
 			return await Store.findByIdAndUpdate(store._id, args, { new: true });
 		},
 
-		addProductToStore: async (_, { productId, price, stock }, { user }) => {
+		addProductToStore: async (
+			_,
+			{ productId, price, stock, discount },
+			{ user },
+		) => {
 			if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
 
 			const store = await Store.findOne({ owner: user._id });
@@ -91,18 +98,25 @@ const storeResolvers = {
 				throw new Error("Product already in store");
 			}
 
+			if (discount !== undefined) existing.discount = discount;
+
 			const storeProduct = await StoreProduct.create({
 				store: store._id,
 				product: productId,
 				active: true,
 				price: price ?? null,
 				stock: stock ?? null,
+				discount: discount ?? null,
 			});
 
 			return await storeProduct.populate(PRODUCT_POPULATE);
 		},
 
-		updateStoreProduct: async (_, { productId, price, stock }, { user }) => {
+		updateStoreProduct: async (
+			_,
+			{ productId, price, stock, discount },
+			{ user },
+		) => {
 			if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
 
 			const store = await Store.findOne({ owner: user._id });
@@ -110,7 +124,7 @@ const storeResolvers = {
 
 			const storeProduct = await StoreProduct.findOneAndUpdate(
 				{ store: store._id, product: productId },
-				{ price, stock },
+				{ price, stock, discount },
 				{ new: true },
 			);
 

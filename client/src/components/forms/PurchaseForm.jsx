@@ -90,6 +90,14 @@ const OrderItemRow = ({ item, index }) => {
 							<span className="text-[11px] text-first/35">{product.size}</span>
 						</>
 					)}
+					{product.discount > 0 && (
+						<>
+							<span className="text-first/20 text-[10px]">·</span>
+							<span className="text-[11px] text-error font-medium">
+								-{product.discount}%
+							</span>
+						</>
+					)}
 				</div>
 			</div>
 
@@ -98,9 +106,16 @@ const OrderItemRow = ({ item, index }) => {
 				<span className="text-sm font-semibold text-first tabular-nums">
 					{formatPrice(subtotal)}
 				</span>
-				<span className="text-[11px] text-first/35 tabular-nums">
-					{quantity} × {formatPrice(product.price)}
-				</span>
+				<div className="flex items-center gap-1.5">
+					{product.originalPrice && (
+						<span className="text-[11px] text-first/30 line-through tabular-nums">
+							{formatPrice(product.originalPrice * quantity)}
+						</span>
+					)}
+					<span className="text-[11px] text-first/35 tabular-nums">
+						{quantity} × {formatPrice(product.price)}
+					</span>
+				</div>
 			</div>
 		</div>
 	);
