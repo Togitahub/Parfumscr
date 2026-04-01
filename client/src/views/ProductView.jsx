@@ -45,6 +45,9 @@ import { Spinner } from "../components/interface/LoadingUi";
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
 
+const discountedPrice = (discount, displayPrice) =>
+	discount > 0 ? displayPrice * (1 - discount / 100) : displayPrice;
+
 // ── Image gallery ─────────────────────────────────────────────────────────────
 
 const ImageGallery = ({ images = [], name }) => {
@@ -221,9 +224,13 @@ const ProductView = () => {
 
 	const product = data?.getProduct;
 
+	const storeProductIds = new Set(
+		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
+	);
 	const storeProduct = storeProductsData?.getStoreProducts?.find(
 		(sp) => sp.product.id === id,
 	);
+
 	const storePrice = storeProduct?.price ?? product?.price ?? 0;
 	const storeStock = storeProduct?.stock ?? product?.stock ?? 0;
 
@@ -231,7 +238,20 @@ const ProductView = () => {
 		favoritesData?.getUserFavorites?.products?.map((p) => p.id) ?? [];
 	const isFavorite = favoriteIds.includes(id);
 
-	const decants = product?.decants ?? [];
+	const decants = (product?.decants ?? [])
+		.filter((d) => storeProductIds.has(d.id))
+		.map((d) => {
+			const sp = storeProductsData?.getStoreProducts?.find(
+				(sp) => sp.product.id === d.id,
+			);
+			return {
+				...d,
+				price: sp?.price ?? d.price,
+				stock: sp?.stock ?? d.stock,
+				discount: sp?.discount ?? d.discount ?? 0,
+			};
+		});
+
 	const hasDecants = decants.length > 0;
 	const isOutOfStock = storeStock === 0;
 
@@ -243,9 +263,6 @@ const ProductView = () => {
 		: storePrice;
 
 	const discount = storeProduct?.discount ?? product?.discount ?? 0;
-
-	const discountedPrice =
-		discount > 0 ? displayPrice * (1 - discount / 100) : displayPrice;
 
 	const hasDiscount = discount > 0;
 
@@ -403,7 +420,7 @@ const ProductView = () => {
 							</h1>
 
 							{/* Size */}
-							{product.size && !hasDecants && (
+							{product.size && (
 								<p className="text-sm text-first/40 tracking-wide">
 									{product.size}
 								</p>
@@ -438,7 +455,7 @@ const ProductView = () => {
 										fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)",
 									}}
 								>
-									{formatPrice(discountedPrice)}
+									{formatPrice(discountedPrice(discount, displayPrice))}
 								</span>
 								{hasDiscount && (
 									<span className="text-base text-first/30 line-through tabular-nums">
@@ -678,9 +695,22 @@ const ProductView = () => {
 											</Badge>
 										)}
 									</div>
-									<span className="text-lg font-semibold text-first tabular-nums">
-										{formatPrice(d.price)}
-									</span>
+									<div className="flex items-baseline gap-3">
+										<span
+											className="font-semibold text-first tabular-nums"
+											style={{
+												fontFamily: "'Cinzel', serif",
+												fontSize: "clamp(1.5rem, 3vw, 2rem)",
+											}}
+										>
+											{formatPrice(discountedPrice(d.discount, d.price))}
+										</span>
+										{hasDiscount && (
+											<span className="text-base text-first/30 line-through tabular-nums">
+												{formatPrice(d.price)}
+											</span>
+										)}
+									</div>
 									<span
 										className="text-xs font-medium transition-colors"
 										style={{ color: "var(--color-second)", opacity: 0 }}

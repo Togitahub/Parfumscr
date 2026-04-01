@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Cormorant:ital,wght@1,300&display=swap");
 
 .dark-theme {
 	--color-main: black;
@@ -102,7 +101,7 @@ body {
 }
 .hero-body {
 	font-family: "Cormorant Garamond", Georgia, serif;
-	font-size: 1.125rem;
+	font-size: 1.08rem;
 	font-weight: 300;
 }
 .hero-eyebrow {

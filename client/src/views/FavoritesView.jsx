@@ -1,22 +1,35 @@
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
+
+// Context
+
 import { useAuth } from "../hooks/AuthContext";
+import { useStore } from "../hooks/StoreContext";
 import { useToast } from "../hooks/ToastContext";
 import { FilterProvider } from "../hooks/FilterContext";
 
-import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
+// GraphQL
+
 import {
 	ADD_FAVORITE,
 	REMOVE_FAVORITE,
 } from "../graphql/favorites/FavoritesMutations";
-import { ADD_ITEM_TO_CART } from "../graphql/cart/CartMutations";
-import { GET_BRANDS } from "../graphql/brand/BrandQueries";
-import { GET_CATEGORIES } from "../graphql/category/CategoryQueries";
-import { GET_SEGMENTS } from "../graphql/segment/SegmentQueries";
+
 import { GET_NOTES } from "../graphql/note/NoteQueries";
+import { GET_BRANDS } from "../graphql/brand/BrandQueries";
+import { GET_SEGMENTS } from "../graphql/segment/SegmentQueries";
+import { ADD_ITEM_TO_CART } from "../graphql/cart/CartMutations";
+import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
+import { GET_CATEGORIES } from "../graphql/category/CategoryQueries";
+import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
+
+// Componentes
 
 import ProductList from "../lists/ProductList";
 import Button from "../components/common/Button";
+
+// Iconos
+
 import { BsHeart, BsArrowLeft } from "react-icons/bs";
 
 // ── Empty state elegante ──────────────────────────────────────────────────────
@@ -105,9 +118,11 @@ const FavoritesEmpty = () => {
 
 const FavoritesView = () => {
 	const toast = useToast();
+
 	const navigate = useNavigate();
 
 	const { user } = useAuth();
+	const { store } = useStore();
 
 	// ── Queries ───────────────────────────────────────────────────────────────
 
@@ -118,6 +133,11 @@ const FavoritesView = () => {
 	} = useQuery(GET_USER_FAVORITES, {
 		variables: { userId: user?.id },
 		skip: !user?.id,
+	});
+
+	const { data: storeProductsData } = useQuery(GET_STORE_PRODUCTS, {
+		variables: { storeId: store?.storeId },
+		skip: !store?.storeId,
 	});
 
 	const { data: brandsData } = useQuery(GET_BRANDS);
@@ -136,7 +156,27 @@ const FavoritesView = () => {
 	// Los productos favoritos vienen del campo `products` del documento Favorites.
 	// La query GET_USER_FAVORITES solo trae id/name/brand, así que necesitamos
 	// enriquecer los datos. Por eso usamos una query dedicada que traiga todo.
-	const favoriteProducts = favoritesData?.getUserFavorites?.products ?? [];
+	const rawFavoriteProducts = favoritesData?.getUserFavorites?.products ?? [];
+
+	const storeProductsMap = Object.fromEntries(
+		(storeProductsData?.getStoreProducts ?? []).map((sp) => [
+			sp.product.id,
+			sp,
+		]),
+	);
+
+	const favoriteProducts = rawFavoriteProducts
+		.filter((p) => storeProductsMap[p.id])
+		.map((p) => {
+			const sp = storeProductsMap[p.id];
+			return {
+				...p,
+				price: sp.price ?? p.price,
+				stock: sp.stock ?? p.stock,
+				discount: sp.discount ?? p.discount ?? 0,
+			};
+		});
+
 	const favoriteIds = favoriteProducts.map((p) => p.id);
 
 	const brands = brandsData?.getBrands ?? [];

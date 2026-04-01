@@ -8,13 +8,15 @@ import ImageUploader from "../common/ImageUploader";
 
 import { useState } from "react";
 import { useToast } from "../../hooks/ToastContext";
-import { BsPlus, BsTrash, BsFlask } from "react-icons/bs";
+import { BsPlus, BsTrash, BsFlask, BsX } from "react-icons/bs";
 import { useMutation, useQuery } from "@apollo/client/react";
 
 import {
 	CREATE_PRODUCT,
 	UPDATE_PRODUCT,
 } from "../../graphql/product/ProductMutations";
+
+import { CREATE_NOTE } from "../../graphql/note/NoteMutations";
 
 import { GET_NOTES } from "../../graphql/note/NoteQueries";
 import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
@@ -146,6 +148,116 @@ const BrandCombobox = ({
 				)}
 			</div>
 		</>
+	);
+};
+
+const NotesCombobox = ({ noteOptions, selectedNotes, onToggle, onCreated }) => {
+	const toast = useToast();
+	const [search, setSearch] = useState("");
+	const [creating, setCreating] = useState(false);
+
+	const [createNote] = useMutation(CREATE_NOTE, {
+		refetchQueries: [{ query: GET_NOTES }],
+	});
+
+	const filtered = noteOptions.filter((n) =>
+		n.label.toLowerCase().includes(search.toLowerCase()),
+	);
+
+	const exactMatch = noteOptions.some(
+		(n) => n.label.toLowerCase() === search.trim().toLowerCase(),
+	);
+
+	const handleCreate = async () => {
+		if (!search.trim() || exactMatch) return;
+		setCreating(true);
+		try {
+			const { data } = await createNote({ variables: { name: search.trim() } });
+			const newNote = data.createNote;
+			toast.success(`Acorde "${newNote.name}" creado`);
+			onCreated(newNote);
+			setSearch("");
+		} catch (err) {
+			toast.error("Error al crear el acorde", { description: err.message });
+		} finally {
+			setCreating(false);
+		}
+	};
+
+	return (
+		<div className="flex flex-col gap-2">
+			<label className="text-sm font-medium text-first/80 select-none">
+				Acordes olfativos
+			</label>
+
+			{/* Search input */}
+			<div className="relative flex items-center">
+				<input
+					type="text"
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					placeholder="Buscar acorde..."
+					className="w-full h-9 pl-3 pr-9 rounded-md border border-first/20 bg-main text-sm text-first placeholder:text-first/30 focus:outline-none focus:ring-2 focus:ring-second/30 focus:border-second transition-all duration-150"
+				/>
+				{search && (
+					<button
+						type="button"
+						onClick={() => setSearch("")}
+						className="absolute right-3 text-first/30 hover:text-first/60 transition-colors cursor-pointer"
+					>
+						<BsX className="w-4 h-4" />
+					</button>
+				)}
+			</div>
+
+			{/* Create suggestion */}
+			{search.trim() && !exactMatch && (
+				<button
+					type="button"
+					onClick={handleCreate}
+					disabled={creating}
+					className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-second/40 text-xs text-second hover:bg-second/8 transition-all duration-150 cursor-pointer disabled:opacity-50 w-fit"
+				>
+					<BsPlus className="w-3.5 h-3.5" />
+					{creating ? "Creando..." : `Crear "${search.trim()}"`}
+				</button>
+			)}
+
+			{/* Chips */}
+			<div className="flex flex-wrap gap-2">
+				{(search.trim() ? filtered : noteOptions).map((note) => {
+					const selected = selectedNotes.includes(note.value);
+					return (
+						<button
+							key={note.value}
+							type="button"
+							onClick={() => onToggle(note.value)}
+							className={[
+								"px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150 cursor-pointer",
+								selected
+									? "bg-second text-main border-second"
+									: "bg-transparent text-first/50 border-first/20 hover:border-first/40",
+							].join(" ")}
+						>
+							{note.label}
+						</button>
+					);
+				})}
+				{search.trim() && filtered.length === 0 && (
+					<p className="text-xs text-first/30 italic px-1">
+						Sin resultados — puedes crear este acorde arriba
+					</p>
+				)}
+			</div>
+
+			{/* Selected count */}
+			{selectedNotes.length > 0 && (
+				<p className="text-xs text-first/35">
+					{selectedNotes.length} acorde{selectedNotes.length !== 1 ? "s" : ""}{" "}
+					seleccionado{selectedNotes.length !== 1 ? "s" : ""}
+				</p>
+			)}
+		</div>
 	);
 };
 
@@ -418,33 +530,17 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 					/>
 				</div>
 
-				{noteOptions.length > 0 && (
-					<div className="flex flex-col gap-2">
-						<label className="text-sm font-medium text-first/80 select-none">
-							Acordes olfativos
-						</label>
-						<div className="flex flex-wrap gap-2">
-							{noteOptions.map((note) => {
-								const selected = form.notes.includes(note.value);
-								return (
-									<button
-										key={note.value}
-										type="button"
-										onClick={() => handleNoteToggle(note.value)}
-										className={[
-											"px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150 cursor-pointer",
-											selected
-												? "bg-second text-main border-second"
-												: "bg-transparent text-first/50 border-first/20 hover:border-first/40",
-										].join(" ")}
-									>
-										{note.label}
-									</button>
-								);
-							})}
-						</div>
-					</div>
-				)}
+				<NotesCombobox
+					noteOptions={noteOptions}
+					selectedNotes={form.notes}
+					onToggle={handleNoteToggle}
+					onCreated={(newNote) => {
+						setForm((prev) => ({
+							...prev,
+							notes: [...prev.notes, newNote.id],
+						}));
+					}}
+				/>
 
 				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 					<Input

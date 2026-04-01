@@ -30,6 +30,7 @@ import {
 	BsPencil,
 	BsTrash,
 	BsDroplet,
+	BsShop,
 } from "react-icons/bs";
 import ProductCard from "../components/cards/ProductCard";
 import Filters from "../components/functional/Filters";
@@ -100,6 +101,8 @@ const ProductList = ({
 	onAddToCart,
 	showFilters = true,
 	showAdminActions = false,
+	onToggleStore,
+	storeProductIds,
 	onEdit,
 	onDelete,
 	onAddDecant,
@@ -335,6 +338,27 @@ const ProductList = ({
 													}}
 													aria-label="Crear decant"
 												/>
+												{onToggleStore && (
+													<Button
+														iconOnly
+														size="xs"
+														variant={
+															storeProductIds?.has(product.id)
+																? "primary"
+																: "outline"
+														}
+														icon={<BsShop />}
+														onClick={(e) => {
+															e.stopPropagation();
+															onToggleStore?.(product);
+														}}
+														aria-label={
+															storeProductIds?.has(product.id)
+																? "Quitar de tienda"
+																: "Agregar a tienda"
+														}
+													/>
+												)}
 											</div>
 										)}
 									</div>

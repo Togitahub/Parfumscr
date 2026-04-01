@@ -11,6 +11,16 @@ export const StoreProvider = ({ children }) => {
 	const [loadingStore, setLoadingStore] = useState(true);
 	const [storeNotFound, setStoreNotFound] = useState(false);
 
+	const setFavicon = (url) => {
+		let link = document.querySelector("link[rel~='icon']");
+		if (!link) {
+			link = document.createElement("link");
+			link.rel = "icon";
+			document.head.appendChild(link);
+		}
+		link.href = url;
+	};
+
 	useEffect(() => {
 		const fetchStoreConfig = async () => {
 			try {
@@ -28,6 +38,7 @@ export const StoreProvider = ({ children }) => {
 
 				if (!res.ok) {
 					setStoreNotFound(true);
+					document.title = "Parfumscr";
 					return;
 				}
 
@@ -48,6 +59,12 @@ export const StoreProvider = ({ children }) => {
 				);
 
 				setStore(data);
+
+				document.title = data.storeName ?? "Parfumscr";
+
+				if (data.logo) {
+					setFavicon(data.logo);
+				}
 
 				if (location.pathname === "/" || location.pathname === "") {
 					navigate("/store", { replace: true });

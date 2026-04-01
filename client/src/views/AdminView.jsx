@@ -62,6 +62,11 @@ import {
 import { GET_USERS } from "../graphql/user/UserQueries";
 import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
 import { GET_MY_STORE } from "../graphql/store/StoreQueries";
+import {
+	ADD_PRODUCT_TO_STORE,
+	REMOVE_PRODUCT_FROM_STORE,
+} from "../graphql/store/StoreMutations";
+import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
 // Components
 import { Modal, ConfirmDialog } from "../components/interface/Modal";
@@ -83,8 +88,11 @@ import { FilterProvider } from "../hooks/FilterContext";
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 
-const ADMIN_TABS = [
+const buildAdminTabs = (myStoreExists) => [
 	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
+	...(myStoreExists
+		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
+		: []),
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
@@ -275,7 +283,7 @@ const EntitySection = ({
 
 // ── Products section ──────────────────────────────────────────────────────────
 
-const ProductsSection = () => {
+const ProductsSection = ({ myStoreId }) => {
 	const toast = useToast();
 	const { user } = useAuth();
 	const [modalOpen, setModalOpen] = useState(false);
@@ -289,9 +297,23 @@ const ProductsSection = () => {
 	const { data: categoriesData } = useQuery(GET_CATEGORIES);
 	const { data: segmentsData } = useQuery(GET_SEGMENTS);
 	const { data: notesData } = useQuery(GET_NOTES);
+	const { data: storeProductsData, refetch: refetchStoreProducts } = useQuery(
+		GET_STORE_PRODUCTS,
+		{ variables: { storeId: myStoreId }, skip: !myStoreId },
+	);
 
 	const [deleteProduct, { loading: deleting }] = useMutation(DELETE_PRODUCT, {
 		refetchQueries: [{ query: GET_PRODUCTS }],
+	});
+	const [addProductToStore] = useMutation(ADD_PRODUCT_TO_STORE, {
+		refetchQueries: [
+			{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
+		],
+	});
+	const [removeProductFromStore] = useMutation(REMOVE_PRODUCT_FROM_STORE, {
+		refetchQueries: [
+			{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
+		],
 	});
 
 	const products = productsData?.getProducts ?? [];
@@ -301,13 +323,15 @@ const ProductsSection = () => {
 	const segments = segmentsData?.getSegments ?? [];
 	const notes = notesData?.getNotes ?? [];
 
+	const storeProductIds = new Set(
+		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
+	);
+
 	const handleEdit = (product) => {
 		setEditProduct(product);
 		setModalOpen(true);
 	};
-
 	const handleDelete = (product) => setDeleteTarget(product);
-
 	const handleConfirmDelete = async () => {
 		try {
 			await deleteProduct({ variables: { id: deleteTarget.id } });
@@ -317,20 +341,33 @@ const ProductsSection = () => {
 			toast.error("Error al eliminar", { description: err.message });
 		}
 	};
-
 	const handleOpenCreate = () => {
 		setEditProduct(null);
 		setModalOpen(true);
 	};
-
 	const handleModalClose = () => {
 		setModalOpen(false);
 		setEditProduct(null);
 	};
 
+	const handleToggleStore = async (product) => {
+		if (!myStoreId) return;
+		try {
+			if (storeProductIds.has(product.id)) {
+				await removeProductFromStore({ variables: { productId: product.id } });
+				toast.success("Quitado de tu tienda");
+			} else {
+				await addProductToStore({ variables: { productId: product.id } });
+				toast.success("Agregado a tu tienda");
+			}
+			refetchStoreProducts();
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4">
-			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
 					<h2 className="text-base font-semibold text-first">Productos</h2>
@@ -340,14 +377,11 @@ const ProductsSection = () => {
 							: `${products.length} producto${products.length !== 1 ? "s" : ""}`}
 					</p>
 				</div>
-				<div className="flex gap-4">
-					<Button size="sm" icon={<BsPlus />} onClick={handleOpenCreate}>
-						Nuevo Perfume
-					</Button>
-				</div>
+				<Button size="sm" icon={<BsPlus />} onClick={handleOpenCreate}>
+					Nuevo Perfume
+				</Button>
 			</div>
 
-			{/* List */}
 			<FilterProvider pageSize={9}>
 				<ProductList
 					products={products}
@@ -359,11 +393,12 @@ const ProductsSection = () => {
 					onEdit={isSuperAdmin ? handleEdit : undefined}
 					onDelete={isSuperAdmin ? handleDelete : undefined}
 					onAddDecant={(product) => setDecantTarget(product)}
+					onToggleStore={myStoreId ? handleToggleStore : undefined}
+					storeProductIds={storeProductIds}
 					showAdminActions
 				/>
 			</FilterProvider>
 
-			{/* Create / Edit modal */}
 			<Modal
 				isOpen={modalOpen}
 				onClose={handleModalClose}
@@ -391,7 +426,6 @@ const ProductsSection = () => {
 				/>
 			</Modal>
 
-			{/* Delete confirm */}
 			<ConfirmDialog
 				isOpen={Boolean(deleteTarget)}
 				onClose={() => setDeleteTarget(null)}
@@ -525,9 +559,6 @@ const AdminView = () => {
 
 	const toast = useToast();
 
-	const tabs = isSuperAdmin ? SUPER_ADMIN_TABS : ADMIN_TABS;
-	const [activeTab, setActiveTab] = useState(tabs[0].key);
-
 	// Queries for entity sections
 	const { data: brandsData, loading: loadingBrands } = useQuery(GET_BRANDS);
 	const { data: categoriesData, loading: loadingCategories } =
@@ -546,6 +577,9 @@ const AdminView = () => {
 	const myStoreExists = myStoreData?.getMyStore;
 	const myStoreId = myStoreData?.getMyStore?.id;
 
+	const tabs = isSuperAdmin ? SUPER_ADMIN_TABS : buildAdminTabs(myStoreExists);
+	const [activeTab, setActiveTab] = useState(tabs[0].key);
+
 	const copyMyStoreLink = () => {
 		const link = myStoreExists?.customDomain
 			? `https://${myStoreExists?.customDomain}`
@@ -563,7 +597,10 @@ const AdminView = () => {
 	const renderContent = () => {
 		switch (activeTab) {
 			case "products":
-				return <ProductsSection />;
+				return <ProductsSection myStoreId={myStoreId} />;
+
+			case "catalog":
+				return myStoreId ? <StoreCatalog storeId={myStoreId} /> : null;
 
 			case "brands":
 				return (
@@ -649,7 +686,6 @@ const AdminView = () => {
 							</div>
 						)}
 						<StoreForm />
-						{myStoreId && <StoreCatalog storeId={myStoreId} />}
 					</div>
 				);
 

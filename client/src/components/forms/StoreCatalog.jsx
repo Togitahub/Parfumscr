@@ -1,13 +1,11 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { BsSearch, BsX, BsPlus, BsTrash } from "react-icons/bs";
+import { BsSearch, BsX, BsTrash } from "react-icons/bs";
 import { useToast } from "../../hooks/ToastContext";
-import { GET_PRODUCTS } from "../../graphql/product/ProductQueries";
 import { GET_STORE_PRODUCTS } from "../../graphql/store/StoreQueries";
 import {
-	ADD_PRODUCT_TO_STORE,
-	UPDATE_STORE_PRODUCT,
 	REMOVE_PRODUCT_FROM_STORE,
+	UPDATE_STORE_PRODUCT,
 } from "../../graphql/store/StoreMutations";
 import { Spinner } from "../interface/LoadingUi";
 import Button from "../common/Button";
@@ -17,7 +15,6 @@ const StoreCatalog = ({ storeId }) => {
 	const [search, setSearch] = useState("");
 	const [editing, setEditing] = useState({});
 
-	const { data: allData, loading: loadingAll } = useQuery(GET_PRODUCTS);
 	const { data: storeData, loading: loadingStore } = useQuery(
 		GET_STORE_PRODUCTS,
 		{
@@ -25,10 +22,6 @@ const StoreCatalog = ({ storeId }) => {
 			skip: !storeId,
 		},
 	);
-
-	const [addProduct, { loading: adding }] = useMutation(ADD_PRODUCT_TO_STORE, {
-		refetchQueries: [{ query: GET_STORE_PRODUCTS, variables: { storeId } }],
-	});
 
 	const [updateStoreProduct] = useMutation(UPDATE_STORE_PRODUCT, {
 		refetchQueries: [{ query: GET_STORE_PRODUCTS, variables: { storeId } }],
@@ -41,54 +34,18 @@ const StoreCatalog = ({ storeId }) => {
 		},
 	);
 
-	useEffect(() => {
-		if (!storeData?.getStoreProducts) return;
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setEditing((prev) => {
-			const next = { ...prev };
-			storeData.getStoreProducts.forEach((sp) => {
-				if (!next[sp.product.id]) {
-					next[sp.product.id] = {
-						price: sp.price != null ? String(sp.price) : "",
-						stock: sp.stock != null ? String(sp.stock) : "",
-						discount: sp.discount != null ? String(sp.discount) : "",
-					};
-				}
-			});
-			return next;
-		});
-	}, [storeData]);
-
-	const allProducts = useMemo(() => allData?.getProducts ?? [], [allData]);
-	const storeProductIds = new Set(
-		storeData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
-	);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const storeProducts = storeData?.getStoreProducts ?? [];
 
 	const filtered = useMemo(() => {
-		if (!search.trim()) return allProducts;
+		if (!search.trim()) return storeProducts;
 		const q = search.toLowerCase();
-		return allProducts.filter(
-			(p) =>
-				p.name?.toLowerCase().includes(q) ||
-				p.brand?.name?.toLowerCase().includes(q),
+		return storeProducts.filter(
+			(sp) =>
+				sp.product.name?.toLowerCase().includes(q) ||
+				sp.product.brand?.name?.toLowerCase().includes(q),
 		);
-	}, [allProducts, search]);
-
-	const handleAdd = async (productId, values) => {
-		try {
-			await addProduct({
-				variables: {
-					productId,
-					price: values?.price ? parseFloat(values.price) : undefined,
-					stock: values?.stock ? parseInt(values.stock) : undefined,
-					discount: values?.discount ? parseFloat(values.discount) : undefined,
-				},
-			});
-			toast.success("Producto agregado a tu tienda");
-		} catch (err) {
-			toast.error("Error", { description: err.message });
-		}
-	};
+	}, [storeProducts, search]);
 
 	const handleRemove = async (productId) => {
 		try {
@@ -99,7 +56,14 @@ const StoreCatalog = ({ storeId }) => {
 		}
 	};
 
-	if (loadingAll || loadingStore) {
+	const getEditing = (sp) =>
+		editing[sp.product.id] ?? {
+			price: sp.price != null ? String(sp.price) : "",
+			stock: sp.stock != null ? String(sp.stock) : "",
+			discount: sp.discount != null ? String(sp.discount) : "",
+		};
+
+	if (loadingStore) {
 		return (
 			<div className="flex items-center justify-center py-10">
 				<Spinner size="md" />
@@ -110,11 +74,11 @@ const StoreCatalog = ({ storeId }) => {
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-1">
-				<h2 className="text-base font-semibold text-first">
-					Catálogo de tu tienda
-				</h2>
+				<h2 className="text-base font-semibold text-first">Mi catálogo</h2>
 				<p className="text-xs text-first/40">
-					Activa o desactiva los productos que ofreces a tus clientes.
+					{storeProducts.length} producto{storeProducts.length !== 1 ? "s" : ""}{" "}
+					en tu tienda. Para agregar más, ve a la pestaña{" "}
+					<span className="text-second font-medium">Productos</span>.
 				</p>
 			</div>
 
@@ -140,74 +104,67 @@ const StoreCatalog = ({ storeId }) => {
 				)}
 			</div>
 
-			{/* Stats */}
-			<p className="text-xs text-first/35">
-				{storeProductIds.size} de {allProducts.length} productos en tu tienda
-			</p>
+			{/* Empty state */}
+			{storeProducts.length === 0 ? (
+				<div className="flex flex-col items-center gap-3 py-16 border border-dashed border-first/10 rounded-2xl">
+					<p className="text-sm text-first/30 italic">
+						Tu tienda no tiene productos aún.
+					</p>
+					<p className="text-xs text-first/25">
+						Agrégalos desde la pestaña{" "}
+						<span className="text-second/60">Productos</span>.
+					</p>
+				</div>
+			) : (
+				<div className="flex flex-col gap-2">
+					{filtered.map((sp) => {
+						const editValues = getEditing(sp);
+						const product = sp.product;
 
-			{/* Product rows */}
-			<div className="flex flex-col gap-2">
-				{filtered.map((product) => {
-					const inStore = storeProductIds.has(product.id);
-					const editValues = editing[product.id] ?? { price: "", stock: "" };
-
-					return (
-						<div
-							key={product.id}
-							className={[
-								"flex flex-col gap-3 px-4 py-3 rounded-xl border transition-all duration-150",
-								inStore
-									? "border-second/30 bg-second/4"
-									: "border-first/8 hover:border-first/20",
-							].join(" ")}
-						>
-							<div className="flex items-center gap-3">
-								{product.images?.[0] && (
-									<div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
-										<img
-											src={product.images[0]}
-											alt={product.name}
-											className="w-full h-full object-cover"
-										/>
+						return (
+							<div
+								key={product.id}
+								className="flex flex-col gap-3 px-4 py-3 rounded-xl border border-second/30 bg-second/4"
+							>
+								{/* Product header */}
+								<div className="flex items-center gap-3">
+									{product.images?.[0] && (
+										<div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+											<img
+												src={product.images[0]}
+												alt={product.name}
+												className="w-full h-full object-cover"
+											/>
+										</div>
+									)}
+									<div className="flex-1 min-w-0">
+										<p className="text-sm font-medium text-first truncate">
+											{product.name}
+										</p>
+										<p className="text-xs text-first/40">
+											{product.brand?.name}
+											{product.size && ` · ${product.size}`}
+											{product.isDecant && " · Decant"}
+										</p>
 									</div>
-								)}
-								<div className="flex-1 min-w-0">
-									<p className="text-sm font-medium text-first truncate">
-										{product.name}
-									</p>
-									<p className="text-xs text-first/40">
-										{product.brand?.name}
-										{product.size && ` · ${product.size}`}
-										{product.isDecant && " · Decant"}
-									</p>
+									<Button
+										iconOnly
+										size="sm"
+										variant="ghost"
+										icon={<BsTrash />}
+										onClick={() => handleRemove(product.id)}
+										disabled={removing}
+										className="hover:text-error!"
+									/>
 								</div>
-								<Button
-									iconOnly
-									size="sm"
-									variant={inStore ? "ghost" : "primary"}
-									icon={inStore ? <BsTrash /> : <BsPlus />}
-									onClick={() =>
-										inStore
-											? handleRemove(product.id)
-											: handleAdd(product.id, editValues)
-									}
-									disabled={adding || removing}
-									className={inStore ? "hover:text-error!" : ""}
-								/>
-							</div>
 
-							{/* Precio y stock — solo cuando está en la store */}
-							{inStore && (
-								<div className="flex gap-3 pl-13">
+								{/* Price / stock / discount override */}
+								<div className="flex gap-3">
 									<div className="flex flex-col gap-1 flex-1">
 										<label className="text-xs text-first/40">Precio (₡)</label>
 										<input
 											type="number"
-											placeholder={`Actual: ${
-												storeData?.getStoreProducts?.find(
-													(sp) => sp.product.id === product.id,
-												)?.price ?? product.price
-											}`}
+											placeholder={`Base: ${sp.price ?? product.price}`}
 											value={editValues.price}
 											onChange={(e) =>
 												setEditing((prev) => ({
@@ -228,6 +185,10 @@ const StoreCatalog = ({ storeId }) => {
 																editValues.stock !== ""
 																	? parseInt(editValues.stock)
 																	: undefined,
+															discount:
+																editValues.discount !== ""
+																	? parseFloat(editValues.discount)
+																	: undefined,
 														},
 													});
 												}
@@ -239,11 +200,7 @@ const StoreCatalog = ({ storeId }) => {
 										<label className="text-xs text-first/40">Stock</label>
 										<input
 											type="number"
-											placeholder={`Actual: ${
-												storeData?.getStoreProducts?.find(
-													(sp) => sp.product.id === product.id,
-												)?.stock ?? product.stock
-											}`}
+											placeholder={`Base: ${sp.stock ?? product.stock}`}
 											value={editValues.stock}
 											onChange={(e) =>
 												setEditing((prev) => ({
@@ -264,6 +221,10 @@ const StoreCatalog = ({ storeId }) => {
 																	? parseFloat(editValues.price)
 																	: undefined,
 															stock: parseInt(editValues.stock),
+															discount:
+																editValues.discount !== ""
+																	? parseFloat(editValues.discount)
+																	: undefined,
 														},
 													});
 												}
@@ -279,11 +240,7 @@ const StoreCatalog = ({ storeId }) => {
 											type="number"
 											min="0"
 											max="100"
-											placeholder={`Actual: ${
-												storeData?.getStoreProducts?.find(
-													(sp) => sp.product.id === product.id,
-												)?.discount ?? 0
-											}%`}
+											placeholder={`Base: ${sp.discount ?? 0}%`}
 											value={editValues.discount}
 											onChange={(e) =>
 												setEditing((prev) => ({
@@ -316,11 +273,11 @@ const StoreCatalog = ({ storeId }) => {
 										/>
 									</div>
 								</div>
-							)}
-						</div>
-					);
-				})}
-			</div>
+							</div>
+						);
+					})}
+				</div>
+			)}
 		</div>
 	);
 };
