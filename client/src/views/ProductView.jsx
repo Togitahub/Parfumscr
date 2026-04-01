@@ -115,63 +115,6 @@ const ImageGallery = ({ images = [], name }) => {
 	);
 };
 
-// ── Decant selector ───────────────────────────────────────────────────────────
-
-const DecantCard = ({ decant, selected, onSelect }) => {
-	const isOutOfStock = decant.stock === 0;
-
-	return (
-		<button
-			onClick={() => !isOutOfStock && onSelect(decant)}
-			disabled={isOutOfStock}
-			className={[
-				"relative flex flex-col gap-1.5 p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer",
-				selected
-					? "border-second bg-second/8"
-					: isOutOfStock
-						? "border-first/8 opacity-40 cursor-not-allowed"
-						: "border-first/10 hover:border-first/25 hover:bg-first/3",
-			].join(" ")}
-		>
-			{selected && (
-				<span
-					className="absolute top-2 right-2 text-second"
-					style={{ fontSize: "12px" }}
-				>
-					✦
-				</span>
-			)}
-			<span
-				className="text-sm font-bold tabular-nums"
-				style={{
-					color: selected ? "var(--color-second)" : "var(--color-first)",
-				}}
-			>
-				{decant.size}
-			</span>
-			<span className="text-base font-semibold text-first tabular-nums">
-				{formatPrice(decant.price)}
-			</span>
-			<span
-				className="text-[11px]"
-				style={{
-					color: isOutOfStock
-						? "color-mix(in srgb, var(--color-error) 60%, transparent)"
-						: decant.stock <= 5
-							? "color-mix(in srgb, #facc15 80%, transparent)"
-							: "color-mix(in srgb, var(--color-success) 70%, transparent)",
-				}}
-			>
-				{isOutOfStock
-					? "Agotado"
-					: decant.stock <= 5
-						? `${decant.stock} disp.`
-						: "En stock"}
-			</span>
-		</button>
-	);
-};
-
 // ── Info row ──────────────────────────────────────────────────────────────────
 
 const InfoRow = ({ icon, label, value, to, navigate }) => (
@@ -279,8 +222,7 @@ const ProductView = () => {
 	const product = data?.getProduct;
 
 	const storeProduct = storeProductsData?.getStoreProducts?.find(
-		(sp) =>
-			sp.product.id === id || sp.product.id === product?.linkedProduct?.id,
+		(sp) => sp.product.id === id,
 	);
 	const storePrice = storeProduct?.price ?? product?.price ?? 0;
 	const storeStock = storeProduct?.stock ?? product?.stock ?? 0;
@@ -300,7 +242,7 @@ const ProductView = () => {
 			)?.price ?? selectedDecant.price)
 		: storePrice;
 
-	const discount = product?.discount ?? 0;
+	const discount = storeProduct?.discount ?? product?.discount ?? 0;
 
 	const discountedPrice =
 		discount > 0 ? displayPrice * (1 - discount / 100) : displayPrice;
@@ -423,7 +365,7 @@ const ProductView = () => {
 							{/* Eyebrow: brand + badges */}
 							<div className="flex items-center justify-between gap-3 flex-wrap">
 								<button
-									onClick={() => navigate(`/brand/${product.brand?.id}`)}
+									onClick={() => navigate(`/store/brand/${product.brand?.id}`)}
 									className="text-[11px] font-bold tracking-[0.2em] uppercase transition-opacity hover:opacity-70 cursor-pointer"
 									style={{ color: "var(--color-second)" }}
 								>
@@ -437,7 +379,7 @@ const ProductView = () => {
 									)}
 									{hasDiscount && (
 										<Badge variant="error" size="sm">
-											-{discount}%
+											{discount}% Descuento
 										</Badge>
 									)}
 									{isOutOfStock && !hasDecants && (
@@ -612,21 +554,21 @@ const ProductView = () => {
 								icon={<BsBookmark className="w-3.5 h-3.5" />}
 								label="Marca"
 								value={product.brand?.name}
-								to={`/brand/${product.brand?.id}`}
+								to={`/store/brand/${product.brand?.id}`}
 								navigate={navigate}
 							/>
 							<InfoRow
 								icon={<BsTag className="w-3.5 h-3.5" />}
 								label="Categoría"
 								value={product.category?.name}
-								to={`/category/${product.category?.id}`}
+								to={`/store/category/${product.category?.id}`}
 								navigate={navigate}
 							/>
 							<InfoRow
 								icon={<BsLayers className="w-3.5 h-3.5" />}
 								label="Segmento"
 								value={product.segment?.name}
-								to={`/segment/${product.segment?.id}`}
+								to={`/store/segment/${product.segment?.id}`}
 								navigate={navigate}
 							/>
 							{product.size && !hasDecants && (
@@ -649,7 +591,7 @@ const ProductView = () => {
 									{product.notes.map((note) => (
 										<button
 											key={note.id}
-											onClick={() => navigate(`/note/${note.id}`)}
+											onClick={() => navigate(`/store/note/${note.id}`)}
 											className="px-2.5 py-1 rounded-full text-xs font-medium border border-first/10 text-first/50 hover:text-second hover:border-second/25 hover:bg-second/6 transition-all duration-150 cursor-pointer"
 										>
 											{note.name}

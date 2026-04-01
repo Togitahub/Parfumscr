@@ -23,7 +23,6 @@ import LandingNavbar from "./components/design/LandingNavbar";
 import { useAuth } from "./hooks/AuthContext";
 import { useStore } from "./hooks/StoreContext";
 
-
 const App = () => {
 	const { user } = useAuth();
 	const { store } = useStore();
