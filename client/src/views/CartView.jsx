@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import {
 	BsCart3,
 	BsTrash,
@@ -12,21 +12,17 @@ import {
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
+import { useCart } from "../hooks/CartContext";
 import { useStore } from "../hooks/StoreContext";
 import { useToast } from "../hooks/ToastContext";
 
-import {
-	ADD_ITEM_TO_CART,
-	REMOVE_ITEM_FROM_CART,
-	CLEAR_CART,
-} from "../graphql/cart/CartMutations";
-import { GET_USER_CART } from "../graphql/cart/CartQueries";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
 import { ConfirmDialog } from "../components/interface/Modal";
 import PurchaseForm from "../components/forms/PurchaseForm";
+import { getOptimizedUrl } from "../utils/ImageUtils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -43,7 +39,6 @@ const EmptyCart = () => {
 			className="flex flex-col items-center justify-center gap-8 py-24 px-4"
 			style={{ animation: "fadeUp 0.6s ease both" }}
 		>
-			{/* Ornamental icon */}
 			<div className="relative flex items-center justify-center">
 				<div
 					className="absolute w-28 h-28 rounded-full border"
@@ -77,7 +72,6 @@ const EmptyCart = () => {
 				</div>
 			</div>
 
-			{/* Text */}
 			<div className="flex flex-col items-center gap-3 text-center">
 				<h2
 					className="text-3xl font-light tracking-wide text-first"
@@ -102,7 +96,7 @@ const EmptyCart = () => {
 				variant="outline"
 				size="md"
 				rounded
-				onClick={() => navigate("/")}
+				onClick={() => navigate("/store")}
 				icon={<BsArrowLeft />}
 			>
 				Explorar catálogo
@@ -129,7 +123,7 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 			<div className="w-16 h-16 rounded-xl overflow-hidden bg-first/5 shrink-0">
 				{product.images?.[0] ? (
 					<img
-						src={product.images[0]}
+						src={getOptimizedUrl(product.images[0], "thumb")}
 						alt={product.name}
 						className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
 					/>
@@ -178,14 +172,8 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 						</>
 					)}
 				</div>
-				{/* Unit price */}
 				<p className="text-xs text-first/35 mt-1 tabular-nums">
 					{formatPrice(product.price)} c/u
-					{product.originalPrice && (
-						<span className="line-through text-first/20 ml-1.5">
-							{formatPrice(product.originalPrice)}
-						</span>
-					)}
 				</p>
 			</div>
 
@@ -204,7 +192,7 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 				</span>
 
 				<button
-					onClick={() => onIncrease(product.id)}
+					onClick={() => onIncrease(product)}
 					className="w-7 h-7 rounded-lg border border-first/12 flex items-center justify-center text-first/40 hover:text-first hover:border-first/30 transition-all duration-150 cursor-pointer"
 					aria-label="Aumentar cantidad"
 				>
@@ -217,8 +205,6 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 				<span className="text-base font-bold text-first tabular-nums w-24 text-right hidden sm:block">
 					{formatPrice(subtotal)}
 				</span>
-
-				{/* Remove */}
 				<button
 					onClick={() => onRemove(product.id)}
 					className="w-7 h-7 rounded-lg flex items-center justify-center text-first/25 hover:text-error hover:bg-error/8 transition-all duration-150 cursor-pointer"
@@ -234,40 +220,32 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 // ── CartView ──────────────────────────────────────────────────────────────────
 
 const CartView = () => {
-	const { user } = useAuth();
+	const { user, isAuthenticated } = useAuth();
 	const { store } = useStore();
-
 	const toast = useToast();
 	const navigate = useNavigate();
 
+	const {
+		items: rawCartItems,
+		totalItems,
+		loading,
+		isGuest,
+		addItem,
+		removeItem,
+		decreaseItem,
+		clearCart,
+	} = useCart();
+
 	const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 	const [purchaseOpen, setPurchaseOpen] = useState(false);
+	const [clearing, setClearing] = useState(false);
 
-	const { data, loading } = useQuery(GET_USER_CART, {
-		variables: { userId: user?.id },
-		skip: !user?.id,
-	});
-
+	// Enrich prices with store-specific overrides
 	const { data: storeProductsData } = useQuery(GET_STORE_PRODUCTS, {
 		variables: { storeId: store?.storeId },
 		skip: !store?.storeId,
 	});
 
-	const [addItem] = useMutation(ADD_ITEM_TO_CART, {
-		refetchQueries: [{ query: GET_USER_CART, variables: { userId: user?.id } }],
-	});
-
-	const [removeItem] = useMutation(REMOVE_ITEM_FROM_CART, {
-		refetchQueries: [{ query: GET_USER_CART, variables: { userId: user?.id } }],
-	});
-
-	const [clearCart, { loading: clearing }] = useMutation(CLEAR_CART, {
-		refetchQueries: [{ query: GET_USER_CART, variables: { userId: user?.id } }],
-	});
-
-	// ── Derived data ──────────────────────────────────────────────────────────
-
-	const rawCartItems = data?.getUserCart?.items ?? [];
 	const cartItems = rawCartItems.map((item) => {
 		const storeProduct = storeProductsData?.getStoreProducts?.find(
 			(sp) => sp.product.id === item.product.id,
@@ -287,23 +265,17 @@ const CartView = () => {
 			},
 		};
 	});
-	const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
 	const totalPrice = cartItems.reduce(
 		(acc, i) => acc + i.product.price * i.quantity,
 		0,
 	);
 
-	// ── Solo para consumidores ──────────────────────────────────────────────────────────────
-	if (!user && user.role === "COSTUMER") {
-		navigate("/store", { replace: true });
-		return null;
-	}
-
 	// ── Handlers ──────────────────────────────────────────────────────────────
 
-	const handleIncrease = async (productId) => {
+	const handleIncrease = async (product) => {
 		try {
-			await addItem({ variables: { userId: user.id, productId, quantity: 1 } });
+			await addItem(product, 1);
 		} catch (err) {
 			toast.error("Error al actualizar", { description: err.message });
 		}
@@ -311,15 +283,7 @@ const CartView = () => {
 
 	const handleDecrease = async (productId, quantity) => {
 		try {
-			if (quantity <= 1) {
-				await removeItem({ variables: { userId: user.id, productId } });
-			} else {
-				// Apollo no tiene "subtract", así que re-seteamos vía addItem con -1
-				// El resolver suma, así que mandamos -1
-				await addItem({
-					variables: { userId: user.id, productId, quantity: -1 },
-				});
-			}
+			await decreaseItem(productId, quantity);
 		} catch (err) {
 			toast.error("Error al actualizar", { description: err.message });
 		}
@@ -327,7 +291,7 @@ const CartView = () => {
 
 	const handleRemove = async (productId) => {
 		try {
-			await removeItem({ variables: { userId: user.id, productId } });
+			await removeItem(productId);
 			toast.success("Producto eliminado del carrito");
 		} catch (err) {
 			toast.error("Error al eliminar", { description: err.message });
@@ -336,11 +300,14 @@ const CartView = () => {
 
 	const handleClearCart = async () => {
 		try {
-			await clearCart({ variables: { userId: user.id } });
+			setClearing(true);
+			await clearCart();
 			toast.success("Carrito vaciado");
 			setClearConfirmOpen(false);
 		} catch (err) {
 			toast.error("Error al vaciar el carrito", { description: err.message });
+		} finally {
+			setClearing(false);
 		}
 	};
 
@@ -405,6 +372,32 @@ const CartView = () => {
 							opacity: 0.5,
 						}}
 					/>
+
+					{/* Guest notice */}
+					{isGuest && (
+						<div
+							className="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl border"
+							style={{
+								background:
+									"color-mix(in srgb, var(--color-second) 6%, transparent)",
+								borderColor:
+									"color-mix(in srgb, var(--color-second) 20%, transparent)",
+							}}
+						>
+							<p className="text-xs text-first/60 leading-relaxed">
+								Estás comprando como{" "}
+								<span className="font-semibold text-first/80">invitado</span>.{" "}
+								<button
+									onClick={() => navigate("/auth")}
+									className="underline underline-offset-2 cursor-pointer"
+									style={{ color: "var(--color-second)" }}
+								>
+									Inicia sesión
+								</button>{" "}
+								para guardar tu historial de órdenes y favoritos.
+							</p>
+						</div>
+					)}
 				</div>
 
 				{/* ── Empty state ── */}
@@ -414,7 +407,6 @@ const CartView = () => {
 					<div className="flex flex-col lg:flex-row gap-6 items-start">
 						{/* ── Items list ── */}
 						<div className="flex-1 min-w-0">
-							{/* Cart actions header */}
 							<div className="flex items-center justify-between mb-2 px-1">
 								<p className="text-xs font-medium text-first/40 uppercase tracking-widest">
 									Productos
@@ -428,7 +420,6 @@ const CartView = () => {
 								</button>
 							</div>
 
-							{/* Items */}
 							<div className="rounded-2xl border border-first/8 bg-main px-4 overflow-hidden">
 								{cartItems.map((item, i) => (
 									<CartItemRow
@@ -475,7 +466,6 @@ const CartView = () => {
 								Resumen
 							</p>
 
-							{/* Line items */}
 							<div className="flex flex-col gap-2">
 								{cartItems.map((item) => (
 									<div
@@ -495,10 +485,8 @@ const CartView = () => {
 								))}
 							</div>
 
-							{/* Divider */}
 							<div className="h-px bg-first/8" />
 
-							{/* Total */}
 							<div className="flex items-center justify-between">
 								<span className="text-xs font-medium text-first/50 uppercase tracking-wider">
 									Total
@@ -511,7 +499,6 @@ const CartView = () => {
 								</span>
 							</div>
 
-							{/* CTA */}
 							<Button
 								fullWidth
 								size="md"
@@ -522,7 +509,6 @@ const CartView = () => {
 								Comprar por WhatsApp
 							</Button>
 
-							{/* WhatsApp hint */}
 							<p className="text-[11px] text-center text-first/25 leading-snug">
 								Recibirás confirmación de tu pedido por WhatsApp
 							</p>
@@ -531,7 +517,7 @@ const CartView = () => {
 				)}
 			</div>
 
-			{/* ── Clear cart confirm ── */}
+			{/* ── Confirm clear ── */}
 			<ConfirmDialog
 				isOpen={clearConfirmOpen}
 				onClose={() => setClearConfirmOpen(false)}
@@ -542,13 +528,15 @@ const CartView = () => {
 				confirmLabel="Vaciar"
 			/>
 
-			{/* ── Purchase form modal ── */}
+			{/* ── Purchase form ── */}
 			<PurchaseForm
 				isOpen={purchaseOpen}
 				onClose={() => setPurchaseOpen(false)}
 				cartItems={cartItems}
 				totalPrice={totalPrice}
-				user={user}
+				user={isAuthenticated ? user : null}
+				isGuest={isGuest}
+				onSuccess={() => clearCart()}
 			/>
 		</div>
 	);

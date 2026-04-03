@@ -18,7 +18,7 @@ const orderResolvers = {
 			const order = await Order.findById(id);
 			if (!order) throw new Error("Order not found");
 			if (
-				order.user.toString() !== context.user.id &&
+				order.user?.toString() !== context.user.id &&
 				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
 			)
 				throw new Error("Not authorized");
@@ -28,18 +28,20 @@ const orderResolvers = {
 
 	Mutation: {
 		createOrder: async (_, { userId, totalPrice, items }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
-
+			// Allow guest orders — no auth required
 			const parsedItems = items.map((item) => JSON.parse(item));
 
 			const order = await Order.create({
-				user: userId,
+				user: userId ?? null,
 				orderItems: parsedItems,
 				totalPrice,
 				status: "SOLICITADO_WS",
 			});
 
-			await Cart.findOneAndUpdate({ user: userId }, { items: [] });
+			// Clear server-side cart only for authenticated users
+			if (userId) {
+				await Cart.findOneAndUpdate({ user: userId }, { items: [] });
+			}
 
 			return order;
 		},

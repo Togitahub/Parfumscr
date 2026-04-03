@@ -40,6 +40,10 @@ import Badge from "../components/common/Badge";
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
 
+// Utils
+
+import { getOptimizedUrl } from "../utils/ImageUtils";
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const formatPrice = (price) =>
@@ -54,7 +58,9 @@ const ImageGallery = ({ images = [], name }) => {
 	const [active, setActive] = useState(0);
 	const [loaded, setLoaded] = useState(false);
 
-	const current = images[active] ?? null;
+	const current = images[active]
+		? getOptimizedUrl(images[active], "detail")
+		: null;
 
 	return (
 		<div className="flex flex-col gap-3">

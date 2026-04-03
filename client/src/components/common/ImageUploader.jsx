@@ -36,9 +36,35 @@ const ImageUploader = ({
 	const [uploadedUrl, setUploadedUrl] = useState("");
 	const [uploadError, setUploadError] = useState("");
 
+	const ALLOWED_TYPES = [
+		"image/webp",
+		"image/png",
+		"image/jpg",
+		"image/jpeg",
+		"image/avif",
+	];
+	const MAX_SIZE_MB = 5;
+	const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
 	const handleFileChange = async (e) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
+
+		// Validar tipo
+		if (!ALLOWED_TYPES.includes(file.type)) {
+			setStatus("error");
+			setUploadError(
+				"Solo se permiten imágenes en formato WebP, PNG, JPG o AVIF",
+			);
+			return;
+		}
+
+		// Validar tamaño
+		if (file.size > MAX_SIZE_BYTES) {
+			setStatus("error");
+			setUploadError(`La imagen no puede superar los ${MAX_SIZE_MB}MB`);
+			return;
+		}
 
 		// Reset
 		setStatus("uploading");
@@ -58,12 +84,20 @@ const ImageUploader = ({
 						"Content-Type": "application/json",
 						authorization: `Bearer ${localStorage.getItem("authToken")}`,
 					},
+					body: JSON.stringify({
+						fileType: file.type,
+						fileSize: file.size,
+					}),
 				},
 			);
 
-			if (!sigRes.ok) throw new Error("No se pudo obtener la firma");
+			if (!sigRes.ok) {
+				const { error } = await sigRes.json();
+				throw new Error(error);
+			}
 
-			const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+			const { signature, timestamp, cloudName, apiKey, folder, eager } =
+				await sigRes.json();
 
 			// 2. Subir imagen directamente a Cloudinary
 			const formData = new FormData();
@@ -71,6 +105,9 @@ const ImageUploader = ({
 			formData.append("api_key", apiKey);
 			formData.append("timestamp", timestamp);
 			formData.append("signature", signature);
+			formData.append("folder", folder);
+			formData.append("eager", eager);
+			formData.append("transformation", "q_auto:best,f_auto");
 
 			const uploadRes = await fetch(
 				`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -211,7 +248,7 @@ const ImageUploader = ({
 			<input
 				ref={inputRef}
 				type="file"
-				accept="image/*"
+				accept="image/webp,image/png,image/jpeg,image/avif"
 				className="hidden"
 				onChange={handleFileChange}
 				disabled={disabled}

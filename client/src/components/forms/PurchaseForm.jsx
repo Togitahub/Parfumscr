@@ -15,9 +15,9 @@ import Input from "../common/Input";
 import Button from "../common/Button";
 import { Modal } from "../interface/Modal";
 import { useToast } from "../../hooks/ToastContext";
+import { useStore } from "../../hooks/StoreContext";
 import { CREATE_ORDER } from "../../graphql/order/OrderMutations";
-import { CLEAR_CART } from "../../graphql/cart/CartMutations";
-import { GET_USER_CART } from "../../graphql/cart/CartQueries";
+import { getOptimizedUrl } from "../../utils/ImageUtils";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -58,11 +58,10 @@ const OrderItemRow = ({ item, index }) => {
 				animationDelay: `${index * 50}ms`,
 			}}
 		>
-			{/* Thumbnail */}
 			<div className="w-12 h-12 rounded-lg overflow-hidden bg-first/5 shrink-0">
 				{product.images?.[0] ? (
 					<img
-						src={product.images[0]}
+						src={getOptimizedUrl(product.images[0], "thumb")}
 						alt={product.name}
 						className="w-full h-full object-cover"
 					/>
@@ -73,7 +72,6 @@ const OrderItemRow = ({ item, index }) => {
 				)}
 			</div>
 
-			{/* Info */}
 			<div className="flex-1 min-w-0">
 				<p className="text-sm font-medium text-first truncate">
 					{product.name}
@@ -90,38 +88,22 @@ const OrderItemRow = ({ item, index }) => {
 							<span className="text-[11px] text-first/35">{product.size}</span>
 						</>
 					)}
-					{product.discount > 0 && (
-						<>
-							<span className="text-first/20 text-[10px]">·</span>
-							<span className="text-[11px] text-error font-medium">
-								-{product.discount}%
-							</span>
-						</>
-					)}
 				</div>
 			</div>
 
-			{/* Qty + price */}
 			<div className="flex flex-col items-end gap-0.5 shrink-0">
 				<span className="text-sm font-semibold text-first tabular-nums">
 					{formatPrice(subtotal)}
 				</span>
-				<div className="flex items-center gap-1.5">
-					{product.originalPrice && (
-						<span className="text-[11px] text-first/30 line-through tabular-nums">
-							{formatPrice(product.originalPrice * quantity)}
-						</span>
-					)}
+				{quantity > 1 && (
 					<span className="text-[11px] text-first/35 tabular-nums">
 						{quantity} × {formatPrice(product.price)}
 					</span>
-				</div>
+				)}
 			</div>
 		</div>
 	);
 };
-
-// ── Section label ─────────────────────────────────────────────────────────────
 
 const SectionLabel = ({ icon, children }) => (
 	<div className="flex items-center gap-2 mb-3">
@@ -136,14 +118,14 @@ const SectionLabel = ({ icon, children }) => (
 // ── PurchaseForm ──────────────────────────────────────────────────────────────
 
 /**
- * PurchaseForm
- *
  * Props:
  * - isOpen: boolean
  * - onClose: () => void
- * - cartItems: [{ product: { id, name, brand, price, images, size, isDecant }, quantity }]
+ * - cartItems: [{ product, quantity }]
  * - totalPrice: number
- * - user: { id, name, phone, address }
+ * - user: object | null  — null for guests
+ * - isGuest: boolean
+ * - onSuccess: () => void — called after successful order (to clear cart)
  */
 const PurchaseForm = ({
 	isOpen,
@@ -151,9 +133,12 @@ const PurchaseForm = ({
 	cartItems = [],
 	totalPrice = 0,
 	user,
+	isGuest = false,
+	onSuccess,
 }) => {
 	const toast = useToast();
 	const navigate = useNavigate();
+	const { store } = useStore();
 
 	const [form, setForm] = useState({
 		name: user?.name ?? "",
@@ -163,15 +148,7 @@ const PurchaseForm = ({
 	const [errors, setErrors] = useState({});
 	const [done, setDone] = useState(false);
 
-	const [createOrder, { loading: creatingOrder }] = useMutation(CREATE_ORDER, {
-		refetchQueries: [{ query: GET_USER_CART, variables: { userId: user?.id } }],
-	});
-
-	const [clearCart, { loading: clearingCart }] = useMutation(CLEAR_CART, {
-		refetchQueries: [{ query: GET_USER_CART, variables: { userId: user?.id } }],
-	});
-
-	const loading = creatingOrder || clearingCart;
+	const [createOrder, { loading }] = useMutation(CREATE_ORDER);
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -184,6 +161,7 @@ const PurchaseForm = ({
 	const validate = () => {
 		const newErrors = {};
 		if (!form.name.trim()) newErrors.name = "El nombre es requerido";
+		if (!form.phone.trim()) newErrors.phone = "El teléfono es requerido";
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
@@ -196,7 +174,6 @@ const PurchaseForm = ({
 		}
 
 		try {
-			// 1. Serializar los items para la mutación
 			const items = cartItems.map((item) =>
 				JSON.stringify({
 					name: item.product.name,
@@ -205,15 +182,16 @@ const PurchaseForm = ({
 				}),
 			);
 
-			// 2. Crear la order en BD
+			// userId is optional — omitted for guests
 			await createOrder({
-				variables: { userId: user.id, totalPrice, items },
+				variables: {
+					...(user?.id ? { userId: user.id } : {}),
+					totalPrice,
+					items,
+				},
 			});
 
-			// 3. Limpiar el carrito
-			await clearCart({ variables: { userId: user.id } });
-
-			// 4. Construir el mensaje de WhatsApp y abrir
+			// Build WhatsApp message directed to the store's number
 			const message = buildWhatsAppMessage({
 				items: cartItems,
 				totalPrice,
@@ -222,11 +200,13 @@ const PurchaseForm = ({
 				address: form.address.trim(),
 			});
 
-			const wsNumnber = form.phone;
+			const waNumber = store?.whatsapp ?? "";
+			window.open(
+				`https://wa.me/${waNumber.replace(/\D/g, "")}?text=${message}`,
+				"_blank",
+			);
 
-			window.open(`https://wa.me/${wsNumnber}?text=${message}`, "_blank");
-
-			// 5. Mostrar pantalla de éxito
+			onSuccess?.();
 			setDone(true);
 		} catch (err) {
 			toast.error("Error al procesar la orden", { description: err.message });
@@ -234,9 +214,7 @@ const PurchaseForm = ({
 	};
 
 	const handleClose = () => {
-		if (done) {
-			navigate("/orders");
-		}
+		if (done && !isGuest) navigate("/store/orders");
 		setDone(false);
 		setErrors({});
 		onClose();
@@ -256,7 +234,6 @@ const PurchaseForm = ({
 					className="flex flex-col items-center gap-6 py-4 text-center"
 					style={{ animation: "fadeUp 0.5s ease both" }}
 				>
-					{/* Icon */}
 					<div className="relative">
 						<div
 							className="w-20 h-20 rounded-full flex items-center justify-center"
@@ -272,7 +249,6 @@ const PurchaseForm = ({
 								style={{ color: "var(--color-success)" }}
 							/>
 						</div>
-						{/* Ring */}
 						<div
 							className="absolute inset-0 rounded-full border border-dashed"
 							style={{
@@ -283,7 +259,6 @@ const PurchaseForm = ({
 						/>
 					</div>
 
-					{/* Text */}
 					<div className="flex flex-col gap-2">
 						<h2
 							className="text-2xl font-light text-first"
@@ -297,17 +272,30 @@ const PurchaseForm = ({
 						</p>
 					</div>
 
-					{/* Actions */}
 					<div className="flex flex-col gap-2 w-full pt-2">
-						<Button fullWidth onClick={handleClose}>
-							Ver mis órdenes
-						</Button>
+						{!isGuest ? (
+							<Button fullWidth onClick={handleClose}>
+								Ver mis órdenes
+							</Button>
+						) : (
+							<Button
+								fullWidth
+								onClick={() => {
+									setDone(false);
+									onClose();
+									navigate("/store");
+								}}
+							>
+								Seguir explorando
+							</Button>
+						)}
 						<Button
 							fullWidth
 							variant="ghost"
 							onClick={() => {
 								setDone(false);
 								onClose();
+								navigate("/store");
 							}}
 						>
 							Seguir comprando
@@ -330,7 +318,7 @@ const PurchaseForm = ({
 			closeOnOverlay={!loading}
 		>
 			<div className="flex flex-col gap-6">
-				{/* ── Resumen de productos ── */}
+				{/* ── Resumen ── */}
 				<div>
 					<SectionLabel icon={<BsBoxSeam />}>
 						Resumen — {cartItems.length}{" "}
@@ -349,7 +337,6 @@ const PurchaseForm = ({
 						)}
 					</div>
 
-					{/* Total */}
 					<div className="flex items-center justify-between mt-3 px-1">
 						<span className="text-xs text-first/40 uppercase tracking-wider font-medium">
 							Total estimado
@@ -378,7 +365,6 @@ const PurchaseForm = ({
 							iconLeft={<BsPerson />}
 							required
 						/>
-
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 							<Input
 								label="Teléfono"
@@ -387,8 +373,10 @@ const PurchaseForm = ({
 								placeholder="+506 0000-0000"
 								value={form.phone}
 								onChange={handleChange}
+								error={errors.phone}
 								iconLeft={<BsTelephone />}
 								hint="Para coordinar la entrega"
+								required
 							/>
 							<Input
 								label="Dirección"

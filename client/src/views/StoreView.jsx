@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from "@apollo/client/react";
-// import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/AuthContext";
 import { useToast } from "../hooks/ToastContext";
 import { useStore } from "../hooks/StoreContext";
+import { useCart } from "../hooks/CartContext";
 import { FilterProvider } from "../hooks/FilterContext";
 
 import {
@@ -15,18 +15,16 @@ import { GET_CATEGORIES } from "../graphql/category/CategoryQueries";
 import { GET_SEGMENTS } from "../graphql/segment/SegmentQueries";
 import { GET_NOTES } from "../graphql/note/NoteQueries";
 import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
-import { ADD_ITEM_TO_CART } from "../graphql/cart/CartMutations";
 
 import Hero from "../components/design/Hero";
 import ProductList from "../lists/ProductList";
-// import { useEffect } from "react";
 import NotFoundView from "./NotFoundView";
 
 const StoreView = () => {
 	const { user, isAuthenticated } = useAuth();
 	const { store, loadingStore, storeNotFound } = useStore();
+	const { addItem } = useCart();
 	const toast = useToast();
-	// const navigate = useNavigate();
 
 	const { data: storeProductsData, loading: loadingProducts } = useQuery(
 		GET_STORE_PRODUCTS,
@@ -51,7 +49,6 @@ const StoreView = () => {
 
 	const [addFavorite] = useMutation(ADD_FAVORITE);
 	const [removeFavorite] = useMutation(REMOVE_FAVORITE);
-	const [addToCart] = useMutation(ADD_ITEM_TO_CART);
 
 	const storeProducts = storeProductsData?.getStoreProducts ?? [];
 	const products = storeProducts.map((sp) => ({
@@ -93,14 +90,11 @@ const StoreView = () => {
 	};
 
 	const handleAddToCart = async (productId) => {
-		if (!isAuthenticated) {
-			toast.info("Inicia sesión para agregar al carrito");
-			return;
-		}
+		// Find the full product object from our enriched list
+		const product = products.find((p) => p.id === productId);
+		if (!product) return;
 		try {
-			await addToCart({
-				variables: { userId: user.id, productId, quantity: 1 },
-			});
+			await addItem(product, 1);
 			toast.success("Agregado al carrito");
 		} catch (err) {
 			toast.error("Error", { description: err.message });

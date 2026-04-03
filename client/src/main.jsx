@@ -11,6 +11,7 @@ import { AuthProvider } from "./hooks/AuthContext.jsx";
 import { ThemeProvider } from "./hooks/ThemeContext.jsx";
 import { ToastProvider } from "./hooks/ToastContext.jsx";
 import { StoreProvider } from "./hooks/StoreContext.jsx";
+import { CartProvider } from "./hooks/CartContext.jsx";
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
@@ -18,11 +19,13 @@ createRoot(document.getElementById("root")).render(
 			<BrowserRouter>
 				<AuthProvider>
 					<StoreProvider>
-						<ThemeProvider>
-							<ToastProvider>
-								<App />
-							</ToastProvider>
-						</ThemeProvider>
+						<CartProvider>
+							<ThemeProvider>
+								<ToastProvider>
+									<App />
+								</ToastProvider>
+							</ThemeProvider>
+						</CartProvider>
 					</StoreProvider>
 				</AuthProvider>
 			</BrowserRouter>

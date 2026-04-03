@@ -42,23 +42,28 @@ const App = () => {
 					<Route path="/auth" element={<AuthView />} />
 					<Route path="/about" element={<AboutView />} />
 					<Route path="/store/product/:id" element={<ProductView />} />
+
 					<Route
 						path="/store/brand/:id"
 						element={<EntityView type="brand" />}
 					/>
+
 					<Route
 						path="/store/segment/:id"
 						element={<EntityView type="segment" />}
 					/>
+
 					<Route
 						path="/store/category/:id"
 						element={<EntityView type="category" />}
 					/>
+
 					<Route path="/store/note/:id" element={<EntityView type="note" />} />
+
+					<Route path="/store/cart" element={<CartView />} />
 
 					{/* ── Protegidas (usuario autenticado) ── */}
 					<Route element={<ProtectedRoute />}>
-						<Route path="/store/cart" element={<CartView />} />
 						<Route path="/store/orders" element={<OrdersView />} />
 						<Route path="/store/orders/:id" element={<OrderView />} />
 						<Route path="/store/favorites" element={<FavoritesView />} />

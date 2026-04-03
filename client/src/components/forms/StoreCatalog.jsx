@@ -9,6 +9,7 @@ import {
 } from "../../graphql/store/StoreMutations";
 import { Spinner } from "../interface/LoadingUi";
 import Button from "../common/Button";
+import { getOptimizedUrl } from "../../utils/ImageUtils";
 
 const StoreCatalog = ({ storeId }) => {
 	const toast = useToast();
@@ -131,7 +132,7 @@ const StoreCatalog = ({ storeId }) => {
 									{product.images?.[0] && (
 										<div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
 											<img
-												src={product.images[0]}
+												src={getOptimizedUrl(product.images[0], "thumb")}
 												alt={product.name}
 												className="w-full h-full object-cover"
 											/>

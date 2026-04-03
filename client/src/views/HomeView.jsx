@@ -45,7 +45,7 @@ const PLANS = [
 	{
 		key: "EDT",
 		name: "EDT",
-		price: "$40",
+		price: "$20",
 		period: "/mes",
 		tagline: "Para empezar con fuerza",
 		featured: false,
@@ -61,7 +61,7 @@ const PLANS = [
 	{
 		key: "EDP",
 		name: "EDP",
-		price: "$60",
+		price: "$35",
 		period: "/mes",
 		tagline: "Con dominio propio",
 		featured: false,
@@ -77,7 +77,7 @@ const PLANS = [
 	{
 		key: "Elixir",
 		name: "Elixir",
-		price: "$80",
+		price: "$60",
 		period: "/mes",
 		tagline: "Diseño completamente tuyo",
 		featured: true,
@@ -94,7 +94,7 @@ const PLANS = [
 	{
 		key: "Absolute",
 		name: "Absolute",
-		price: "$100",
+		price: "$90",
 		period: "/mes",
 		tagline: "Una app solo para ti",
 		featured: false,

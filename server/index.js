@@ -26,13 +26,43 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const ALLOWED_TYPES = [
+	"image/webp",
+	"image/png",
+	"image/jpg",
+	"image/jpeg",
+	"image/avif",
+];
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+
 app.post("/api/cloudinary-signature", async (req, res) => {
 	try {
+		const { fileType, fileSize } = req.body;
+
+		if (!ALLOWED_TYPES.includes(fileType)) {
+			return res.status(400).json({
+				error: "Tipo de archivo no permitido. Solo WebP, PNG, JPG o AVIF",
+			});
+		}
+
+		if (fileSize > MAX_SIZE_BYTES) {
+			return res.status(400).json({
+				error: "El archivo supera el límite de 5MB",
+			});
+		}
+
 		const timestamp = Math.round(new Date().getTime() / 1000);
+
+		const paramsToSign = {
+			timestamp,
+			folder: "products",
+			transformation: "q_auto:best,f_auto",
+			eager: "w_1200,q_auto:best,f_auto|w_400,q_auto:good,f_auto",
+			eager_async: true,
+		};
+
 		const signature = cloudinary.utils.api_sign_request(
-			{
-				timestamp: timestamp,
-			},
+			paramsToSign,
 			process.env.CLOUD_SECRET,
 		);
 
@@ -41,6 +71,8 @@ app.post("/api/cloudinary-signature", async (req, res) => {
 			timestamp,
 			cloudName: process.env.CLOUD_NAME,
 			apiKey: process.env.CLOUD_KEY,
+			folder: paramsToSign.folder,
+			eager: paramsToSign.eager,
 		});
 	} catch (error) {
 		console.error("Error generating signature:", error);

@@ -9,7 +9,7 @@ const orderDefs = gql`
 
 	type Order {
 		id: ID!
-		user: ID!
+		user: ID
 		orderItems: [OrderItem]!
 		totalPrice: Float!
 		status: String
@@ -22,7 +22,7 @@ const orderDefs = gql`
 	}
 
 	type Mutation {
-		createOrder(userId: ID!, totalPrice: Float!, items: [String]!): Order
+		createOrder(userId: ID, totalPrice: Float!, items: [String]!): Order
 	}
 `;
 

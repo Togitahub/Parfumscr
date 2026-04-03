@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
 	BsHeart,
 	BsHeartFill,
 	BsCart3,
 	BsBoxArrowUpRight,
 } from "react-icons/bs";
+
 import Badge from "../common/Badge";
 import Button from "../common/Button";
+
+import { getOptimizedUrl } from "../../utils/ImageUtils";
 
 /**
  * ProductCard Component
@@ -55,6 +59,7 @@ const ProductCard = ({
 	} = product;
 
 	const image = images?.[0] ?? null;
+	const optimizedImage = image ? getOptimizedUrl(image, "card") : null;
 	const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
 	const hasDiscount = discount > 0;
 	const isOutOfStock = stock === 0;
@@ -96,7 +101,7 @@ const ProductCard = ({
 
 				{image ? (
 					<img
-						src={image}
+						src={optimizedImage}
 						alt={name}
 						onLoad={() => setImgLoaded(true)}
 						className={[
