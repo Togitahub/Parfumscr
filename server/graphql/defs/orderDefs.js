@@ -1,5 +1,3 @@
-import gql from "graphql-tag";
-
 const orderDefs = gql`
 	type OrderItem {
 		name: String!
@@ -10,6 +8,7 @@ const orderDefs = gql`
 	type Order {
 		id: ID!
 		user: ID
+		store: ID
 		orderItems: [OrderItem]!
 		totalPrice: Float!
 		status: String
@@ -19,11 +18,16 @@ const orderDefs = gql`
 	type Query {
 		getMyOrders(userId: ID!): [Order]
 		getOrderById(id: ID!): Order
+		getAllOrders: [Order]
 	}
 
 	type Mutation {
-		createOrder(userId: ID, totalPrice: Float!, items: [String]!): Order
+		createOrder(
+			userId: ID
+			storeId: ID
+			totalPrice: Float!
+			items: [String]!
+		): Order
+		updateOrderStatus(id: ID!, status: String!): Order
 	}
 `;
-
-export default orderDefs;

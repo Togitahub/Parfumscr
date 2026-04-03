@@ -33,3 +33,21 @@ export const GET_ORDER_BY_ID = gql`
 		}
 	}
 `;
+
+export const GET_ALL_ORDERS = gql`
+	query GetAllOrders {
+		getAllOrders {
+			id
+			user
+			store
+			orderItems {
+				name
+				quantity
+				price
+			}
+			totalPrice
+			status
+			createdAt
+		}
+	}
+`;

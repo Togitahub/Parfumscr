@@ -186,6 +186,7 @@ const PurchaseForm = ({
 			await createOrder({
 				variables: {
 					...(user?.id ? { userId: user.id } : {}),
+					storeId: store?.storeId ?? null,
 					totalPrice,
 					items,
 				},

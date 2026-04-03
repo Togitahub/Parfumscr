@@ -79,6 +79,8 @@ const OrderList = ({
 	orders = [],
 	loading = false,
 	variant = "default",
+	onStatusChange,
+	showStatusChange = false,
 	className = "",
 }) => {
 	const [search, setSearch] = useState("");
@@ -217,6 +219,7 @@ const OrderList = ({
 							<OrderCard
 								order={order}
 								variant={isCompact ? "compact" : "default"}
+								onStatusChange={showStatusChange ? onStatusChange : undefined}
 							/>
 						</AnimatedItem>
 					))}

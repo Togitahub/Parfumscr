@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 const OrderSchema = new mongoose.Schema(
 	{
 		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+		store: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Store",
+			default: null,
+		},
 		orderItems: [
 			{
 				name: { type: String, required: true },

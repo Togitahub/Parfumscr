@@ -1,5 +1,6 @@
 import Order from "../../models/Order.js";
 import Cart from "../../models/Cart.js";
+import Store from "../../models/Store.js";
 
 const orderResolvers = {
 	Query: {
@@ -24,26 +25,51 @@ const orderResolvers = {
 				throw new Error("Not authorized");
 			return order;
 		},
+
+		getAllOrders: async (_, __, context) => {
+			if (
+				!context.user ||
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
+			)
+				throw new Error("Not authorized");
+
+			if (context.user.role === "SUPER_ADMIN") {
+				return await Order.find().sort({ createdAt: -1 });
+			}
+
+			// ADMIN: solo órdenes de su tienda
+			const store = await Store.findOne({ owner: context.user._id });
+			if (!store) return [];
+			return await Order.find({ store: store._id }).sort({ createdAt: -1 });
+		},
 	},
 
 	Mutation: {
-		createOrder: async (_, { userId, totalPrice, items }, context) => {
-			// Allow guest orders — no auth required
+		createOrder: async (_, { userId, storeId, totalPrice, items }, context) => {
 			const parsedItems = items.map((item) => JSON.parse(item));
 
 			const order = await Order.create({
 				user: userId ?? null,
+				store: storeId ?? null,
 				orderItems: parsedItems,
 				totalPrice,
 				status: "SOLICITADO_WS",
 			});
 
-			// Clear server-side cart only for authenticated users
 			if (userId) {
 				await Cart.findOneAndUpdate({ user: userId }, { items: [] });
 			}
 
 			return order;
+		},
+
+		updateOrderStatus: async (_, { id, status }, context) => {
+			if (
+				!context.user ||
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
+			)
+				throw new Error("Not authorized");
+			return await Order.findByIdAndUpdate(id, { status }, { new: true });
 		},
 	},
 };

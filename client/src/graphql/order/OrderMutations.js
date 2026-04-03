@@ -1,10 +1,16 @@
 import gql from "graphql-tag";
 
 export const CREATE_ORDER = gql`
-	mutation ($userId: ID, $totalPrice: Float!, $items: [String]!) {
-		createOrder(userId: $userId, totalPrice: $totalPrice, items: $items) {
+	mutation ($userId: ID, $storeId: ID, $totalPrice: Float!, $items: [String]!) {
+		createOrder(
+			userId: $userId
+			storeId: $storeId
+			totalPrice: $totalPrice
+			items: $items
+		) {
 			id
 			user
+			store
 			orderItems {
 				name
 				quantity
@@ -13,6 +19,15 @@ export const CREATE_ORDER = gql`
 			totalPrice
 			status
 			createdAt
+		}
+	}
+`;
+
+export const UPDATE_ORDER_STATUS = gql`
+	mutation UpdateOrderStatus($id: ID!, $status: String!) {
+		updateOrderStatus(id: $id, status: $status) {
+			id
+			status
 		}
 	}
 `;

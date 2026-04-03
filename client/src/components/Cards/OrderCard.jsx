@@ -65,7 +65,12 @@ const formatPrice = (price) =>
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const OrderCard = ({ order, variant = "default", className = "" }) => {
+const OrderCard = ({
+	order,
+	variant = "default",
+	onStatusChange,
+	className = "",
+}) => {
 	const navigate = useNavigate();
 
 	if (!order) return null;
@@ -181,6 +186,24 @@ const OrderCard = ({ order, variant = "default", className = "" }) => {
 				>
 					{formatPrice(totalPrice)}
 				</span>
+
+				{/* Status */}
+				{onStatusChange && (
+					<select
+						value={status}
+						onClick={(e) => e.stopPropagation()}
+						onChange={(e) => {
+							e.stopPropagation();
+							onStatusChange(id, e.target.value);
+						}}
+						className="text-xs rounded-lg border border-first/15 bg-main text-first px-2 py-1 focus:outline-none focus:ring-2 focus:ring-second/30 cursor-pointer"
+					>
+						<option value="SOLICITADO_WS">Solicitado</option>
+						<option value="EN_PROCESO">En proceso</option>
+						<option value="COMPLETADO">Completado</option>
+						<option value="CANCELADO">Cancelado</option>
+					</select>
+				)}
 			</div>
 		</article>
 	);

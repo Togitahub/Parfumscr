@@ -26,6 +26,7 @@ import {
 	BsPencil,
 	BsTrash,
 	BsShop,
+	BsReceipt,
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
@@ -35,38 +36,47 @@ import { useToast } from "../hooks/ToastContext";
 // GraphQL
 import { GET_PRODUCTS } from "../graphql/product/ProductQueries";
 import { DELETE_PRODUCT } from "../graphql/product/ProductMutations";
+
 import { GET_BRANDS } from "../graphql/brand/BrandQueries";
 import {
 	CREATE_BRAND,
 	UPDATE_BRAND,
 	DELETE_BRAND,
 } from "../graphql/brand/BrandMutations";
+
 import { GET_CATEGORIES } from "../graphql/category/CategoryQueries";
 import {
 	CREATE_CATEGORY,
 	UPDATE_CATEGORY,
 	DELETE_CATEGORY,
 } from "../graphql/category/CategoryMutations";
+
 import { GET_SEGMENTS } from "../graphql/segment/SegmentQueries";
 import {
 	CREATE_SEGMENT,
 	UPDATE_SEGMENT,
 	DELETE_SEGMENT,
 } from "../graphql/segment/SegmentMutations";
+
 import { GET_NOTES } from "../graphql/note/NoteQueries";
 import {
 	CREATE_NOTE,
 	UPDATE_NOTE,
 	DELETE_NOTE,
 } from "../graphql/note/NoteMutations";
+
 import { GET_USERS } from "../graphql/user/UserQueries";
 import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
 import { GET_MY_STORE } from "../graphql/store/StoreQueries";
+
 import {
 	ADD_PRODUCT_TO_STORE,
 	REMOVE_PRODUCT_FROM_STORE,
 } from "../graphql/store/StoreMutations";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
+
+import { GET_ALL_ORDERS } from "../graphql/order/OrderQueries";
+import { UPDATE_ORDER_STATUS } from "../graphql/order/OrderMutations";
 
 // Components
 import { Modal, ConfirmDialog } from "../components/interface/Modal";
@@ -97,6 +107,7 @@ const buildAdminTabs = (myStoreExists) => [
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
 	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
+	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 ];
 
@@ -106,6 +117,7 @@ const SUPER_ADMIN_TABS = [
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
 	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
+	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "users", label: "Usuarios", icon: <BsPeople /> },
 ];
 
@@ -551,6 +563,45 @@ const UsersSection = () => {
 	);
 };
 
+const OrdersSection = () => {
+	const toast = useToast();
+
+	const { data, loading } = useQuery(GET_ALL_ORDERS);
+	const [updateStatus] = useMutation(UPDATE_ORDER_STATUS, {
+		refetchQueries: [{ query: GET_ALL_ORDERS }],
+	});
+
+	const orders = data?.getAllOrders ?? [];
+
+	const handleStatusChange = async (id, status) => {
+		try {
+			await updateStatus({ variables: { id, status } });
+			toast.success("Estado actualizado");
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div>
+				<h2 className="text-base font-semibold text-first">Órdenes</h2>
+				<p className="text-xs text-first/35 mt-0.5">
+					{loading
+						? "Cargando..."
+						: `${orders.length} orden${orders.length !== 1 ? "es" : ""}`}
+				</p>
+			</div>
+			<OrderList
+				orders={orders}
+				loading={loading}
+				onStatusChange={handleStatusChange}
+				showStatusChange
+			/>
+		</div>
+	);
+};
+
 // ── Main AdminView ────────────────────────────────────────────────────────────
 
 const AdminView = () => {
@@ -664,6 +715,9 @@ const AdminView = () => {
 
 			case "users":
 				return isSuperAdmin ? <UsersSection /> : null;
+
+			case "orders":
+				return <OrdersSection />;
 
 			case "store":
 				return (
