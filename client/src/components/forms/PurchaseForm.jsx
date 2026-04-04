@@ -197,6 +197,7 @@ const PurchaseForm = ({
 		try {
 			const items = cartItems.map((item) =>
 				JSON.stringify({
+					productId: item.product.id,
 					name: item.product.name,
 					quantity: item.quantity,
 					price: item.product.price,

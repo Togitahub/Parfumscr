@@ -1,6 +1,7 @@
 import Order from "../../models/Order.js";
 import Cart from "../../models/Cart.js";
 import Store from "../../models/Store.js";
+import StoreProduct from "../../models/StoreProduct.js";
 
 const orderResolvers = {
 	Query: {
@@ -76,9 +77,34 @@ const orderResolvers = {
 				if (finalPrice !== undefined && finalPrice !== null) {
 					update.finalPrice = finalPrice;
 				}
+
+				const order = await Order.findById(id);
+				if (order && order.status !== "COMPLETADO") {
+					for (const item of order.orderItems) {
+						if (!item.productId) continue;
+						await StoreProduct.updateOne(
+							{ store: order.store, product: item.productId },
+							{ $inc: { stock: -item.quantity } },
+						);
+					}
+				}
 			}
 
 			return await Order.findByIdAndUpdate(id, update, { new: true });
+		},
+
+		deleteOrder: async (_, { id }, context) => {
+			if (
+				!context.user ||
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
+			)
+				throw new Error("Not authorized");
+
+			const order = await Order.findById(id);
+			if (!order) throw new Error("Order not found");
+
+			await Order.findByIdAndDelete(id);
+			return { success: true, message: "Order deleted" };
 		},
 	},
 };

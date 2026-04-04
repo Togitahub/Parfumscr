@@ -7,6 +7,7 @@ import {
 	BsCheckCircle,
 	BsXCircle,
 	BsHourglass,
+	BsTrash,
 } from "react-icons/bs";
 
 import Badge from "../common/Badge";
@@ -71,6 +72,7 @@ const OrderCard = ({
 	order,
 	variant = "default",
 	onStatusChange,
+	onDelete,
 	className = "",
 }) => {
 	const navigate = useNavigate();
@@ -206,6 +208,18 @@ const OrderCard = ({
 						<option value="COMPLETADO">Completado</option>
 						<option value="CANCELADO">Cancelado</option>
 					</select>
+				)}
+				{onDelete && (
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+							onDelete(order);
+						}}
+						className="w-7 h-7 rounded-lg flex items-center justify-center text-first/25 hover:text-error hover:bg-error/8 transition-all duration-150 cursor-pointer"
+						aria-label="Eliminar orden"
+					>
+						<BsTrash className="w-3.5 h-3.5" />
+					</button>
 				)}
 			</div>
 		</article>

@@ -81,6 +81,7 @@ const OrderList = ({
 	variant = "default",
 	onStatusChange,
 	showStatusChange = false,
+	onDelete,
 	className = "",
 }) => {
 	const [search, setSearch] = useState("");
@@ -220,6 +221,7 @@ const OrderList = ({
 								order={order}
 								variant={isCompact ? "compact" : "default"}
 								onStatusChange={showStatusChange ? onStatusChange : undefined}
+								onDelete={onDelete}
 							/>
 						</AnimatedItem>
 					))}

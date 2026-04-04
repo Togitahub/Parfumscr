@@ -145,3 +145,5 @@ server/
         User
     .env
     index.js
+
+    Por favor, quiero que cuando se ponga el status de una orden como completado, el stock se descuente en los productos de la tienda, es decir, que los productos que se vendieron en esa orden se descuenten del stock.

@@ -80,7 +80,10 @@ import {
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
 import { GET_ALL_ORDERS } from "../graphql/order/OrderQueries";
-import { UPDATE_ORDER_STATUS } from "../graphql/order/OrderMutations";
+import {
+	DELETE_ORDER,
+	UPDATE_ORDER_STATUS,
+} from "../graphql/order/OrderMutations";
 
 // Components
 import { Modal, ConfirmDialog } from "../components/interface/Modal";
@@ -581,11 +584,18 @@ const UsersSection = () => {
 
 const OrdersSection = () => {
 	const toast = useToast();
+	const [deleteTarget, setDeleteTarget] = useState(null);
 
 	const { data, loading } = useQuery(GET_ALL_ORDERS);
+
 	const [updateStatus] = useMutation(UPDATE_ORDER_STATUS, {
 		refetchQueries: [{ query: GET_ALL_ORDERS }],
 		awaitRefetchQueries: true,
+	});
+
+	const [deleteOrder, { loading: deleting }] = useMutation(DELETE_ORDER, {
+		// agregar
+		refetchQueries: [{ query: GET_ALL_ORDERS }],
 	});
 
 	const orders = data?.getAllOrders ?? [];
@@ -594,6 +604,17 @@ const OrdersSection = () => {
 		try {
 			await updateStatus({ variables: { id, status } });
 			toast.success("Estado actualizado");
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
+	const handleConfirmDelete = async () => {
+		// agregar
+		try {
+			await deleteOrder({ variables: { id: deleteTarget.id } });
+			toast.success("Orden eliminada");
+			setDeleteTarget(null);
 		} catch (err) {
 			toast.error("Error", { description: err.message });
 		}
@@ -613,7 +634,17 @@ const OrdersSection = () => {
 				orders={orders}
 				loading={loading}
 				onStatusChange={handleStatusChange}
+				onDelete={(order) => setDeleteTarget(order)}
 				showStatusChange
+			/>
+			<ConfirmDialog
+				isOpen={Boolean(deleteTarget)}
+				onClose={() => setDeleteTarget(null)}
+				onConfirm={handleConfirmDelete}
+				loading={deleting}
+				title="¿Eliminar orden?"
+				description={`La orden #${deleteTarget?.id?.slice(-8).toUpperCase()} será eliminada permanentemente.`}
+				confirmLabel="Eliminar"
 			/>
 		</div>
 	);

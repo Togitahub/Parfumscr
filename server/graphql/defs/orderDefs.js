@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 
 const orderDefs = gql`
 	type OrderItem {
+		productId: ID
 		name: String!
 		quantity: Int!
 		price: Float!
@@ -33,6 +34,7 @@ const orderDefs = gql`
 			items: [String]!
 		): Order
 		updateOrderStatus(id: ID!, status: String!, finalPrice: Float): Order
+		deleteOrder(id: ID!): DeleteResponse
 	}
 `;
 
