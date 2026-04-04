@@ -128,6 +128,7 @@ app.get("/api/store-config", async (req, res) => {
 			colorFirst: store.colorFirst,
 			colorSecond: store.colorSecond,
 			logo: store.logo,
+			posEnabled: store.posEnabled ?? false,
 			whatsapp: store.whatsapp,
 			facebook: store.facebook,
 			instagram: store.instagram,

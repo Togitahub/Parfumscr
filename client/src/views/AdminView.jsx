@@ -28,6 +28,7 @@ import {
 	BsShop,
 	BsReceipt,
 	BsGraphUp,
+	BsUpcScan,
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
@@ -68,14 +69,12 @@ import {
 
 import { GET_USERS } from "../graphql/user/UserQueries";
 import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
-import {
-	GET_DASHBOARD_STATS,
-	GET_MY_STORE,
-} from "../graphql/store/StoreQueries";
+import { GET_MY_STORE, GET_STORES } from "../graphql/store/StoreQueries";
 
 import {
 	ADD_PRODUCT_TO_STORE,
 	REMOVE_PRODUCT_FROM_STORE,
+	TOGGLE_STORE_POS,
 } from "../graphql/store/StoreMutations";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
@@ -101,6 +100,7 @@ import StoreCatalog from "../components/forms/StoreCatalog";
 import OrderList from "../lists/OrderList";
 
 // Views
+import POSView from "./POSView";
 import DashboardView from "./DashboardView";
 
 // Contexts
@@ -117,6 +117,9 @@ const buildAdminTabs = (myStoreExists) => [
 	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
 	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
+	...(myStoreExists?.posEnabled
+		? [{ key: "pos", label: "POS", icon: <BsUpcScan /> }]
+		: []),
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
@@ -479,16 +482,21 @@ const UsersSection = () => {
 	const [deleteTarget, setDeleteTarget] = useState(null);
 
 	const { data, loading } = useQuery(GET_USERS);
+	const { data: storesData, refetch: refetchStores } = useQuery(GET_STORES);
 
 	const [toggleUserActive] = useMutation(TOGGLE_USER_ACTIVE, {
 		refetchQueries: [{ query: GET_USERS }],
 	});
+	const [toggleStorePos] = useMutation(TOGGLE_STORE_POS, {
+		refetchQueries: [{ query: GET_STORES }],
+	});
+
+	const users = data?.getUsers ?? [];
+	const stores = storesData?.getStores ?? []; // ← nuevo
 
 	const [deleteUser, { loading: deleting }] = useMutation(DELETE_USER, {
 		refetchQueries: [{ query: GET_USERS }],
 	});
-
-	const users = data?.getUsers ?? [];
 
 	const handleEdit = (user) => {
 		setEditUser(user);
@@ -528,9 +536,19 @@ const UsersSection = () => {
 		}
 	};
 
+	const handleTogglePos = async (user) => {
+		try {
+			await toggleStorePos({ variables: { ownerId: user.id } });
+			const store = stores.find((s) => s.owner === user.id);
+			toast.success(store?.posEnabled ? "POS desactivado" : "POS activado");
+			refetchStores();
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4">
-			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
 					<h2 className="text-base font-semibold text-first">Usuarios</h2>
@@ -545,16 +563,16 @@ const UsersSection = () => {
 				</Button>
 			</div>
 
-			{/* List */}
 			<UserList
 				users={users}
+				stores={stores}
 				loading={loading}
 				onEdit={handleEdit}
 				onDelete={handleDelete}
 				onToggleActive={handleToggleActive}
+				onTogglePos={handleTogglePos}
 			/>
 
-			{/* Create / Edit modal */}
 			<Modal
 				isOpen={modalOpen}
 				onClose={handleModalClose}
@@ -568,7 +586,6 @@ const UsersSection = () => {
 				/>
 			</Modal>
 
-			{/* Delete confirm */}
 			<ConfirmDialog
 				isOpen={Boolean(deleteTarget)}
 				onClose={() => setDeleteTarget(null)}
@@ -733,8 +750,8 @@ const AdminView = () => {
 					</div>
 				);
 
-			default:
-				return null;
+			case "pos":
+				return myStoreId ? <POSView storeId={myStoreId} /> : null;
 
 			case "brands":
 				return (
@@ -798,6 +815,9 @@ const AdminView = () => {
 
 			case "users":
 				return isSuperAdmin ? <UsersSection /> : null;
+
+			default:
+				return null;
 		}
 	};
 

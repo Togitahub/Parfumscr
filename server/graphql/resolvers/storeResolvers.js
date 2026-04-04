@@ -242,6 +242,17 @@ const storeResolvers = {
 			return { success: true, message: "Product removed from store" };
 		},
 
+		toggleStorePos: async (_, { ownerId }, { user }) => {
+			if (!user || user.role !== "SUPER_ADMIN") throw new Error("Unauthorized");
+			const store = await Store.findOne({ owner: ownerId });
+			if (!store) throw new Error("Store not found");
+			return await Store.findByIdAndUpdate(
+				store._id,
+				{ posEnabled: !store.posEnabled },
+				{ new: true },
+			);
+		},
+
 		toggleStoreProduct: async (_, { productId, active }, { user }) => {
 			if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
 

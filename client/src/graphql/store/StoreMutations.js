@@ -142,6 +142,15 @@ export const REMOVE_PRODUCT_FROM_STORE = gql`
 	}
 `;
 
+export const TOGGLE_STORE_POS = gql`
+	mutation ToggleStorePos($ownerId: ID!) {
+		toggleStorePos(ownerId: $ownerId) {
+			id
+			posEnabled
+		}
+	}
+`;
+
 export const TOGGLE_STORE_PRODUCT = gql`
 	mutation ToggleStoreProduct($productId: ID!, $active: Boolean!) {
 		toggleStoreProduct(productId: $productId, active: $active) {

@@ -15,6 +15,7 @@ export const GET_MY_STORE = gql`
 			facebook
 			instagram
 			active
+			posEnabled
 			heroTagline
 			heroDescription
 			heroBadge1
@@ -71,6 +72,8 @@ export const GET_STORES = gql`
 			colorMain
 			colorSecond
 			logo
+			owner
+			posEnabled
 		}
 	}
 `;

@@ -15,6 +15,7 @@ const storeDefs = gql`
 		facebook: String
 		instagram: String
 		active: Boolean!
+		posEnabled: Boolean
 		heroTagline: String
 		heroDescription: String
 		heroBadge1: String
@@ -100,6 +101,7 @@ const storeDefs = gql`
 			stock: Int
 			discount: Float
 		): StoreProduct!
+		toggleStorePos(ownerId: ID!): Store!
 		registerProductView(productId: ID!): Boolean
 		removeProductFromStore(productId: ID!): DeleteResponse!
 		toggleStoreProduct(productId: ID!, active: Boolean!): StoreProduct!

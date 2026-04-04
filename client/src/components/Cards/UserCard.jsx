@@ -77,6 +77,8 @@ const UserCard = ({
 	onEdit,
 	onDelete,
 	onToggleActive,
+	onTogglePos,
+	store,
 	variant = "default",
 	className = "",
 }) => {
@@ -186,6 +188,23 @@ const UserCard = ({
 									user.active ? "hover:text-error!" : "hover:text-success!"
 								}
 							/>
+						)}
+						{onTogglePos && store && user.role === "ADMIN" && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									onTogglePos(user);
+								}}
+								title={store.posEnabled ? "Desactivar POS" : "Activar POS"}
+								className={[
+									"w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 border text-xs font-bold cursor-pointer",
+									store.posEnabled
+										? "border-second/40 bg-second/10 text-second"
+										: "border-first/15 text-first/30 hover:border-second/30 hover:text-second",
+								].join(" ")}
+							>
+								POS
+							</button>
 						)}
 					</div>
 				)}

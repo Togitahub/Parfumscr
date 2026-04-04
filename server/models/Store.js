@@ -55,6 +55,10 @@ const StoreSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
+		posEnabled: {
+			type: Boolean,
+			default: false,
+		},
 		heroTagline: {
 			type: String,
 			default: null,
