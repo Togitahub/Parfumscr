@@ -1,3 +1,5 @@
+import gql from "graphql-tag";
+
 const orderDefs = gql`
 	type OrderItem {
 		name: String!
@@ -31,3 +33,5 @@ const orderDefs = gql`
 		updateOrderStatus(id: ID!, status: String!): Order
 	}
 `;
+
+export default orderDefs;

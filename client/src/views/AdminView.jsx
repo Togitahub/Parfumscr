@@ -91,6 +91,7 @@ import EmptyState from "../components/interface/EmptyState";
 import DecantForm from "../components/forms/DecantForm";
 import StoreForm from "../components/forms/StoreForm";
 import StoreCatalog from "../components/forms/StoreCatalog";
+import OrderList from "../lists/OrderList";
 
 // Contexts
 
@@ -315,13 +316,20 @@ const ProductsSection = ({ myStoreId }) => {
 	);
 
 	const [deleteProduct, { loading: deleting }] = useMutation(DELETE_PRODUCT, {
-		refetchQueries: [{ query: GET_PRODUCTS }],
+		refetchQueries: [
+			{ query: GET_PRODUCTS },
+			...(myStoreId
+				? [{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } }]
+				: []),
+		],
 	});
+
 	const [addProductToStore] = useMutation(ADD_PRODUCT_TO_STORE, {
 		refetchQueries: [
 			{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
 		],
 	});
+
 	const [removeProductFromStore] = useMutation(REMOVE_PRODUCT_FROM_STORE, {
 		refetchQueries: [
 			{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },

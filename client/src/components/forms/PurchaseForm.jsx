@@ -16,8 +16,13 @@ import Button from "../common/Button";
 import { Modal } from "../interface/Modal";
 import { useToast } from "../../hooks/ToastContext";
 import { useStore } from "../../hooks/StoreContext";
-import { CREATE_ORDER } from "../../graphql/order/OrderMutations";
 import { getOptimizedUrl } from "../../utils/ImageUtils";
+
+import {
+	GET_ALL_ORDERS,
+	GET_MY_ORDERS,
+} from "../../graphql/order/OrderQueries";
+import { CREATE_ORDER } from "../../graphql/order/OrderMutations";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -148,7 +153,15 @@ const PurchaseForm = ({
 	const [errors, setErrors] = useState({});
 	const [done, setDone] = useState(false);
 
-	const [createOrder, { loading }] = useMutation(CREATE_ORDER);
+	const [createOrder, { loading }] = useMutation(CREATE_ORDER, {
+		refetchQueries: (result) => {
+			const userId = result.data?.createOrder?.user;
+			return [
+				{ query: GET_ALL_ORDERS },
+				...(userId ? [{ query: GET_MY_ORDERS, variables: { userId } }] : []),
+			];
+		},
+	});
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 

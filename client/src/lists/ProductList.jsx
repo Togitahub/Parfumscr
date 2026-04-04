@@ -22,7 +22,8 @@
  * - className: string
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+
 import {
 	BsGrid3X3Gap,
 	BsList,
@@ -32,12 +33,14 @@ import {
 	BsDroplet,
 	BsShop,
 } from "react-icons/bs";
+
 import ProductCard from "../components/cards/ProductCard";
 import Filters from "../components/functional/Filters";
 import SearchBar from "../components/functional/SearchBar";
 import Pagination from "../components/functional/Pagination";
 import EmptyState from "../components/interface/EmptyState";
 import Button from "../components/common/Button";
+
 import { useFilters } from "../hooks/FilterContext";
 
 // ── Shimmer skeleton ──────────────────────────────────────────────────────────
@@ -108,12 +111,16 @@ const ProductList = ({
 	onAddDecant,
 	className = "",
 }) => {
-	const { applyFilters, activeFilterCount, search } = useFilters();
+	const { applyFilters, activeFilterCount, search, filterKey } = useFilters();
 	const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const prevKeyRef = useRef("");
 
-	const { items, total, totalPages } = applyFilters(products, locked);
+	const { items, total, totalPages } = useMemo(
+		() => applyFilters(products, locked),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[filterKey, products],
+	);
 
 	// Reset animation key cuando cambian los resultados
 	const animKey = `${search}-${total}-${JSON.stringify(locked)}`;

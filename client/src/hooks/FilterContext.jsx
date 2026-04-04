@@ -86,6 +86,16 @@ export const FilterProvider = ({ children, pageSize = 12 }) => {
 
 	const setPage = useCallback((n) => setPageRaw(n), []);
 
+	const filterKey = useMemo(
+		() =>
+			JSON.stringify({
+				search,
+				filters,
+				page,
+			}),
+		[search, filters, page],
+	);
+
 	// ── Active filter count (excluding locked ones) ────────────────────────────
 
 	const activeFilterCount = useMemo(() => {
@@ -189,6 +199,7 @@ export const FilterProvider = ({ children, pageSize = 12 }) => {
 		filters,
 		page,
 		pageSize,
+		filterKey,
 		activeFilterCount,
 		setSearch,
 		setFilter,
