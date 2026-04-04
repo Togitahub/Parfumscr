@@ -36,6 +36,100 @@ const storeResolvers = {
 		getStores: async () => {
 			return await Store.find({ active: true });
 		},
+
+		getDashboardStats: async (_, { storeId, period }, { user }) => {
+			if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role))
+				throw new Error("Unauthorized");
+
+			const now = new Date();
+			let startDate = null;
+
+			if (period === "week") {
+				startDate = new Date(now);
+				startDate.setDate(now.getDate() - 7);
+			} else if (period === "month") {
+				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+			} else if (period === "year") {
+				startDate = new Date(now.getFullYear(), 0, 1);
+			}
+
+			const dateFilter = startDate ? { createdAt: { $gte: startDate } } : {};
+
+			const orders = await Order.find({ store: storeId, ...dateFilter });
+
+			const totalRequests = orders.length;
+			const completed = orders.filter((o) => o.status === "COMPLETADO");
+			const confirmedSales = completed.length;
+			const closingRate =
+				totalRequests > 0 ? (confirmedSales / totalRequests) * 100 : 0;
+			const confirmedRevenue = completed.reduce(
+				(acc, o) => acc + (o.finalPrice ?? o.totalPrice),
+				0,
+			);
+
+			// Top solicitados: contar apariciones en orderItems de todas las órdenes
+			const requestCount = {};
+			for (const order of orders) {
+				for (const item of order.orderItems) {
+					const key = item.name;
+					requestCount[key] = (requestCount[key] || 0) + item.quantity;
+				}
+			}
+
+			// Top vistos: desde StoreProduct.views
+			const storeProducts = await StoreProduct.find({
+				store: storeId,
+				active: true,
+			}).populate(PRODUCT_POPULATE);
+
+			const topViewed = storeProducts
+				.sort((a, b) => (b.views || 0) - (a.views || 0))
+				.slice(0, 5)
+				.map((sp) => ({ product: sp.product, count: sp.views || 0 }));
+
+			// Top solicitados mapeados a productos
+			const topRequestedRaw = Object.entries(requestCount)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5);
+
+			const topRequested = topRequestedRaw
+				.map(([name, count]) => {
+					const sp = storeProducts.find((sp) => sp.product?.name === name);
+					if (!sp) return null;
+					return { product: sp.product, count };
+				})
+				.filter(Boolean);
+
+			// Top favoriteados: desde Favorites
+			const Favorites = (await import("../../models/Favorites.js")).default;
+			const allFavs = await Favorites.find();
+			const favCount = {};
+			for (const fav of allFavs) {
+				for (const productId of fav.products) {
+					const id = productId.toString();
+					favCount[id] = (favCount[id] || 0) + 1;
+				}
+			}
+
+			const topFavorited = storeProducts
+				.map((sp) => ({
+					product: sp.product,
+					count: favCount[sp.product?._id?.toString()] || 0,
+				}))
+				.sort((a, b) => b.count - a.count)
+				.slice(0, 5)
+				.filter((x) => x.count > 0);
+
+			return {
+				totalRequests,
+				confirmedSales,
+				closingRate: parseFloat(closingRate.toFixed(1)),
+				confirmedRevenue,
+				topRequested,
+				topViewed,
+				topFavorited,
+			};
+		},
 	},
 
 	Mutation: {
@@ -163,100 +257,6 @@ const storeResolvers = {
 			if (!storeProduct) throw new Error("Product not found in store");
 
 			return await storeProduct.populate(PRODUCT_POPULATE);
-		},
-
-		getDashboardStats: async (_, { storeId, period }, { user }) => {
-			if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role))
-				throw new Error("Unauthorized");
-
-			const now = new Date();
-			let startDate = null;
-
-			if (period === "week") {
-				startDate = new Date(now);
-				startDate.setDate(now.getDate() - 7);
-			} else if (period === "month") {
-				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-			} else if (period === "year") {
-				startDate = new Date(now.getFullYear(), 0, 1);
-			}
-
-			const dateFilter = startDate ? { createdAt: { $gte: startDate } } : {};
-
-			const orders = await Order.find({ store: storeId, ...dateFilter });
-
-			const totalRequests = orders.length;
-			const completed = orders.filter((o) => o.status === "COMPLETADO");
-			const confirmedSales = completed.length;
-			const closingRate =
-				totalRequests > 0 ? (confirmedSales / totalRequests) * 100 : 0;
-			const confirmedRevenue = completed.reduce(
-				(acc, o) => acc + (o.finalPrice ?? o.totalPrice),
-				0,
-			);
-
-			// Top solicitados: contar apariciones en orderItems de todas las órdenes
-			const requestCount = {};
-			for (const order of orders) {
-				for (const item of order.orderItems) {
-					const key = item.name;
-					requestCount[key] = (requestCount[key] || 0) + item.quantity;
-				}
-			}
-
-			// Top vistos: desde StoreProduct.views
-			const storeProducts = await StoreProduct.find({
-				store: storeId,
-				active: true,
-			}).populate(PRODUCT_POPULATE);
-
-			const topViewed = storeProducts
-				.sort((a, b) => (b.views || 0) - (a.views || 0))
-				.slice(0, 5)
-				.map((sp) => ({ product: sp.product, count: sp.views || 0 }));
-
-			// Top solicitados mapeados a productos
-			const topRequestedRaw = Object.entries(requestCount)
-				.sort((a, b) => b[1] - a[1])
-				.slice(0, 5);
-
-			const topRequested = topRequestedRaw
-				.map(([name, count]) => {
-					const sp = storeProducts.find((sp) => sp.product?.name === name);
-					if (!sp) return null;
-					return { product: sp.product, count };
-				})
-				.filter(Boolean);
-
-			// Top favoriteados: desde Favorites
-			const Favorites = (await import("../../models/Favorites.js")).default;
-			const allFavs = await Favorites.find();
-			const favCount = {};
-			for (const fav of allFavs) {
-				for (const productId of fav.products) {
-					const id = productId.toString();
-					favCount[id] = (favCount[id] || 0) + 1;
-				}
-			}
-
-			const topFavorited = storeProducts
-				.map((sp) => ({
-					product: sp.product,
-					count: favCount[sp.product?._id?.toString()] || 0,
-				}))
-				.sort((a, b) => b.count - a.count)
-				.slice(0, 5)
-				.filter((x) => x.count > 0);
-
-			return {
-				totalRequests,
-				confirmedSales,
-				closingRate: parseFloat(closingRate.toFixed(1)),
-				confirmedRevenue,
-				topRequested,
-				topViewed,
-				topFavorited,
-			};
 		},
 
 		registerProductView: async (_, { productId }, { user: ctxUser }) => {
