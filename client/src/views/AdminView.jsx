@@ -27,6 +27,7 @@ import {
 	BsTrash,
 	BsShop,
 	BsReceipt,
+	BsGraphUp,
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
@@ -104,21 +105,22 @@ const buildAdminTabs = (myStoreExists) => [
 	...(myStoreExists
 		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
 		: []),
+	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
+	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
+	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
 	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
-	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
-	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 ];
 
 const SUPER_ADMIN_TABS = [
 	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
+	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
 	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
-	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "users", label: "Usuarios", icon: <BsPeople /> },
 ];
 
@@ -661,6 +663,41 @@ const AdminView = () => {
 			case "catalog":
 				return myStoreId ? <StoreCatalog storeId={myStoreId} /> : null;
 
+			case "dashboard":
+				return myStoreId ? (
+					<DashboardView embedded storeId={myStoreId} />
+				) : null;
+
+			case "orders":
+				return <OrdersSection />;
+
+			case "store":
+				return (
+					<div className="flex flex-col gap-10">
+						{myStoreExists && (
+							<div className="flex gap-2">
+								<Button
+									variant="secondary"
+									onClick={() =>
+										(window.location.href = myStoreExists?.customDomain
+											? `https://${myStoreExists?.customDomain}`
+											: `https://${myStoreExists.slug}.parfumscr.com`)
+									}
+								>
+									Ver Tienda
+								</Button>
+								<Button variant="outline" onClick={copyMyStoreLink}>
+									Copiar Enlace
+								</Button>
+							</div>
+						)}
+						<StoreForm />
+					</div>
+				);
+
+			default:
+				return null;
+
 			case "brands":
 				return (
 					<EntitySection
@@ -723,36 +760,6 @@ const AdminView = () => {
 
 			case "users":
 				return isSuperAdmin ? <UsersSection /> : null;
-
-			case "orders":
-				return <OrdersSection />;
-
-			case "store":
-				return (
-					<div className="flex flex-col gap-10">
-						{myStoreExists && (
-							<div className="flex gap-2">
-								<Button
-									variant="secondary"
-									onClick={() =>
-										(window.location.href = myStoreExists?.customDomain
-											? `https://${myStoreExists?.customDomain}`
-											: `https://${myStoreExists.slug}.parfumscr.com`)
-									}
-								>
-									Ver Tienda
-								</Button>
-								<Button variant="outline" onClick={copyMyStoreLink}>
-									Copiar Enlace
-								</Button>
-							</div>
-						)}
-						<StoreForm />
-					</div>
-				);
-
-			default:
-				return null;
 		}
 	};
 

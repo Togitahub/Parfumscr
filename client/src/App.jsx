@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Router } from "react-router-dom";
 
 import AuthView from "./views/AuthView";
 import HomeView from "./views/HomeView";
@@ -12,6 +12,7 @@ import EntityView from "./views/EntityView";
 import FavoritesView from "./views/FavoritesView";
 import StoreView from "./views/StoreView";
 import ProfileView from "./views/ProfileView";
+import DashboardView from "./views/DashboardView";
 
 import NavBar from "./components/design/Navbar";
 import Footer from "./components/design/Footer";
@@ -73,6 +74,7 @@ const App = () => {
 					{/* ── Protegidas (admin) ── */}
 					<Route element={<ProtectedRoute roles={["ADMIN", "SUPER_ADMIN"]} />}>
 						<Route path="/admin" element={<AdminView />} />
+						<Route path="/dashboard" element={<DashboardView />} />
 					</Route>
 
 					{/* ── Fallback ── */}

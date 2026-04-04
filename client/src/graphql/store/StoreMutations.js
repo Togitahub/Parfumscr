@@ -83,8 +83,18 @@ export const UPDATE_STORE = gql`
 `;
 
 export const ADD_PRODUCT_TO_STORE = gql`
-	mutation AddProductToStore($productId: ID!, $price: Float, $stock: Int, $discount: Float) {
-		addProductToStore(productId: $productId, price: $price, stock: $stock, discount: $discount) {
+	mutation AddProductToStore(
+		$productId: ID!
+		$price: Float
+		$stock: Int
+		$discount: Float
+	) {
+		addProductToStore(
+			productId: $productId
+			price: $price
+			stock: $stock
+			discount: $discount
+		) {
 			id
 			active
 			price
@@ -99,8 +109,18 @@ export const ADD_PRODUCT_TO_STORE = gql`
 `;
 
 export const UPDATE_STORE_PRODUCT = gql`
-	mutation UpdateStoreProduct($productId: ID!, $price: Float, $stock: Int, $discount: Float) {
-		updateStoreProduct(productId: $productId, price: $price, stock: $stock, discount: $discount) {
+	mutation UpdateStoreProduct(
+		$productId: ID!
+		$price: Float
+		$stock: Int
+		$discount: Float
+	) {
+		updateStoreProduct(
+			productId: $productId
+			price: $price
+			stock: $stock
+			discount: $discount
+		) {
 			id
 			price
 			stock
@@ -132,5 +152,11 @@ export const TOGGLE_STORE_PRODUCT = gql`
 				name
 			}
 		}
+	}
+`;
+
+export const REGISTER_PRODUCT_VIEW = gql`
+	mutation RegisterProductView($productId: ID!) {
+		registerProductView(productId: $productId)
 	}
 `;

@@ -24,10 +24,12 @@ export const CREATE_ORDER = gql`
 `;
 
 export const UPDATE_ORDER_STATUS = gql`
-	mutation UpdateOrderStatus($id: ID!, $status: String!) {
-		updateOrderStatus(id: $id, status: $status) {
+	mutation UpdateOrderStatus($id: ID!, $status: String!, $finalPrice: Float) {
+		updateOrderStatus(id: $id, status: $status, finalPrice: $finalPrice) {
 			id
 			status
+			finalPrice
+			confirmedAt
 		}
 	}
 `;

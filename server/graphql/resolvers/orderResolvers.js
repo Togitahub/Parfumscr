@@ -63,13 +63,22 @@ const orderResolvers = {
 			return order;
 		},
 
-		updateOrderStatus: async (_, { id, status }, context) => {
+		updateOrderStatus: async (_, { id, status, finalPrice }, context) => {
 			if (
 				!context.user ||
 				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
 			)
 				throw new Error("Not authorized");
-			return await Order.findByIdAndUpdate(id, { status }, { new: true });
+
+			const update = { status };
+			if (status === "COMPLETADO") {
+				update.confirmedAt = new Date();
+				if (finalPrice !== undefined && finalPrice !== null) {
+					update.finalPrice = finalPrice;
+				}
+			}
+
+			return await Order.findByIdAndUpdate(id, update, { new: true });
 		},
 	},
 };

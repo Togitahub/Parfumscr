@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
+
 import {
 	BsHeart,
 	BsCart3,
@@ -15,6 +16,7 @@ import {
 } from "react-icons/bs";
 
 import { useAuth } from "../../hooks/AuthContext";
+import { useCart } from "../../hooks/CartContext";
 import { useStore } from "../../hooks/StoreContext";
 
 import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
@@ -242,7 +244,9 @@ const IconLink = ({ to, icon, label, badge }) => (
 
 const NavBar = () => {
 	const { store } = useStore();
+	const { totalItems } = useCart();
 	const { user, isAuthenticated, logout } = useAuth();
+
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 
@@ -429,6 +433,7 @@ const NavBar = () => {
 											to="/store/cart"
 											icon={<BsCart3 className="w-4 h-4" />}
 											label="Carrito"
+											badge={totalItems}
 										/>
 									</>
 								)}

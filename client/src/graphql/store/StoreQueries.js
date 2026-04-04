@@ -74,3 +74,47 @@ export const GET_STORES = gql`
 		}
 	}
 `;
+
+export const GET_DASHBOARD_STATS = gql`
+	query GetDashboardStats($storeId: ID!, $period: String) {
+		getDashboardStats(storeId: $storeId, period: $period) {
+			totalRequests
+			confirmedSales
+			closingRate
+			confirmedRevenue
+			topRequested {
+				product {
+					id
+					name
+					images
+					brand {
+						name
+					}
+				}
+				count
+			}
+			topViewed {
+				product {
+					id
+					name
+					images
+					brand {
+						name
+					}
+				}
+				count
+			}
+			topFavorited {
+				product {
+					id
+					name
+					images
+					brand {
+						name
+					}
+				}
+				count
+			}
+		}
+	}
+`;

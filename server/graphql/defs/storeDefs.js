@@ -30,12 +30,29 @@ const storeDefs = gql`
 		stock: Int
 		discount: Float
 		active: Boolean!
+		views: Int
+	}
+
+	type ProductStat {
+		product: Product!
+		count: Int!
+	}
+
+	type DashboardStats {
+		totalRequests: Int!
+		confirmedSales: Int!
+		closingRate: Float!
+		confirmedRevenue: Float!
+		topRequested: [ProductStat!]!
+		topViewed: [ProductStat!]!
+		topFavorited: [ProductStat!]!
 	}
 
 	type Query {
 		getMyStore: Store
 		getStoreProducts(storeId: ID!): [StoreProduct]
 		getStores: [Store]
+		getDashboardStats(storeId: ID!, period: String): DashboardStats
 	}
 
 	type Mutation {
@@ -83,6 +100,7 @@ const storeDefs = gql`
 			stock: Int
 			discount: Float
 		): StoreProduct!
+		registerProductView(productId: ID!): Boolean
 		removeProductFromStore(productId: ID!): DeleteResponse!
 		toggleStoreProduct(productId: ID!, active: Boolean!): StoreProduct!
 	}

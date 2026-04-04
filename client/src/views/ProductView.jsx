@@ -33,6 +33,7 @@ import {
 import { GET_PRODUCT } from "../graphql/product/ProductQueries";
 import { ADD_ITEM_TO_CART } from "../graphql/cart/CartMutations";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
+import { REGISTER_PRODUCT_VIEW } from "../graphql/store/StoreMutations";
 import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
 
 // Components
@@ -43,6 +44,7 @@ import { Spinner } from "../components/interface/LoadingUi";
 // Utils
 
 import { getOptimizedUrl } from "../utils/ImageUtils";
+import { useEffect } from "react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -225,6 +227,7 @@ const ProductView = () => {
 	const [addFavorite, { loading: togglingFav }] = useMutation(ADD_FAVORITE);
 	const [removeFavorite] = useMutation(REMOVE_FAVORITE);
 	const [addToCart, { loading: addingCart }] = useMutation(ADD_ITEM_TO_CART);
+	const [registerView] = useMutation(REGISTER_PRODUCT_VIEW);
 
 	// ── Derived data ──────────────────────────────────────────────────────────
 
@@ -318,6 +321,12 @@ const ProductView = () => {
 		);
 		window.open(`https://wa.me/?text=${msg}`, "_blank");
 	};
+
+	// ── Register View ───────────────────────────────────────────────────────────────
+
+	useEffect(() => {
+		if (id) registerView({ variables: { productId: id } });
+	}, [id, registerView]);
 
 	// ── Loading ───────────────────────────────────────────────────────────────
 

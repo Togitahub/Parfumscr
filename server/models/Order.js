@@ -17,6 +17,8 @@ const OrderSchema = new mongoose.Schema(
 		],
 		totalPrice: { type: Number, required: true },
 		status: { type: String, default: "SOLICITADO_WS" },
+		confirmedAt: { type: Date, default: null },
+		finalPrice: { type: Number, default: null },
 	},
 	{ timestamps: true },
 );

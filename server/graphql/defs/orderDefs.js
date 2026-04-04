@@ -15,6 +15,8 @@ const orderDefs = gql`
 		totalPrice: Float!
 		status: String
 		createdAt: String
+		confirmedAt: String
+		finalPrice: Float
 	}
 
 	type Query {
@@ -30,7 +32,7 @@ const orderDefs = gql`
 			totalPrice: Float!
 			items: [String]!
 		): Order
-		updateOrderStatus(id: ID!, status: String!): Order
+		updateOrderStatus(id: ID!, status: String!, finalPrice: Float): Order
 	}
 `;
 
