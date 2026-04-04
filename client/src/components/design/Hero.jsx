@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useStore } from "../../hooks/StoreContext";
 import { GET_PERFUMES } from "../../graphql/product/ProductQueries";
-import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
 
 const DEFAULTS = {
 	tagline: "100%",
@@ -39,10 +38,9 @@ const SplitText = ({ text, baseDelay = 0, className = "" }) => (
 const Hero = () => {
 	const canvasRef = useRef(null);
 	const { store } = useStore();
-	const { data: brandsData } = useQuery(GET_BRANDS);
+
 	const { data: perfumesData } = useQuery(GET_PERFUMES);
 
-	const brands = brandsData?.getBrands || [];
 	const perfumes = perfumesData?.getProducts || [];
 
 	// Datos del hero: los de la tienda o los defaults
@@ -280,7 +278,6 @@ const Hero = () => {
 						>
 							{[
 								{ value: perfumes.length, label: "Perfumes" },
-								{ value: brands.length, label: "Marcas" },
 								{ value: "Decants", label: "Disponibles" },
 							].map((stat, i) => (
 								<div key={i} className="flex flex-col gap-0.5">

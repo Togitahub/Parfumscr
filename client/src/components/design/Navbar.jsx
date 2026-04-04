@@ -13,6 +13,7 @@ import {
 	BsInstagram,
 	BsFacebook,
 	BsWhatsapp,
+	BsReceipt,
 } from "react-icons/bs";
 
 import { useAuth } from "../../hooks/AuthContext";
@@ -400,16 +401,6 @@ const NavBar = () => {
 
 					<div className="w-px h-5 bg-first/10 hidden lg:block" />
 
-					{/* ── Acciones derecha ── */}
-					{!isAdmin && (
-						<IconLink
-							to="/store/cart"
-							icon={<BsCart3 className="w-4 h-4" />}
-							label="Carrito"
-							badge={totalItems}
-						/>
-					)}
-
 					<div className="flex items-center gap-1 ml-auto">
 						{/* Dashboard — solo admins */}
 						{isAdmin && (
@@ -429,14 +420,31 @@ const NavBar = () => {
 							</NavLink>
 						)}
 
+						{/* ── Acciones derecha ── */}
+						{!isAdmin && (
+							<IconLink
+								to="/store/cart"
+								icon={<BsCart3 className="w-4 h-4" />}
+								label="Carrito"
+								badge={totalItems}
+							/>
+						)}
+
 						{isAuthenticated ? (
 							<>
 								{!isAdmin && (
-									<IconLink
-										to="/store/favorites"
-										icon={<BsHeart className="w-4 h-4" />}
-										label="Favoritos"
-									/>
+									<>
+										<IconLink
+											to="/store/favorites"
+											icon={<BsHeart className="w-4 h-4" />}
+											label="Favoritos"
+										/>
+										<IconLink
+											to="/store/orders"
+											icon={<BsReceipt className="w-4 h-4" />}
+											label="Ordenes"
+										/>
+									</>
 								)}
 								<ProfileDropdown
 									user={user}
