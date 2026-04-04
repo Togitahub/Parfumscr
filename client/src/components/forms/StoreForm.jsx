@@ -234,7 +234,7 @@ const StoreForm = () => {
 			{/* Colores */}
 			<div className="flex flex-col gap-3">
 				<p className="text-sm font-medium text-first/80">Colores</p>
-				<div className="grid grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 					{[
 						{ name: "colorMain", label: "Fondo" },
 						{ name: "colorFirst", label: "Texto" },

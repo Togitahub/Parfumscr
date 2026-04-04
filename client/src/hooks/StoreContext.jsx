@@ -44,7 +44,6 @@ export const StoreProvider = ({ children }) => {
 
 				const data = await res.json();
 
-				// Aplicar colores dinámicamente
 				document.documentElement.style.setProperty(
 					"--color-main",
 					data.colorMain,
@@ -59,16 +58,9 @@ export const StoreProvider = ({ children }) => {
 				);
 
 				setStore(data);
-
 				document.title = data.storeName ?? "Parfumscr";
 
-				if (data.logo) {
-					setFavicon(data.logo);
-				}
-
-				if (location.pathname === "/" || location.pathname === "") {
-					navigate("/store", { replace: true });
-				}
+				if (data.logo) setFavicon(data.logo);
 			} catch (err) {
 				console.error("StoreContext error:", err.message);
 			} finally {
@@ -77,7 +69,18 @@ export const StoreProvider = ({ children }) => {
 		};
 
 		fetchStoreConfig();
-	}, [location.pathname, navigate]);
+	}, []); // <- solo al montar
+
+	// Manejo de redirect separado
+	useEffect(() => {
+		if (
+			!loadingStore &&
+			store &&
+			(location.pathname === "/" || location.pathname === "")
+		) {
+			navigate("/store", { replace: true });
+		}
+	}, [loadingStore, store, location.pathname, navigate]);
 
 	return (
 		<StoreContext.Provider value={{ store, loadingStore, storeNotFound }}>

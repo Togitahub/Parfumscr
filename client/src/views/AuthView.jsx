@@ -2,7 +2,7 @@ import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 import ResetPasswordForm from "../components/forms/ResetPasswordForm";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/AuthContext";
 
@@ -16,10 +16,13 @@ const AuthView = () => {
 	const [screen, setScreen] = useState("login");
 
 	// Si ya está autenticado, redirigir al home
-	if (isAuthenticated) {
-		navigate("/", { replace: true });
-		return null;
-	}
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate("/", { replace: true });
+		}
+	}, [isAuthenticated, navigate]);
+
+	if (isAuthenticated) return null;
 
 	// ── Handlers de navegación entre pantallas ────────────────────────────────
 

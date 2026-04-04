@@ -317,7 +317,7 @@ const OrderView = () => {
 								Orden
 							</p>
 							<p
-								className="text-2xl font-bold text-first font-mono tracking-wider"
+								className="text-2xl font-bold text-first font-mono tracking-wider break-all"
 								style={{ fontFamily: "'Cinzel', serif" }}
 							>
 								#{id.slice(-8).toUpperCase()}

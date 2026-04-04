@@ -330,6 +330,7 @@ const PurchaseForm = ({
 			description="Revisa tu pedido y completa tus datos antes de contactarnos por WhatsApp."
 			size="md"
 			closeOnOverlay={!loading}
+			className="pb-safe"
 		>
 			<div className="flex flex-col gap-6">
 				{/* ── Resumen ── */}

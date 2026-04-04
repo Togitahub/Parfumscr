@@ -453,7 +453,7 @@ const CartView = () => {
 
 						{/* ── Order summary sidebar ── */}
 						<div
-							className="w-full lg:w-72 shrink-0 rounded-2xl border border-first/10 bg-main p-5 flex flex-col gap-4 sticky top-24"
+							className="w-full lg:w-72 shrink-0 rounded-2xl border border-first/10 bg-main p-5 flex flex-col gap-4 lg:sticky lg:top-24"
 							style={{
 								animation: "fadeUp 0.5s ease both",
 								animationDelay: "100ms",

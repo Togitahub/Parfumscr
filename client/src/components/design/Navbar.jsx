@@ -382,7 +382,7 @@ const NavBar = () => {
 
 					{/* Redes Sociale de la Store */}
 					{store && (
-						<div className="hidden md:flex items-center gap-3 mt-1">
+						<div className="hidden lg:flex items-center gap-3 mt-1">
 							{SOCIAL.map(({ icon, label, href }) => (
 								<a
 									key={label}

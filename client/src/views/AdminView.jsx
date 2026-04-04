@@ -94,6 +94,9 @@ import StoreForm from "../components/forms/StoreForm";
 import StoreCatalog from "../components/forms/StoreCatalog";
 import OrderList from "../lists/OrderList";
 
+// Views
+import DashboardView from "./DashboardView";
+
 // Contexts
 
 import { FilterProvider } from "../hooks/FilterContext";
@@ -786,7 +789,7 @@ const AdminView = () => {
 
 				{/* ── Tabs ── */}
 				<div
-					className="flex items-center gap-1 p-1 rounded-2xl border border-first/10 bg-main w-fit overflow-x-auto"
+					className="flex items-center gap-1 p-1 rounded-2xl border border-first/10 bg-main overflow-x-auto max-w-full scrollbar-none"
 					style={{ animation: "fadeUp 0.4s ease both", animationDelay: "60ms" }}
 				>
 					{tabs.map((tab) => (

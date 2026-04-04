@@ -2,7 +2,6 @@ import { Routes, Route, Router } from "react-router-dom";
 
 import AuthView from "./views/AuthView";
 import HomeView from "./views/HomeView";
-import AboutView from "./views/AboutView";
 import AdminView from "./views/AdminView";
 import CartView from "./views/CartView";
 import OrderView from "./views/OrderView";
@@ -41,7 +40,6 @@ const App = () => {
 					<Route path="/" element={isAdmin ? <AdminView /> : <HomeView />} />
 					<Route path="/store" element={<StoreView />} />
 					<Route path="/auth" element={<AuthView />} />
-					<Route path="/about" element={<AboutView />} />
 					<Route path="/store/product/:id" element={<ProductView />} />
 
 					<Route
