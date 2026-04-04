@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+
 import {
 	BsBoxSeam,
 	BsChevronRight,
@@ -7,6 +8,7 @@ import {
 	BsXCircle,
 	BsHourglass,
 } from "react-icons/bs";
+
 import Badge from "../common/Badge";
 
 /**
@@ -88,7 +90,7 @@ const OrderCard = ({
 	const previewItems = orderItems.slice(0, 2);
 	const remaining = orderItems.length - 2;
 
-	const handleClick = () => navigate(`/orders/${id}`);
+	const handleClick = () => navigate(`/store/orders/${id}`);
 
 	return (
 		<article
@@ -121,6 +123,7 @@ const OrderCard = ({
 					</Badge>
 
 					{/* Chevron */}
+
 					<span className="text-first/20 group-hover:text-first/50 transition-colors duration-200">
 						<BsChevronRight className="w-4 h-4" />
 					</span>
@@ -184,7 +187,7 @@ const OrderCard = ({
 						isCompact ? "text-base" : "text-lg",
 					].join(" ")}
 				>
-					{formatPrice(totalPrice)}
+					Total: {formatPrice(totalPrice)}
 				</span>
 
 				{/* Status */}

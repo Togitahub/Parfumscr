@@ -68,7 +68,10 @@ import {
 
 import { GET_USERS } from "../graphql/user/UserQueries";
 import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
-import { GET_MY_STORE } from "../graphql/store/StoreQueries";
+import {
+	GET_DASHBOARD_STATS,
+	GET_MY_STORE,
+} from "../graphql/store/StoreQueries";
 
 import {
 	ADD_PRODUCT_TO_STORE,
@@ -582,6 +585,7 @@ const OrdersSection = () => {
 	const { data, loading } = useQuery(GET_ALL_ORDERS);
 	const [updateStatus] = useMutation(UPDATE_ORDER_STATUS, {
 		refetchQueries: [{ query: GET_ALL_ORDERS }],
+		awaitRefetchQueries: true,
 	});
 
 	const orders = data?.getAllOrders ?? [];

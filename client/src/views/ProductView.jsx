@@ -69,7 +69,7 @@ const ImageGallery = ({ images = [], name }) => {
 			{/* Main image */}
 			<div
 				className="relative overflow-hidden rounded-2xl bg-first/4"
-				style={{ aspectRatio: "4/3" }}
+				style={{ aspectRatio: "4/4" }}
 			>
 				{!loaded && <div className="absolute inset-0 shimmer" />}
 				{current ? (

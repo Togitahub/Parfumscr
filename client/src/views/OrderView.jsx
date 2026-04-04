@@ -12,9 +12,12 @@ import {
 } from "react-icons/bs";
 
 import { GET_ORDER_BY_ID } from "../graphql/order/OrderQueries";
+
 import Badge from "../components/common/Badge";
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
+
+import { useAuth } from "../hooks/AuthContext";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -231,6 +234,11 @@ const OrderItemRow = ({ item, index }) => {
 
 const OrderView = () => {
 	const { id } = useParams();
+
+	const { user } = useAuth();
+
+	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
+
 	const navigate = useNavigate();
 
 	const { data, loading, error } = useQuery(GET_ORDER_BY_ID, {
@@ -294,12 +302,12 @@ const OrderView = () => {
 			<div className="max-w-2xl mx-auto flex flex-col gap-8">
 				{/* ── Back button ── */}
 				<button
-					onClick={() => navigate("/orders")}
+					onClick={() => (!isAdmin ? navigate("/store/orders") : navigate(-1))}
 					className="flex items-center gap-1.5 text-sm text-first/40 hover:text-first/70 transition-colors w-fit cursor-pointer"
 					style={{ animation: "fadeUp 0.4s ease both" }}
 				>
 					<BsArrowLeft className="w-3.5 h-3.5" />
-					Mis órdenes
+					{!isAdmin ? "Mis Ordenes" : "Volver"}
 				</button>
 
 				{/* ── Order header card ── */}
@@ -331,10 +339,14 @@ const OrderView = () => {
 							<Badge variant={statusInfo.badge} size="lg" dot>
 								{statusInfo.label}
 							</Badge>
-							{statusInfo.description && (
-								<p className="text-xs text-first/40 text-right max-w-45 leading-snug">
-									{statusInfo.description}
-								</p>
+							{!isAdmin && (
+								<div>
+									{statusInfo.description && (
+										<p className="text-xs text-first/40 text-right max-w-45 leading-snug">
+											{statusInfo.description}
+										</p>
+									)}
+								</div>
 							)}
 						</div>
 					</div>
@@ -393,35 +405,37 @@ const OrderView = () => {
 				</div>
 
 				{/* ── Actions ── */}
-				<div
-					className="flex flex-col sm:flex-row gap-3"
-					style={{
-						animation: "fadeUp 0.45s ease both",
-						animationDelay: "120ms",
-					}}
-				>
-					{/* WhatsApp follow-up */}
-					<Button
-						fullWidth
-						variant="outline"
-						size="md"
-						icon={<BsWhatsapp />}
-						onClick={handleWhatsApp}
-						className="hover:text-[#25D366]! hover:border-[#25D366]/40!"
+				{!isAdmin && (
+					<div
+						className="flex flex-col sm:flex-row gap-3"
+						style={{
+							animation: "fadeUp 0.45s ease both",
+							animationDelay: "120ms",
+						}}
 					>
-						Consultar por WhatsApp
-					</Button>
+						{/* WhatsApp follow-up */}
+						<Button
+							fullWidth
+							variant="outline"
+							size="md"
+							icon={<BsWhatsapp />}
+							onClick={handleWhatsApp}
+							className="hover:text-[#25D366]! hover:border-[#25D366]/40!"
+						>
+							Consultar por WhatsApp
+						</Button>
 
-					{/* Back to catalog */}
-					<Button
-						fullWidth
-						variant="ghost"
-						size="md"
-						onClick={() => navigate("/")}
-					>
-						Seguir comprando
-					</Button>
-				</div>
+						{/* Back to catalog */}
+						<Button
+							fullWidth
+							variant="ghost"
+							size="md"
+							onClick={() => navigate("/")}
+						>
+							Seguir comprando
+						</Button>
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -401,6 +401,15 @@ const NavBar = () => {
 					<div className="w-px h-5 bg-first/10 hidden lg:block" />
 
 					{/* ── Acciones derecha ── */}
+					{!isAdmin && (
+						<IconLink
+							to="/store/cart"
+							icon={<BsCart3 className="w-4 h-4" />}
+							label="Carrito"
+							badge={totalItems}
+						/>
+					)}
+
 					<div className="flex items-center gap-1 ml-auto">
 						{/* Dashboard — solo admins */}
 						{isAdmin && (
@@ -408,7 +417,7 @@ const NavBar = () => {
 								to="/admin"
 								className={({ isActive }) =>
 									[
-										"hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+										"flex items-center gap-1.5 px-1 py-2 rounded-lg text-sm font-medium transition-all duration-200",
 										isActive
 											? "text-second bg-second/10 border border-second/20"
 											: "text-first/50 hover:text-first hover:bg-first/8 border border-transparent",
@@ -416,26 +425,18 @@ const NavBar = () => {
 								}
 							>
 								<BsSpeedometer2 className="w-3.5 h-3.5" />
-								Dashboard
+								Panel
 							</NavLink>
 						)}
 
 						{isAuthenticated ? (
 							<>
 								{!isAdmin && (
-									<>
-										<IconLink
-											to="/store/favorites"
-											icon={<BsHeart className="w-4 h-4" />}
-											label="Favoritos"
-										/>
-										<IconLink
-											to="/store/cart"
-											icon={<BsCart3 className="w-4 h-4" />}
-											label="Carrito"
-											badge={totalItems}
-										/>
-									</>
+									<IconLink
+										to="/store/favorites"
+										icon={<BsHeart className="w-4 h-4" />}
+										label="Favoritos"
+									/>
 								)}
 								<ProfileDropdown
 									user={user}
@@ -506,17 +507,6 @@ const NavBar = () => {
 				)}
 				<div className="max-w-7xl mx-auto px-4 py-4 overflow-y-auto max-h-[calc(80vh-4rem)] flex flex-col gap-4">
 					{/* Links principales */}
-					{isAdmin && (
-						<NavLink
-							to="/admin"
-							onClick={closeMobile}
-							className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-second hover:bg-second/8 transition-colors"
-						>
-							<BsSpeedometer2 className="w-3.5 h-3.5" />
-							Dashboard
-						</NavLink>
-					)}
-
 					<div className="h-px bg-first/8" />
 
 					{/* Catálogo */}

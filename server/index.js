@@ -56,7 +56,6 @@ app.post("/api/cloudinary-signature", async (req, res) => {
 		const paramsToSign = {
 			timestamp,
 			folder: "products",
-			transformation: "q_auto:best,f_auto",
 			eager: "w_1200,q_auto:best,f_auto|w_400,q_auto:good,f_auto",
 			eager_async: true,
 		};
@@ -73,6 +72,7 @@ app.post("/api/cloudinary-signature", async (req, res) => {
 			apiKey: process.env.CLOUD_KEY,
 			folder: paramsToSign.folder,
 			eager: paramsToSign.eager,
+			eager_async: true,
 		});
 	} catch (error) {
 		console.error("Error generating signature:", error);

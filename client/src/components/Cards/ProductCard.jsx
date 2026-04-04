@@ -90,7 +90,7 @@ const ProductCard = ({
 			{/* ── Image section ── */}
 			<div
 				className={[
-					"relative overflow-hidden bg-first/4",
+					"relative overflow-hidden bg-first/4 h-70",
 					isFeatured ? "md:w-2/5 md:min-h-70" : "aspect-4/3",
 					isCompact ? "aspect-square!" : "",
 				]

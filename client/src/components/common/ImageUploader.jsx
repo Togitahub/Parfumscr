@@ -107,7 +107,7 @@ const ImageUploader = ({
 			formData.append("signature", signature);
 			formData.append("folder", folder);
 			formData.append("eager", eager);
-			formData.append("transformation", "q_auto:best,f_auto");
+			formData.append("eager_async", "true");
 
 			const uploadRes = await fetch(
 				`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,

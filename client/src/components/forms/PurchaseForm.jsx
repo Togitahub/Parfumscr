@@ -29,9 +29,17 @@ import { CREATE_ORDER } from "../../graphql/order/OrderMutations";
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
 
-const buildWhatsAppMessage = ({ items, totalPrice, name, phone, address }) => {
+const buildWhatsAppMessage = ({
+	orderId,
+	items,
+	totalPrice,
+	name,
+	phone,
+	address,
+}) => {
 	const lines = [
 		`🛍️ *Nueva solicitud de compra*`,
+		`🔖 *Orden:* #${orderId.slice(-8).toUpperCase()}`,
 		``,
 		`👤 *Cliente:* ${name}`,
 		phone ? `📞 *Teléfono:* ${phone}` : null,
@@ -196,7 +204,7 @@ const PurchaseForm = ({
 			);
 
 			// userId is optional — omitted for guests
-			await createOrder({
+			const order = await createOrder({
 				variables: {
 					...(user?.id ? { userId: user.id } : {}),
 					storeId: store?.storeId ?? null,
@@ -205,8 +213,11 @@ const PurchaseForm = ({
 				},
 			});
 
+			const orderId = order.data.createOrder.id;
+
 			// Build WhatsApp message directed to the store's number
 			const message = buildWhatsAppMessage({
+				orderId,
 				items: cartItems,
 				totalPrice,
 				name: form.name.trim(),
