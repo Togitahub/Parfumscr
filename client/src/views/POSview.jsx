@@ -46,6 +46,7 @@ const POSView = ({ storeId }) => {
 	const [cart, setCart] = useState([]);
 	const [paymentMethod, setPaymentMethod] = useState("EFECTIVO");
 	const [confirming, setConfirming] = useState(false);
+	const [finalPriceOverride, setFinalPriceOverride] = useState("");
 	const [done, setDone] = useState(false);
 
 	const { data, loading } = useQuery(GET_STORE_PRODUCTS, {
@@ -133,14 +134,18 @@ const POSView = ({ storeId }) => {
 				}),
 			);
 
+			const resolvedTotal =
+				finalPriceOverride !== "" ? parseFloat(finalPriceOverride) : total;
 			const { data: orderData } = await createOrder({
-				variables: { storeId, totalPrice: total, items },
+				variables: { storeId, totalPrice: resolvedTotal, items },
 			});
-
 			const orderId = orderData.createOrder.id;
-
 			await updateOrderStatus({
-				variables: { id: orderId, status: "COMPLETADO", finalPrice: total },
+				variables: {
+					id: orderId,
+					status: "COMPLETADO",
+					finalPrice: resolvedTotal,
+				},
 			});
 
 			setDone(true);
@@ -183,7 +188,14 @@ const POSView = ({ storeId }) => {
 						La orden fue registrada y el stock fue descontado.
 					</p>
 				</div>
-				<Button onClick={() => setDone(false)}>Nueva venta</Button>
+				<Button
+					onClick={() => {
+						setDone(false);
+						setFinalPriceOverride("");
+					}}
+				>
+					Nueva venta
+				</Button>
 			</div>
 		);
 	}
@@ -369,16 +381,25 @@ const POSView = ({ storeId }) => {
 
 				{cart.length > 0 && (
 					<>
-						<div className="flex items-center justify-between pt-2 border-t border-first/8">
-							<span className="text-xs font-medium text-first/50 uppercase tracking-wider">
-								Total
-							</span>
-							<span
-								className="text-2xl font-bold text-first tabular-nums"
-								style={{ fontFamily: "'Cinzel', serif" }}
-							>
-								{formatPrice(total)}
-							</span>
+						<div className="flex flex-col gap-2 pt-2 border-t border-first/8">
+							<div className="flex items-center justify-between">
+								<span className="text-xs text-first/35">Subtotal</span>
+								<span className="text-sm text-first/50 tabular-nums">
+									{formatPrice(total)}
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<label className="text-xs font-medium text-first/50 uppercase tracking-wider shrink-0">
+									Precio final
+								</label>
+								<input
+									type="number"
+									placeholder={total}
+									value={finalPriceOverride}
+									onChange={(e) => setFinalPriceOverride(e.target.value)}
+									className="flex-1 h-8 px-2 rounded-lg border border-second/30 bg-main text-first text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-second/30 text-right"
+								/>
+							</div>
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -403,7 +424,6 @@ const POSView = ({ storeId }) => {
 								))}
 							</div>
 						</div>
-
 						<Button
 							fullWidth
 							size="md"
