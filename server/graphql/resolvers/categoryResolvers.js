@@ -10,7 +10,7 @@ const categoryResolvers = {
 	Category: {
 		products: async (parent) =>
 			await Product.find({ category: parent.id }).populate(
-				"brand category segment",
+				"brand category segment notes",
 			),
 	},
 

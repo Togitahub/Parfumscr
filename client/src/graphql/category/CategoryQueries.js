@@ -29,6 +29,11 @@ export const GET_CATEGORY = gql`
 					id
 					name
 				}
+				notes {
+					id
+					name
+				}
+				isDecant
 				price
 				stock
 				images

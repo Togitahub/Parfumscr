@@ -19,7 +19,16 @@ export const GET_NOTE = gql`
 				name
 				price
 				images
+				isDecant
 				brand {
+					id
+					name
+				}
+				segment {
+					id
+					name
+				}
+				notes {
 					id
 					name
 				}

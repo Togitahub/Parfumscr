@@ -139,10 +139,9 @@ const ProductCard = ({
 
 				{/* Top badges */}
 				<div className="absolute top-3 left-3 flex gap-1.5 z-10">
-					{!isDecant && (
-						<span className="pc-pill pc-pill--decant">Perfume</span>
-					)}
-					{isDecant && <span className="pc-pill pc-pill--decant">Decant</span>}
+					<span className="pc-pill pc-pill--decant">
+						{isDecant ? "Decant" : "Perfume"}
+					</span>
 					{isOutOfStock && (
 						<span className="pc-pill pc-pill--stock">Agotado</span>
 					)}
