@@ -11,6 +11,7 @@ import favoritesDefs from "./favoritesDefs.js";
 import cartDefs from "./cartDefs.js";
 import noteDefs from "./noteDefs.js";
 import storeDefs from "./storeDefs.js";
+import expenseDefs from "./expenseDefs.js";
 
 const rootDefs = gql`
 	type Query {
@@ -39,4 +40,5 @@ export const typeDefs = mergeTypeDefs([
 	noteDefs,
 	cartDefs,
 	storeDefs,
+	expenseDefs,
 ]);

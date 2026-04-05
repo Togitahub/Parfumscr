@@ -10,6 +10,7 @@ import favoritesResolvers from "./favoritesResolvers.js";
 import cartResolvers from "./cartResolvers.js";
 import noteResolvers from "./noteResolvers.js";
 import storeResolvers from "./storeResolvers.js";
+import expenseResolvers from "./expenseResolvers.js";
 
 export const resolvers = mergeResolvers([
 	userResolvers,
@@ -22,4 +23,5 @@ export const resolvers = mergeResolvers([
 	noteResolvers,
 	cartResolvers,
 	storeResolvers,
+	expenseResolvers,
 ]);

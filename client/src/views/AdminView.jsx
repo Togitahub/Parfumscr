@@ -31,6 +31,7 @@ import {
 	BsReceipt,
 	BsGraphUp,
 	BsUpcScan,
+	BsWallet2,
 } from "react-icons/bs";
 
 import { useAuth } from "../hooks/AuthContext";
@@ -103,6 +104,7 @@ import OrderList from "../lists/OrderList";
 
 // Views
 import POSView from "./POSView";
+import ExpensesView from "./ExpensesView";
 import DashboardView from "./DashboardView";
 
 // Contexts
@@ -119,6 +121,7 @@ const buildAdminTabs = (myStoreExists) => [
 		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
 		: []),
 	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
+	{ key: "expenses", label: "Gastos", icon: <BsWallet2 /> },
 	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
 	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
@@ -715,11 +718,17 @@ const AdminView = () => {
 
 	const renderContent = () => {
 		switch (activeTab) {
+			case "pos":
+				return myStoreId ? <POSView storeId={myStoreId} /> : null;
+
 			case "catalog":
 				return myStoreId ? <StoreCatalog storeId={myStoreId} /> : null;
 
 			case "products":
 				return <ProductsSection myStoreId={myStoreId} />;
+
+			case "expenses":
+				return myStoreId ? <ExpensesView storeId={myStoreId} /> : null;
 
 			case "dashboard":
 				return myStoreId ? (
@@ -752,9 +761,6 @@ const AdminView = () => {
 						<StoreForm />
 					</div>
 				);
-
-			case "pos":
-				return myStoreId ? <POSView storeId={myStoreId} /> : null;
 
 			case "brands":
 				return (

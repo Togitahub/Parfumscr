@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
+
 import {
 	BsCart3,
 	BsCheckCircle,
@@ -10,10 +11,14 @@ import {
 	BsHeart,
 	BsBoxSeam,
 	BsArrowLeft,
+	BsWallet2,
+	BsGraphUp,
 } from "react-icons/bs";
 
 import { useStore } from "../hooks/StoreContext";
+
 import { GET_DASHBOARD_STATS } from "../graphql/store/StoreQueries";
+import { GET_EXPENSE_SUMMARY } from "../graphql/expense/ExpenseQueries";
 
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
@@ -147,7 +152,22 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 		skip: !store?.storeId,
 	});
 
+	const { data: expenseSummaryData, loading: loadingExpenses } = useQuery(
+		GET_EXPENSE_SUMMARY,
+		{
+			variables: {
+				storeId: resolvedStoreId,
+				period: period === "all" ? null : period,
+			},
+			skip: !resolvedStoreId,
+		},
+	);
+
 	const stats = data?.getDashboardStats;
+	const totalExpenses =
+		expenseSummaryData?.getExpenseSummary?.totalExpenses ?? 0;
+	const confirmedRevenue = stats?.confirmedRevenue ?? 0;
+	const netProfit = confirmedRevenue - totalExpenses;
 
 	return (
 		<div
@@ -218,7 +238,7 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 				</div>
 
 				{/* Stat cards */}
-				<div className="grid  lg:grid-cols-4 gap-4">
+				<div className="grid lg:grid-cols-3 gap-4">
 					<StatCard
 						icon={<BsCart3 className="w-4 h-4" />}
 						label="Solicitudes"
@@ -242,6 +262,22 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 						label="Ingresos confirmados"
 						value={loading ? "—" : formatPrice(stats?.confirmedRevenue ?? 0)}
 						sub="Solo órdenes completadas"
+					/>
+					<StatCard
+						icon={<BsWallet2 className="w-4 h-4" />}
+						label="Total gastos"
+						value={
+							loading || loadingExpenses ? "—" : formatPrice(totalExpenses)
+						}
+						sub="Del período seleccionado"
+						color="error"
+					/>
+					<StatCard
+						icon={<BsGraphUp className="w-4 h-4" />}
+						label="Utilidad neta"
+						value={loading || loadingExpenses ? "—" : formatPrice(netProfit)}
+						sub="Ingresos − Gastos"
+						color={netProfit >= 0 ? "success" : "error"}
 					/>
 				</div>
 
