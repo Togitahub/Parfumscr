@@ -502,6 +502,7 @@ const ExpensesView = ({ storeId }) => {
 				<ExpenseForm
 					storeId={storeId}
 					expense={editExpense}
+					period={period === "all" ? null : period}
 					onSuccess={handleModalClose}
 					onCancel={handleModalClose}
 				/>

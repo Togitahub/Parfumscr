@@ -36,7 +36,13 @@ const buildInitialForm = (expense) => ({
 	notes: expense?.notes ?? "",
 });
 
-const ExpenseForm = ({ storeId, expense = null, onSuccess, onCancel }) => {
+const ExpenseForm = ({
+	storeId,
+	expense = null,
+	onSuccess,
+	onCancel,
+	period = null,
+}) => {
 	const toast = useToast();
 	const isEditing = Boolean(expense);
 
@@ -44,8 +50,8 @@ const ExpenseForm = ({ storeId, expense = null, onSuccess, onCancel }) => {
 	const [errors, setErrors] = useState({});
 
 	const refetchQueries = [
-		{ query: GET_EXPENSES, variables: { storeId } },
-		{ query: GET_EXPENSE_SUMMARY, variables: { storeId } },
+		{ query: GET_EXPENSES, variables: { storeId, period } },
+		{ query: GET_EXPENSE_SUMMARY, variables: { storeId, period } },
 	];
 
 	const [createExpense, { loading: creating }] = useMutation(CREATE_EXPENSE, {
