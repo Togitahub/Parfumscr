@@ -17,12 +17,16 @@ import {
 	CREATE_ORDER,
 	UPDATE_ORDER_STATUS,
 } from "../graphql/order/OrderMutations";
-import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
+import {
+	GET_DASHBOARD_STATS,
+	GET_STORE_PRODUCTS,
+} from "../graphql/store/StoreQueries";
 
 import { useToast } from "../hooks/ToastContext";
 
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
+import { GET_ALL_ORDERS } from "../graphql/order/OrderQueries";
 
 // import { getOptimizedUrl } from "../utils/ImageUtils";
 
@@ -54,8 +58,38 @@ const POSView = ({ storeId }) => {
 		skip: !storeId,
 	});
 
-	const [createOrder] = useMutation(CREATE_ORDER);
-	const [updateOrderStatus] = useMutation(UPDATE_ORDER_STATUS);
+	const updateDashboard = [
+		{ query: GET_STORE_PRODUCTS, variables: { storeId: storeId } },
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: storeId, period: "week" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: storeId, period: "month" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: storeId, period: "year" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: storeId, period: null },
+		},
+	];
+
+	const [createOrder] = useMutation(CREATE_ORDER, {
+		refetchQueries: [
+			{ query: GET_ALL_ORDERS },
+			...(storeId ? updateDashboard : []),
+		],
+	});
+	const [updateOrderStatus] = useMutation(UPDATE_ORDER_STATUS, {
+		refetchQueries: [
+			{ query: GET_ALL_ORDERS },
+			...(storeId ? updateDashboard : []),
+		],
+	});
 
 	const products = useMemo(() => {
 		const all = data?.getStoreProducts ?? [];

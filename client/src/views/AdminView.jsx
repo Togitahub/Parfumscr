@@ -72,7 +72,11 @@ import {
 
 import { GET_USERS } from "../graphql/user/UserQueries";
 import { DELETE_USER, TOGGLE_USER_ACTIVE } from "../graphql/user/UserMutations";
-import { GET_MY_STORE, GET_STORES } from "../graphql/store/StoreQueries";
+import {
+	GET_DASHBOARD_STATS,
+	GET_MY_STORE,
+	GET_STORES,
+} from "../graphql/store/StoreQueries";
 
 import {
 	ADD_PRODUCT_TO_STORE,
@@ -602,20 +606,44 @@ const UsersSection = () => {
 	);
 };
 
-const OrdersSection = () => {
+const OrdersSection = ({ myStoreId }) => {
 	const toast = useToast();
 	const [deleteTarget, setDeleteTarget] = useState(null);
 
 	const { data, loading } = useQuery(GET_ALL_ORDERS);
 
+	const updateDashboard = [
+		{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "week" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "month" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "year" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: null },
+		},
+	];
+
 	const [updateStatus] = useMutation(UPDATE_ORDER_STATUS, {
-		refetchQueries: [{ query: GET_ALL_ORDERS }],
-		awaitRefetchQueries: true,
+		refetchQueries: [
+			{ query: GET_ALL_ORDERS },
+			...(myStoreId ? updateDashboard : []),
+		],
 	});
 
 	const [deleteOrder, { loading: deleting }] = useMutation(DELETE_ORDER, {
-		// agregar
-		refetchQueries: [{ query: GET_ALL_ORDERS }],
+		refetchQueries: [
+			{ query: GET_ALL_ORDERS },
+			...(myStoreId ? updateDashboard : []),
+		],
 	});
 
 	const orders = data?.getAllOrders ?? [];
@@ -736,7 +764,7 @@ const AdminView = () => {
 				) : null;
 
 			case "orders":
-				return <OrdersSection />;
+				return <OrdersSection myStoreId={myStoreId} />;
 
 			case "store":
 				return (
