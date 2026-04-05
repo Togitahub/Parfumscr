@@ -1,15 +1,21 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
+
 import { BsSearch, BsX, BsTrash } from "react-icons/bs";
+
 import { useToast } from "../../hooks/ToastContext";
-import { GET_STORE_PRODUCTS } from "../../graphql/store/StoreQueries";
+
 import {
 	REMOVE_PRODUCT_FROM_STORE,
 	UPDATE_STORE_PRODUCT,
 } from "../../graphql/store/StoreMutations";
+import { GET_STORE_PRODUCTS } from "../../graphql/store/StoreQueries";
+
 import { Spinner } from "../interface/LoadingUi";
 import Button from "../common/Button";
-import { getOptimizedUrl } from "../../utils/ImageUtils";
+import Badge from "../common/Badge";
+
+// import { getOptimizedUrl } from "../../utils/ImageUtils";
 
 const StoreCatalog = ({ storeId }) => {
 	const toast = useToast();
@@ -78,8 +84,7 @@ const StoreCatalog = ({ storeId }) => {
 				<h2 className="text-base font-semibold text-first">Mi catálogo</h2>
 				<p className="text-xs text-first/40">
 					{storeProducts.length} producto{storeProducts.length !== 1 ? "s" : ""}{" "}
-					en tu tienda. Para agregar más, ve a la pestaña{" "}
-					<span className="text-second font-medium">Productos</span>.
+					en tu tienda. Para agregar más, ve a la pestaña productos
 				</p>
 			</div>
 
@@ -112,12 +117,11 @@ const StoreCatalog = ({ storeId }) => {
 						Tu tienda no tiene productos aún.
 					</p>
 					<p className="text-xs text-first/25">
-						Agrégalos desde la pestaña{" "}
-						<span className="text-second/60">Productos</span>.
+						Agrégalos desde la pestaña productos
 					</p>
 				</div>
 			) : (
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col lg:flex-row gap-3">
 					{filtered.map((sp) => {
 						const editValues = getEditing(sp);
 						const product = sp.product;
@@ -129,7 +133,7 @@ const StoreCatalog = ({ storeId }) => {
 							>
 								{/* Product header */}
 								<div className="flex items-center gap-3">
-									{product.images?.[0] && (
+									{/* {product.images?.[0] && (
 										<div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
 											<img
 												src={getOptimizedUrl(product.images[0], "thumb")}
@@ -137,15 +141,20 @@ const StoreCatalog = ({ storeId }) => {
 												className="w-full h-full object-cover"
 											/>
 										</div>
-									)}
+									)} */}
 									<div className="flex-1 min-w-0">
 										<p className="text-sm font-medium text-first truncate">
-											{product.name}
+											{product.name}{" "}
+											{product.isDecant ? (
+												<Badge children={"Decant"} variant="warning" />
+											) : (
+												<Badge children={"Perfume"} variant="success" />
+											)}
 										</p>
 										<p className="text-xs text-first/40">
 											{product.brand?.name}
 											{product.size && ` · ${product.size}`}
-											{product.isDecant && " · Decant"}
+											{product.isDecant ? " · Decant" : " · Perfume"}
 										</p>
 									</div>
 									<Button

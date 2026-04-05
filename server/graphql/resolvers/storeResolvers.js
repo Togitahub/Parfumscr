@@ -67,12 +67,12 @@ const storeResolvers = {
 				0,
 			);
 
-			// Top solicitados: contar apariciones en orderItems de todas las órdenes
-			const requestCount = {};
-			for (const order of orders) {
+			const completedOrders = orders.filter((o) => o.status === "COMPLETADO");
+			const soldCount = {};
+			for (const order of completedOrders) {
 				for (const item of order.orderItems) {
-					const key = item.name;
-					requestCount[key] = (requestCount[key] || 0) + item.quantity;
+					const key = item.productId?.toString();
+					if (key) soldCount[key] = (soldCount[key] || 0) + item.quantity;
 				}
 			}
 
@@ -87,14 +87,15 @@ const storeResolvers = {
 				.slice(0, 5)
 				.map((sp) => ({ product: sp.product, count: sp.views || 0 }));
 
-			// Top solicitados mapeados a productos
-			const topRequestedRaw = Object.entries(requestCount)
+			const topRequestedRaw = Object.entries(soldCount)
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 5);
 
 			const topRequested = topRequestedRaw
-				.map(([name, count]) => {
-					const sp = storeProducts.find((sp) => sp.product?.name === name);
+				.map(([productId, count]) => {
+					const sp = storeProducts.find(
+						(sp) => sp.product?._id?.toString() === productId,
+					);
 					if (!sp) return null;
 					return { product: sp.product, count };
 				})

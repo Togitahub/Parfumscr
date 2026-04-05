@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
+
 import {
 	BsSearch,
 	BsX,
@@ -12,15 +13,18 @@ import {
 	BsPhone,
 } from "react-icons/bs";
 
-import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 import {
 	CREATE_ORDER,
 	UPDATE_ORDER_STATUS,
 } from "../graphql/order/OrderMutations";
+import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
+
 import { useToast } from "../hooks/ToastContext";
-import { getOptimizedUrl } from "../utils/ImageUtils";
+
 import Button from "../components/common/Button";
 import { Spinner } from "../components/interface/LoadingUi";
+
+// import { getOptimizedUrl } from "../utils/ImageUtils";
 
 const PAYMENT_METHODS = [
 	{ key: "SINPE", label: "SINPE", icon: <BsPhone className="w-4 h-4" /> },
@@ -246,7 +250,7 @@ const POSView = ({ storeId }) => {
 												: "border-first/10 hover:border-second/30 hover:bg-second/4 cursor-pointer",
 									].join(" ")}
 								>
-									{sp.product.images?.[0] && (
+									{/* {sp.product.images?.[0] && (
 										<div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-first/5">
 											<img
 												src={getOptimizedUrl(sp.product.images[0], "thumb")}
@@ -254,7 +258,7 @@ const POSView = ({ storeId }) => {
 												className="w-full h-full object-cover"
 											/>
 										</div>
-									)}
+									)} */}
 									<div className="flex-1 min-w-0">
 										<p className="text-sm font-medium text-first truncate">
 											{sp.product.name}

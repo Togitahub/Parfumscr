@@ -46,7 +46,7 @@ const orderResolvers = {
 	},
 
 	Mutation: {
-		createOrder: async (_, { userId, storeId, totalPrice, items }, context) => {
+		createOrder: async (_, { userId, storeId, totalPrice, items }) => {
 			const parsedItems = items.map((item) => JSON.parse(item));
 
 			const order = await Order.create({

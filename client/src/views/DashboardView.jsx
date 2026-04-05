@@ -14,7 +14,6 @@ import {
 
 import { useStore } from "../hooks/StoreContext";
 import { GET_DASHBOARD_STATS } from "../graphql/store/StoreQueries";
-import { getOptimizedUrl } from "../utils/ImageUtils";
 
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
@@ -73,19 +72,6 @@ const ProductRankRow = ({ item, index, icon }) => {
 			>
 				{index + 1}
 			</span>
-			<div className="w-9 h-9 rounded-lg overflow-hidden bg-first/5 shrink-0">
-				{product.images?.[0] ? (
-					<img
-						src={getOptimizedUrl(product.images[0], "thumb")}
-						alt={product.name}
-						className="w-full h-full object-cover"
-					/>
-				) : (
-					<div className="w-full h-full flex items-center justify-center">
-						<BsBoxSeam className="w-3.5 h-3.5 text-first/20" />
-					</div>
-				)}
-			</div>
 			<div className="flex-1 min-w-0">
 				<p className="text-sm font-medium text-first truncate">
 					{product.name}
@@ -212,7 +198,7 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 						</div>
 
 						{/* Period selector */}
-						<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main">
+						<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main overflow-x-auto max-w-full scrollbar-none">
 							{PERIODS.map((p) => (
 								<button
 									key={p.key}
@@ -232,7 +218,7 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 				</div>
 
 				{/* Stat cards */}
-				<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+				<div className="grid  lg:grid-cols-4 gap-4">
 					<StatCard
 						icon={<BsCart3 className="w-4 h-4" />}
 						label="Solicitudes"
@@ -262,19 +248,19 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 				{/* Rankings */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 					<RankSection
-						title="Más solicitados"
+						title="Top Vendidos"
 						icon={<BsCart3 className="w-3.5 h-3.5" />}
 						items={stats?.topRequested ?? []}
 						loading={loading}
 					/>
 					<RankSection
-						title="Más vistos"
+						title="Top Visualizaciones"
 						icon={<BsEye className="w-3.5 h-3.5" />}
 						items={stats?.topViewed ?? []}
 						loading={loading}
 					/>
 					<RankSection
-						title="Más favoriteados"
+						title="Top Favoritos"
 						icon={<BsHeart className="w-3.5 h-3.5" />}
 						items={stats?.topFavorited ?? []}
 						loading={loading}

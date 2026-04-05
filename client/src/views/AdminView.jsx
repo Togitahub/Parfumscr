@@ -15,6 +15,8 @@
  */
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import {
 	BsBoxSeam,
 	BsBookmark,
@@ -110,20 +112,18 @@ import { FilterProvider } from "../hooks/FilterContext";
 // ── Tab definitions ───────────────────────────────────────────────────────────
 
 const buildAdminTabs = (myStoreExists) => [
-	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
-	...(myStoreExists
-		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
-		: []),
-	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
-	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
-	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 	...(myStoreExists?.posEnabled
 		? [{ key: "pos", label: "POS", icon: <BsUpcScan /> }]
 		: []),
-	{ key: "brands", label: "Marcas", icon: <BsBookmark /> },
+	...(myStoreExists
+		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
+		: []),
+	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
+	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
+	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
+	{ key: "store", label: "Mi tienda", icon: <BsShop /> },
 	{ key: "categories", label: "Categorías", icon: <BsTag /> },
 	{ key: "segments", label: "Segmentos", icon: <BsLayers /> },
-	{ key: "notes", label: "Acordes", icon: <BsDroplet /> },
 ];
 
 const SUPER_ADMIN_TABS = [
@@ -694,7 +694,10 @@ const AdminView = () => {
 	const myStoreId = myStoreData?.getMyStore?.id;
 
 	const tabs = isSuperAdmin ? SUPER_ADMIN_TABS : buildAdminTabs(myStoreExists);
-	const [activeTab, setActiveTab] = useState(tabs[0].key);
+
+	const [searchParams, setSearchParams] = useSearchParams();
+	const activeTab = searchParams.get("tab") ?? tabs[0].key;
+	const setActiveTab = (key) => setSearchParams({ tab: key });
 
 	const copyMyStoreLink = () => {
 		const link = myStoreExists?.customDomain
@@ -712,11 +715,11 @@ const AdminView = () => {
 
 	const renderContent = () => {
 		switch (activeTab) {
-			case "products":
-				return <ProductsSection myStoreId={myStoreId} />;
-
 			case "catalog":
 				return myStoreId ? <StoreCatalog storeId={myStoreId} /> : null;
+
+			case "products":
+				return <ProductsSection myStoreId={myStoreId} />;
 
 			case "dashboard":
 				return myStoreId ? (
