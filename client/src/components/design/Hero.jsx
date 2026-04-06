@@ -8,7 +8,7 @@ import { GET_PERFUMES } from "../../graphql/product/ProductQueries";
 const DEFAULTS = {
 	tagline: "100%",
 	description:
-		"Descubre fragancias que trascienden lo ordinario. Desde decants exclusivos hasta colecciones de lujo, cada botella guarda una historia esperando ser tuya.",
+		"Descubre fragancias que trascienden lo ordinario. Cada botella guarda una historia esperando ser tuya.",
 	badge1: "✦ Variedad",
 	badge2: "✦ Calidad",
 };
@@ -43,7 +43,6 @@ const Hero = () => {
 
 	const perfumes = perfumesData?.getProducts || [];
 
-	// Datos del hero: los de la tienda o los defaults
 	const storeName = store?.storeName ?? "Parfums";
 	const tagline = store?.heroTagline || DEFAULTS.tagline;
 	const description = store?.heroDescription || DEFAULTS.description;

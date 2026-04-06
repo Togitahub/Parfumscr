@@ -2,44 +2,7 @@ import { BsInstagram, BsWhatsapp, BsHeart, BsFacebook } from "react-icons/bs";
 
 import { useStore } from "../../hooks/StoreContext";
 
-// ── Ornamental divider ────────────────────────────────────────────────────────
-
-export const OrnamentalDivider = () => (
-	<div className="flex items-center gap-3 opacity-20">
-		<div className="flex-1 h-px bg-first" />
-		<svg width="28" height="10" viewBox="0 0 28 10" fill="none">
-			<path
-				d="M14 1 L18 5 L14 9 L10 5 Z"
-				stroke="var(--color-second)"
-				strokeWidth="0.8"
-				fill="none"
-			/>
-			<circle cx="3" cy="5" r="1.5" fill="var(--color-second)" opacity="0.6" />
-			<circle cx="25" cy="5" r="1.5" fill="var(--color-second)" opacity="0.6" />
-			<line
-				x1="6"
-				y1="5"
-				x2="9"
-				y2="5"
-				stroke="var(--color-second)"
-				strokeWidth="0.6"
-				opacity="0.5"
-			/>
-			<line
-				x1="19"
-				y1="5"
-				x2="22"
-				y2="5"
-				stroke="var(--color-second)"
-				strokeWidth="0.6"
-				opacity="0.5"
-			/>
-		</svg>
-		<div className="flex-1 h-px bg-first" />
-	</div>
-);
-
-// ── Footer ────────────────────────────────────────────────────────────────────
+import OrnamentalDivider from "./OrnamentalDivider";
 
 const Footer = () => {
 	const { store } = useStore();
@@ -63,8 +26,6 @@ const Footer = () => {
 	];
 
 	const year = new Date().getFullYear();
-
-	if (!store) return null;
 
 	return (
 		<footer className="relative overflow-hidden border-t border-first/8">
@@ -93,7 +54,7 @@ const Footer = () => {
 							className="text-2xl font-light tracking-[0.18em] text-first"
 							style={{ fontFamily: "'Cormorant Garamond', serif" }}
 						>
-							{store?.storeName}
+							{store ? store?.storeName : "Parfumscr"}
 						</span>
 						<span
 							className="text-[9px] tracking-[0.3em] uppercase"
@@ -103,7 +64,9 @@ const Footer = () => {
 								fontFamily: "'Cinzel', serif",
 							}}
 						>
-							Fragancias Originales
+							{store
+								? "Fragancias Originales"
+								: "Sube de nivel tu tienda de perfumes"}
 						</span>
 					</div>
 
@@ -117,24 +80,28 @@ const Footer = () => {
 							fontStyle: "italic",
 						}}
 					>
-						{store?.heroDescription}
+						{store
+							? store?.heroDescription
+							: "Una plataforma creada para ayudar a las tiendas de perfumes a crecer y llegar a más clientes."}
 					</p>
 
 					{/* Social icons */}
-					<div className="flex items-center gap-3 mt-1">
-						{SOCIAL.map(({ icon, label, href }) => (
-							<a
-								key={label}
-								href={href}
-								aria-label={label}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="w-9 h-9 rounded-full border border-first/10 flex items-center justify-center transition-all duration-300 hover:border-second/40 hover:text-second text-first/40 hover:shadow-[0_0_12px_color-mix(in_srgb,var(--color-second)_20%,transparent)]"
-							>
-								{icon}
-							</a>
-						))}
-					</div>
+					{store && (
+						<div className="flex items-center gap-3 mt-1">
+							{SOCIAL.map(({ icon, label, href }) => (
+								<a
+									key={label}
+									href={href}
+									aria-label={label}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="w-9 h-9 rounded-full border border-first/10 flex items-center justify-center transition-all duration-300 hover:border-second/40 hover:text-second text-first/40 hover:shadow-[0_0_12px_color-mix(in_srgb,var(--color-second)_20%,transparent)]"
+								>
+									{icon}
+								</a>
+							))}
+						</div>
+					)}
 				</div>
 
 				{/* ── Ornamental divider ── */}
@@ -146,7 +113,7 @@ const Footer = () => {
 						className="text-xs text-first/25 tracking-widest"
 						style={{ fontFamily: "'Cinzel', serif" }}
 					>
-						© {year} Parfums — Todos los derechos reservados
+						© {year} Parfumscr — Todos los derechos reservados
 					</p>
 
 					<p
