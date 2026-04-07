@@ -34,7 +34,7 @@ const App = () => {
 			<ScrollToTop />
 			{store ? <NavBar /> : <LandingNavbar />}
 
-			<main className="flex-1">
+			<main className="flex-1 px-4 py-8 md:px-8 lg:px-12">
 				<Routes>
 					{/* ── Públicas ── */}
 					<Route path="/" element={isAdmin ? <AdminView /> : <HomeView />} />

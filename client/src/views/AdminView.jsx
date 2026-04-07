@@ -107,7 +107,7 @@ import StoreCatalog from "../components/forms/StoreCatalog";
 import OrderList from "../lists/OrderList";
 
 // Views
-import POSView from "./POSView";
+import POSView from "./POSview";
 import ExpensesView from "./ExpensesView";
 import DashboardView from "./DashboardView";
 
