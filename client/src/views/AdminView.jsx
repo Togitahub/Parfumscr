@@ -125,7 +125,9 @@ const buildAdminTabs = (myStoreExists) => [
 		? [{ key: "catalog", label: "Mi catálogo", icon: <BsBoxSeam /> }]
 		: []),
 	{ key: "products", label: "Productos", icon: <BsBoxSeam /> },
-	{ key: "expenses", label: "Gastos", icon: <BsWallet2 /> },
+	...(myStoreExists && myStoreExists?.posEnabled
+		? [{ key: "expenses", label: "Gastos", icon: <BsWallet2 /> }]
+		: []),
 	{ key: "dashboard", label: "Dashboard", icon: <BsGraphUp /> },
 	{ key: "orders", label: "Órdenes", icon: <BsReceipt /> },
 	{ key: "store", label: "Mi tienda", icon: <BsShop /> },

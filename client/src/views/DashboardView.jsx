@@ -9,15 +9,19 @@ import {
 	BsPercent,
 	BsEye,
 	BsHeart,
-	BsBoxSeam,
 	BsArrowLeft,
 	BsWallet2,
 	BsGraphUp,
 } from "react-icons/bs";
 
+import { useAuth } from "../hooks/AuthContext";
 import { useStore } from "../hooks/StoreContext";
 
-import { GET_DASHBOARD_STATS } from "../graphql/store/StoreQueries";
+import {
+	GET_DASHBOARD_STATS,
+	GET_MY_STORE,
+} from "../graphql/store/StoreQueries";
+
 import { GET_EXPENSE_SUMMARY } from "../graphql/expense/ExpenseQueries";
 
 const formatPrice = (price) =>
@@ -139,8 +143,19 @@ const RankSection = ({ title, icon, items = [], loading }) => (
 
 const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 	const navigate = useNavigate();
+
+	const { user } = useAuth();
 	const { store } = useStore();
+
 	const [period, setPeriod] = useState("month");
+
+	const isSuperAdmin = user?.role === "SUPER_ADMIN";
+
+	const { data: myStoreData } = useQuery(GET_MY_STORE, {
+		skip: isSuperAdmin,
+	});
+
+	const myStore = myStoreData?.getMyStore;
 
 	const resolvedStoreId = propStoreId ?? store?.storeId;
 
@@ -238,7 +253,9 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 				</div>
 
 				{/* Stat cards */}
-				<div className="grid lg:grid-cols-3 gap-4">
+				<div
+					className={`grid lg:grid-cols-${myStore?.posEnabled ? "3" : "4"} gap-4`}
+				>
 					<StatCard
 						icon={<BsCart3 className="w-4 h-4" />}
 						label="Solicitudes"
@@ -263,22 +280,28 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 						value={loading ? "—" : formatPrice(stats?.confirmedRevenue ?? 0)}
 						sub="Solo órdenes completadas"
 					/>
-					<StatCard
-						icon={<BsWallet2 className="w-4 h-4" />}
-						label="Total gastos"
-						value={
-							loading || loadingExpenses ? "—" : formatPrice(totalExpenses)
-						}
-						sub="Del período seleccionado"
-						color="error"
-					/>
-					<StatCard
-						icon={<BsGraphUp className="w-4 h-4" />}
-						label="Utilidad neta"
-						value={loading || loadingExpenses ? "—" : formatPrice(netProfit)}
-						sub="Ingresos − Gastos"
-						color={netProfit >= 0 ? "success" : "error"}
-					/>
+					{myStore?.posEnabled && (
+						<>
+							<StatCard
+								icon={<BsWallet2 className="w-4 h-4" />}
+								label="Total gastos"
+								value={
+									loading || loadingExpenses ? "—" : formatPrice(totalExpenses)
+								}
+								sub="Del período seleccionado"
+								color="error"
+							/>
+							<StatCard
+								icon={<BsGraphUp className="w-4 h-4" />}
+								label="Utilidad neta"
+								value={
+									loading || loadingExpenses ? "—" : formatPrice(netProfit)
+								}
+								sub="Ingresos − Gastos"
+								color={netProfit >= 0 ? "success" : "error"}
+							/>
+						</>
+					)}
 				</div>
 
 				{/* Rankings */}
