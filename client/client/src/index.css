@@ -1,0 +1,539 @@
+@import "tailwindcss";
+
+.dark-theme {
+	--color-main: black;
+	--color-first: white;
+	--color-second: gold;
+}
+
+.light-theme {
+	--color-main: white;
+	--color-first: black;
+	--color-second: gold;
+}
+
+@theme {
+	--color-main: var(--color-main);
+	--color-first: var(--color-first);
+	--color-second: var(--color-second);
+
+	--color-error: #dd1616;
+	--color-success: #16dd16;
+}
+
+body {
+	background-color: var(--color-main);
+	color: var(--color-first);
+}
+
+/* KeyFrames */
+
+@keyframes navDropIn {
+	from {
+		opacity: 0;
+		transform: translateY(-6px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes fadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(24px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+@keyframes shimmer {
+	0% {
+		background-position: -200% center;
+	}
+	100% {
+		background-position: 200% center;
+	}
+}
+@keyframes gradientShift {
+	0% {
+		opacity: 0.6;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.6;
+	}
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+
+.hero-display {
+	font-family: "Cormorant Garamond", Georgia, serif;
+	perspective: 600px;
+}
+.hero-caps {
+	font-family: "Cinzel", serif;
+}
+.hero-italic {
+	font-family: "Cormorant", Georgia, serif;
+	font-style: italic;
+}
+.hero-body {
+	font-family: "Cormorant Garamond", Georgia, serif;
+	font-size: 1.08rem;
+	font-weight: 300;
+}
+.hero-eyebrow {
+	font-family: "Cinzel", serif;
+	font-size: 0.75rem;
+	letter-spacing: 0.3em;
+	color: var(--color-second);
+	opacity: 0.8;
+}
+.hero-stat-value {
+	font-family: "Cinzel", serif;
+	font-size: 1.1rem;
+	letter-spacing: 0.05em;
+	color: var(--color-second);
+}
+.hero-stat-label {
+	font-family: "Cinzel", serif;
+	font-size: 0.7rem;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--color-first) 35%, transparent);
+}
+.hero-cta-primary {
+	font-family: "Cinzel", serif;
+	font-size: 0.75rem;
+	letter-spacing: 0.15em;
+	background: var(--color-second);
+	color: var(--color-main);
+	border: 1px solid var(--color-second);
+	padding: 0.875rem 2rem;
+	border-radius: 9999px;
+	font-weight: 500;
+	position: relative;
+	overflow: hidden;
+	transition: color 0.5s;
+}
+.hero-cta-primary::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: color-mix(in srgb, var(--color-first) 90%, var(--color-second));
+	transform: translateX(-100%);
+	transition: transform 0.5s ease;
+}
+.hero-cta-primary:hover::after {
+	transform: translateX(0);
+}
+.hero-cta-primary span {
+	position: relative;
+	z-index: 1;
+	text-transform: uppercase;
+	letter-spacing: 0.15em;
+}
+.hero-cta-secondary {
+	font-family: "Cinzel", serif;
+	font-size: 0.7rem;
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--color-first) 50%, transparent);
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	transition: color 0.3s;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+.hero-cta-secondary:hover {
+	color: var(--color-first);
+}
+.hero-cta-secondary .hero-arrow {
+	font-size: 1rem;
+	display: inline-block;
+	transition: transform 0.3s;
+}
+.hero-cta-secondary:hover .hero-arrow {
+	transform: translateX(4px);
+}
+.hero-scroll-indicator {
+	position: absolute;
+	bottom: 2rem;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	animation: heroFadeUp 1s ease both;
+	animation-delay: 1600ms;
+}
+.hero-scroll-label {
+	font-family: "Cinzel", serif;
+	font-size: 0.6rem;
+	letter-spacing: 0.25em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--color-first) 30%, transparent);
+}
+.hero-scroll-line {
+	width: 1px;
+	height: 2.5rem;
+	position: relative;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--color-first) 15%, transparent);
+}
+.hero-scroll-line::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 40%;
+	background: var(--color-second);
+	opacity: 0.7;
+	animation: heroScroll 2s ease-in-out infinite;
+}
+.hero-badge {
+	padding: 0.375rem 0.75rem;
+	border-radius: 9999px;
+	font-family: "Cinzel", serif;
+	font-size: 0.62rem;
+	letter-spacing: 0.1em;
+	backdrop-filter: blur(8px);
+}
+.hero-badge--accent {
+	background: color-mix(in srgb, var(--color-second) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-second) 30%, transparent);
+	color: var(--color-second);
+}
+.hero-badge--neutral {
+	background: color-mix(in srgb, var(--color-first) 6%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-first) 14%, transparent);
+	color: color-mix(in srgb, var(--color-first) 60%, transparent);
+}
+.hero-decor-line {
+	height: 1px;
+	background: linear-gradient(
+		to right,
+		transparent,
+		var(--color-first),
+		transparent
+	);
+	opacity: 0;
+	transform: scaleX(0);
+	animation: heroLineIn 1.2s ease both;
+}
+
+@keyframes heroLetterIn {
+	from {
+		opacity: 0;
+		transform: translateY(32px) rotateX(-20deg);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) rotateX(0deg);
+	}
+}
+@keyframes heroLineIn {
+	from {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+	to {
+		transform: scaleX(1);
+		opacity: 0.3;
+	}
+}
+@keyframes heroFadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes heroOrbFloat {
+	0%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-18px) scale(1.04);
+	}
+}
+@keyframes heroOrbFloat2 {
+	0%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(14px) scale(0.97);
+	}
+}
+@keyframes heroRotateSlow {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes heroScroll {
+	0%,
+	100% {
+		transform: translateY(0);
+		opacity: 0.5;
+	}
+	50% {
+		transform: translateY(6px);
+		opacity: 1;
+	}
+}
+
+/* ── ProductCard ─────────────────────────────────────────────────────────── */
+
+.pc-root {
+	background: var(--color-main);
+	border: 1px solid color-mix(in srgb, var(--color-first) 8%, transparent);
+	transition:
+		transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+		box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+		border-color 0.3s ease;
+}
+.pc-root:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 24px 64px -16px
+		color-mix(in srgb, var(--color-first) 20%, transparent);
+	border-color: color-mix(in srgb, var(--color-first) 18%, transparent);
+}
+
+.pc-img {
+	transition:
+		transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+		opacity 0.4s ease;
+}
+.pc-img--loaded {
+	opacity: 1;
+}
+.pc-root:hover .pc-img {
+	transform: scale(1.06);
+}
+
+.pc-img-gradient {
+	background: linear-gradient(to top, var(--color-main) 0%, transparent 100%);
+	opacity: 0;
+	transition: opacity 0.4s ease;
+}
+.pc-root:hover .pc-img-gradient {
+	opacity: 0.55;
+}
+
+.pc-shimmer {
+	background: linear-gradient(
+		105deg,
+		color-mix(in srgb, var(--color-first) 4%, transparent) 0%,
+		color-mix(in srgb, var(--color-first) 9%, transparent) 40%,
+		color-mix(in srgb, var(--color-first) 4%, transparent) 100%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.pc-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 9px;
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	line-height: 1.6;
+	backdrop-filter: blur(8px);
+}
+.pc-pill--decant {
+	background: color-mix(in srgb, var(--color-second) 50%, transparent);
+	color: var(--color-main);
+	border: 1px solid color-mix(in srgb, var(--color-second) 30%, transparent);
+}
+.pc-pill--discount {
+	background: color-mix(in srgb, var(--color-succes) 18%, transparent);
+	color: var(--color-success);
+	border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+.pc-pill--stock {
+	background: color-mix(in srgb, var(--color-first) 8%, transparent);
+	color: color-mix(in srgb, var(--color-first) 40%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-first) 10%, transparent);
+}
+
+.pc-fav {
+	transition:
+		transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+		background 0.2s,
+		border-color 0.2s,
+		color 0.2s;
+}
+.pc-fav:hover {
+	transform: scale(1.15);
+}
+.pc-fav:active {
+	transform: scale(0.9);
+}
+.pc-fav--idle {
+	background: color-mix(in srgb, var(--color-main) 50%, transparent);
+	border-color: color-mix(in srgb, var(--color-first) 14%, transparent);
+	color: color-mix(in srgb, var(--color-first) 40%, transparent);
+}
+.pc-fav--idle:hover {
+	color: var(--color-error);
+	border-color: color-mix(in srgb, var(--color-error) 35%, transparent);
+	background: color-mix(in srgb, var(--color-error) 10%, transparent);
+}
+.pc-fav--active {
+	background: color-mix(in srgb, var(--color-error) 18%, transparent);
+	border-color: color-mix(in srgb, var(--color-error) 40%, transparent);
+	color: var(--color-error);
+}
+
+.pc-cart-bar {
+	transform: translateY(100%);
+	transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.pc-root:hover .pc-cart-bar {
+	transform: translateY(0);
+}
+
+.pc-brand {
+	color: var(--color-second);
+}
+
+.pc-name {
+	transition: color 0.25s ease;
+}
+.pc-root:hover .pc-name {
+	color: color-mix(in srgb, var(--color-second) 85%, var(--color-first));
+}
+
+.pc-note-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 7px;
+	border-radius: 4px;
+	font-size: 10px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	color: color-mix(in srgb, var(--color-first) 42%, transparent);
+	background: color-mix(in srgb, var(--color-first) 5%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-first) 9%, transparent);
+	transition:
+		color 0.2s,
+		background 0.2s,
+		border-color 0.2s;
+}
+.pc-note-chip:hover {
+	color: var(--color-second);
+	background: color-mix(in srgb, var(--color-second) 10%, transparent);
+	border-color: color-mix(in srgb, var(--color-second) 25%, transparent);
+}
+.pc-note-chip--more {
+	color: color-mix(in srgb, var(--color-first) 28%, transparent);
+}
+
+.pc-arrow {
+	color: color-mix(in srgb, var(--color-first) 28%, transparent);
+	transition:
+		color 0.25s,
+		border-color 0.25s,
+		background 0.25s,
+		transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pc-root:hover .pc-arrow {
+	color: var(--color-second);
+	border-color: color-mix(in srgb, var(--color-second) 40%, transparent);
+	background: color-mix(in srgb, var(--color-second) 8%, transparent);
+	transform: rotate(12deg) scale(1.08);
+}
+
+/* ── Shimmer skeleton ── */
+
+.shimmer {
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-first) 6%, transparent) 25%,
+		color-mix(in srgb, var(--color-first) 12%, transparent) 50%,
+		color-mix(in srgb, var(--color-first) 6%, transparent) 75%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.6s infinite linear;
+}
+
+/* ── NavBar ──────────────────────────────────────────────────────────────── */
+
+/* Fondo del nav al hacer scroll */
+.nav-scrolled {
+	background: color-mix(in srgb, var(--color-main) 85%, transparent);
+	backdrop-filter: blur(16px) saturate(1.4);
+	-webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* Logo mark */
+.nav-logo-mark {
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-second) 30%, transparent);
+}
+
+/* Logo text */
+.nav-logo-text {
+	letter-spacing: -0.03em;
+}
+
+/* Dropdown panel */
+.nav-dropdown {
+	box-shadow:
+		0 4px 6px -1px color-mix(in srgb, var(--color-first) 4%, transparent),
+		0 16px 40px -8px color-mix(in srgb, var(--color-first) 12%, transparent);
+	animation: navDropIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Scroll personalizado para el panel de acordes */
+.nav-notes-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--color-first) 15%, transparent)
+		transparent;
+}
+.nav-notes-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+.nav-notes-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+.nav-notes-scroll::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--color-first) 15%, transparent);
+	border-radius: 2px;
+}

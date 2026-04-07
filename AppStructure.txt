@@ -17,14 +17,20 @@ client/
             design/
                 Footer
                 Hero
+                LandingNavbar
                 NavBar
+                OrnamentalDivider
             forms/
+                DecantForm
+                ExpenseForm
                 LoginForm
                 NameEntityForm
                 ProductForm
                 PurchaseForm
                 RegisterForm
                 ResetPasswordForm
+                StoreCatalog
+                StoreForm
                 UserForm
             functional/
                 Filters
@@ -49,6 +55,9 @@ client/
             category/
                 CategoryMutations
                 CategoryQueries
+            expense/
+                ExpenseMutations
+                ExpenseQueries
             favorites/
                 FavoritesMutations
                 FavoritesQueries
@@ -64,14 +73,20 @@ client/
             segment/
                 SegmentMutations
                 SegmentQueries
+            store/
+                StoreMutations
+                StoreQueries
             user/
                 UserMutations
                 UserQueries
         hooks/
             AuthContext
+            CartContext
             FilterContext
+            StoreContext
             ThemeContext
             ToastContext
+            useGuestCart
         lists/
             OrderList
             ProductList
@@ -80,19 +95,24 @@ client/
             ProtectedRoute
             ScrollToTop
         utils/
+            ImageUtils
             TokenUtils.js
         views/
-            AboutView
             AdminView
             AuthView
-            EntityView
-            FavoritesView
             CartView
+            DashboardView
+            EntityView
+            ExpensesView
+            FavoritesView
             HomeView
             NotFoundView
             OrdersView
             OrderView
+            POSview
             ProductView
+            ProfileView
+            StoreView
         App.jsx
         index.css
         main.jsx
@@ -111,6 +131,7 @@ server/
             brandDefs
             cartDefs
             categoryDefs
+            expenseDefs
             favoritesDefs
             noteDefs
             orderDefs
@@ -123,6 +144,7 @@ server/
             brandResolvers
             cartResolvers
             categoryResolvers
+            expenseResolvers
             favoritesResolvers
             noteResolvers
             orderResolvers
@@ -135,6 +157,7 @@ server/
         Brand
         Cart
         Category
+        Expense
         Favorites
         Note
         Order
@@ -145,5 +168,3 @@ server/
         User
     .env
     index.js
-
-    Por favor, quiero que cuando se ponga el status de una orden como completado, el stock se descuente en los productos de la tienda, es decir, que los productos que se vendieron en esa orden se descuenten del stock.
