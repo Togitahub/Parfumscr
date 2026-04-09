@@ -31,8 +31,18 @@ const expenseDefs = gql`
 	}
 
 	type Query {
-		getExpenses(storeId: ID!, period: String): [Expense!]!
-		getExpenseSummary(storeId: ID!, period: String): ExpenseSummary!
+		getExpenses(
+			storeId: ID!
+			period: String
+			startDate: String
+			endDate: String
+		): [Expense!]!
+		getExpenseSummary(
+			storeId: ID!
+			period: String
+			startDate: String
+			endDate: String
+		): ExpenseSummary!
 	}
 
 	type Mutation {

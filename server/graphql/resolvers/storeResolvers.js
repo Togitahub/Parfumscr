@@ -3,6 +3,7 @@ import Order from "../../models/Order.js";
 import StoreProduct from "../../models/StoreProduct.js";
 
 import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
+import { getDateFilter } from "./expenseResolvers.js";
 
 const PRODUCT_POPULATE = {
 	path: "product",
@@ -37,25 +38,19 @@ const storeResolvers = {
 			return await Store.find({ active: true });
 		},
 
-		getDashboardStats: async (_, { storeId, period }, { user }) => {
+		getDashboardStats: async (
+			_,
+			{ storeId, period, startDate, endDate },
+			{ user },
+		) => {
 			if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role))
 				throw new Error("Unauthorized");
 
-			const now = new Date();
-			let startDate = null;
+			const dateFilter = getDateFilter(period, startDate, endDate);
+			const orderFilter = { store: storeId };
+			if (dateFilter) orderFilter.createdAt = dateFilter;
 
-			if (period === "week") {
-				startDate = new Date(now);
-				startDate.setDate(now.getDate() - 7);
-			} else if (period === "month") {
-				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-			} else if (period === "year") {
-				startDate = new Date(now.getFullYear(), 0, 1);
-			}
-
-			const dateFilter = startDate ? { createdAt: { $gte: startDate } } : {};
-
-			const orders = await Order.find({ store: storeId, ...dateFilter });
+			const orders = await Order.find(orderFilter);
 
 			const totalRequests = orders.length;
 			const completed = orders.filter((o) => o.status === "COMPLETADO");
@@ -76,7 +71,6 @@ const storeResolvers = {
 				}
 			}
 
-			// Top vistos: desde StoreProduct.views
 			const storeProducts = await StoreProduct.find({
 				store: storeId,
 				active: true,
@@ -101,7 +95,6 @@ const storeResolvers = {
 				})
 				.filter(Boolean);
 
-			// Top favoriteados: desde Favorites
 			const Favorites = (await import("../../models/Favorites.js")).default;
 			const allFavs = await Favorites.find();
 			const favCount = {};
@@ -194,7 +187,7 @@ const storeResolvers = {
 				throw new Error("Product already in store");
 			}
 
-			if (discount !== undefined) existing.discount = discount;
+			if (discount !== undefined && existing) existing.discount = discount;
 
 			const storeProduct = await StoreProduct.create({
 				store: store._id,
@@ -271,7 +264,7 @@ const storeResolvers = {
 			return await storeProduct.populate(PRODUCT_POPULATE);
 		},
 
-		registerProductView: async (_, { productId }, { user: ctxUser }) => {
+		registerProductView: async (_, { productId }) => {
 			await StoreProduct.findOneAndUpdate(
 				{ product: productId },
 				{ $inc: { views: 1 } },

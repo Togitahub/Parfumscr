@@ -23,16 +23,10 @@ import {
 } from "../graphql/store/StoreQueries";
 
 import { GET_EXPENSE_SUMMARY } from "../graphql/expense/ExpenseQueries";
+import PeriodSelector from "../components/common/PeriodSelector";
 
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
-
-const PERIODS = [
-	{ key: "week", label: "Esta semana" },
-	{ key: "month", label: "Este mes" },
-	{ key: "year", label: "Este año" },
-	{ key: "all", label: "Todo" },
-];
 
 const StatCard = ({ icon, label, value, sub, color = "second" }) => (
 	<div
@@ -147,33 +141,45 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 	const { user } = useAuth();
 	const { store } = useStore();
 
-	const [period, setPeriod] = useState("month");
-
 	const isSuperAdmin = user?.role === "SUPER_ADMIN";
+
+	// Unified period state
+	const [periodConfig, setPeriodConfig] = useState({
+		period: "day",
+		startDate: "",
+		endDate: "",
+	});
 
 	const { data: myStoreData } = useQuery(GET_MY_STORE, {
 		skip: isSuperAdmin,
 	});
 
 	const myStore = myStoreData?.getMyStore;
-
 	const resolvedStoreId = propStoreId ?? store?.storeId;
 
+	// Build query variables
+	const queryVariables = {
+		storeId: resolvedStoreId,
+		period:
+			periodConfig.period === "all"
+				? null
+				: periodConfig.period === "custom"
+					? "custom"
+					: periodConfig.period,
+		...(periodConfig.period === "custom"
+			? { startDate: periodConfig.startDate, endDate: periodConfig.endDate }
+			: {}),
+	};
+
 	const { data, loading } = useQuery(GET_DASHBOARD_STATS, {
-		variables: {
-			storeId: resolvedStoreId,
-			period: period === "all" ? null : period,
-		},
-		skip: !store?.storeId,
+		variables: queryVariables,
+		skip: !resolvedStoreId,
 	});
 
 	const { data: expenseSummaryData, loading: loadingExpenses } = useQuery(
 		GET_EXPENSE_SUMMARY,
 		{
-			variables: {
-				storeId: resolvedStoreId,
-				period: period === "all" ? null : period,
-			},
+			variables: queryVariables,
 			skip: !resolvedStoreId,
 		},
 	);
@@ -205,7 +211,7 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 						</button>
 					)}
 
-					<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+					<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 relative">
 						<div className="flex flex-col gap-1">
 							<p
 								className="text-[10px] font-semibold uppercase tracking-[0.3em]"
@@ -233,28 +239,18 @@ const DashboardView = ({ embedded = false, storeId: propStoreId }) => {
 						</div>
 
 						{/* Period selector */}
-						<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main overflow-x-auto max-w-full scrollbar-none">
-							{PERIODS.map((p) => (
-								<button
-									key={p.key}
-									onClick={() => setPeriod(p.key)}
-									className={[
-										"px-3 h-8 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer whitespace-nowrap",
-										period === p.key
-											? "bg-second text-main shadow-sm"
-											: "text-first/40 hover:text-first/70",
-									].join(" ")}
-								>
-									{p.label}
-								</button>
-							))}
-						</div>
+						<PeriodSelector
+							period={periodConfig.period}
+							startDate={periodConfig.startDate}
+							endDate={periodConfig.endDate}
+							onChange={setPeriodConfig}
+						/>
 					</div>
 				</div>
 
 				{/* Stat cards */}
 				<div
-					className={`grid lg:grid-cols-${myStore?.posEnabled ? "3" : "4"} gap-4`}
+					className={`grid lg:grid-cols-${myStore?.posEnabled ? "3" : "4"} gap-4 relative z-[-1]`}
 				>
 					<StatCard
 						icon={<BsCart3 className="w-4 h-4" />}

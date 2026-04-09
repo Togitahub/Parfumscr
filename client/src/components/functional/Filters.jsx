@@ -201,21 +201,23 @@ const Filters = ({
 				{/* Marca — oculto si locked.brandId */}
 				{!locked.brandId && brands.length > 0 && (
 					<Section title="Marca" defaultOpen={false}>
-						<RadioOption
-							label="Todas"
-							active={!filters.brandId}
-							onClick={() => setFilter("brandId", "")}
-						/>
-						{brands.map((b) => (
+						<div className="h-50 overflow-y-auto nav-notes-scroll">
 							<RadioOption
-								key={b.id}
-								label={b.name}
-								active={filters.brandId === b.id}
-								onClick={() =>
-									setFilter("brandId", filters.brandId === b.id ? "" : b.id)
-								}
+								label="Todas"
+								active={!filters.brandId}
+								onClick={() => setFilter("brandId", "")}
 							/>
-						))}
+							{brands.map((b) => (
+								<RadioOption
+									key={b.id}
+									label={b.name}
+									active={filters.brandId === b.id}
+									onClick={() =>
+										setFilter("brandId", filters.brandId === b.id ? "" : b.id)
+									}
+								/>
+							))}
+						</div>
 					</Section>
 				)}
 
@@ -280,8 +282,8 @@ const Filters = ({
 						{filters.noteIds.length > 0 && (
 							<p className="text-xs text-first/35 mt-1">
 								Mostrando perfumes con{" "}
-								<span className="text-second font-medium">todos</span> los acordes
-								seleccionadas
+								<span className="text-second font-medium">todos</span> los
+								acordes seleccionadas
 							</p>
 						)}
 					</Section>

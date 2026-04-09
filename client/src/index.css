@@ -21,6 +21,25 @@
 	--color-success: #16dd16;
 }
 
+/* 1. Ancho de la barra */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-main);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-first);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-second);
+}
+
 body {
 	background-color: var(--color-main);
 	color: var(--color-first);

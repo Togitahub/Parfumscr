@@ -5,7 +5,7 @@ import brandResolvers from "./brandResolvers.js";
 import productResolvers from "./productResolvers.js";
 import categoryResolvers from "./categoryResolvers.js";
 import segmentResolvers from "./segmentResolvers.js";
-import orderResolvers from "./orderResolvers.js";
+import orderResolvers from "./orderResolversV2.js";
 import favoritesResolvers from "./favoritesResolvers.js";
 import cartResolvers from "./cartResolvers.js";
 import noteResolvers from "./noteResolvers.js";

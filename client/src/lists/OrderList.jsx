@@ -13,7 +13,7 @@
 
 import { useState, useMemo } from "react";
 import { BsSearch, BsX, BsReceipt } from "react-icons/bs";
-import OrderCard from "../components/cards/OrderCard";
+import OrderCard from "../components/cards/OrderCardV2";
 import EmptyState from "../components/interface/EmptyState";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -79,8 +79,6 @@ const OrderList = ({
 	orders = [],
 	loading = false,
 	variant = "default",
-	onStatusChange,
-	showStatusChange = false,
 	onDelete,
 	className = "",
 }) => {
@@ -220,7 +218,6 @@ const OrderList = ({
 							<OrderCard
 								order={order}
 								variant={isCompact ? "compact" : "default"}
-								onStatusChange={showStatusChange ? onStatusChange : undefined}
 								onDelete={onDelete}
 							/>
 						</AnimatedItem>

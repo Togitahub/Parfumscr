@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -25,6 +26,7 @@ import { Spinner } from "../components/interface/LoadingUi";
 import EmptyState from "../components/interface/EmptyState";
 import Badge from "../components/common/Badge";
 import ExpenseForm from "../components/forms/ExpenseForm";
+import PeriodSelector from "../components/common/PeriodSelector";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -35,13 +37,6 @@ const CATEGORY_COLORS = {
 	Operativo: { badge: "neutral", emoji: "⚙️" },
 	Otro: { badge: "neutral", emoji: "📝" },
 };
-
-const PERIODS = [
-	{ key: "week", label: "Esta semana" },
-	{ key: "month", label: "Este mes" },
-	{ key: "year", label: "Este año" },
-	{ key: "all", label: "Todo" },
-];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -126,7 +121,6 @@ const ExpenseRow = ({ expense, index, onEdit, onDelete }) => {
 				animationDelay: `${Math.min(index * 40, 300)}ms`,
 			}}
 		>
-			{/* Category emoji */}
 			<div
 				className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg"
 				style={{
@@ -138,7 +132,6 @@ const ExpenseRow = ({ expense, index, onEdit, onDelete }) => {
 				{cfg.emoji}
 			</div>
 
-			{/* Info */}
 			<div className="flex-1 min-w-0">
 				<p className="text-sm font-medium text-first truncate">
 					{expense.description}
@@ -159,7 +152,6 @@ const ExpenseRow = ({ expense, index, onEdit, onDelete }) => {
 				)}
 			</div>
 
-			{/* Amount */}
 			<span
 				className="text-base font-bold text-first tabular-nums shrink-0"
 				style={{ fontFamily: "'Cinzel', serif" }}
@@ -167,7 +159,6 @@ const ExpenseRow = ({ expense, index, onEdit, onDelete }) => {
 				{formatPrice(expense.amount)}
 			</span>
 
-			{/* Actions */}
 			<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
 				<Button
 					iconOnly
@@ -196,46 +187,56 @@ const ExpenseRow = ({ expense, index, onEdit, onDelete }) => {
 const ExpensesView = ({ storeId }) => {
 	const toast = useToast();
 
-	const [period, setPeriod] = useState("month");
+	// Period state unified
+	const [periodConfig, setPeriodConfig] = useState({
+		period: "day",
+		startDate: "",
+		endDate: "",
+	});
+
 	const [search, setSearch] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState("ALL");
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editExpense, setEditExpense] = useState(null);
 	const [deleteTarget, setDeleteTarget] = useState(null);
 
-	const variables = { storeId, period: period === "all" ? null : period };
+	// Variables for queries — only pass startDate/endDate for custom period
+	const queryVariables = {
+		storeId,
+		period: periodConfig.period === "all" ? null : periodConfig.period,
+		...(periodConfig.period === "custom"
+			? { startDate: periodConfig.startDate, endDate: periodConfig.endDate }
+			: {}),
+	};
 
 	const { data: expensesData, loading: loadingExpenses } = useQuery(
 		GET_EXPENSES,
-		{ variables, skip: !storeId },
+		{ variables: queryVariables, skip: !storeId },
 	);
 
 	const { data: summaryData, loading: loadingSummary } = useQuery(
 		GET_EXPENSE_SUMMARY,
-		{ variables, skip: !storeId },
+		{ variables: queryVariables, skip: !storeId },
 	);
 
 	const [deleteExpense, { loading: deleting }] = useMutation(DELETE_EXPENSE, {
 		refetchQueries: [
-			{ query: GET_EXPENSES, variables },
-			{ query: GET_EXPENSE_SUMMARY, variables },
+			{ query: GET_EXPENSES, variables: queryVariables },
+			{ query: GET_EXPENSE_SUMMARY, variables: queryVariables },
 		],
 	});
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const expenses = expensesData?.getExpenses ?? [];
 	const summary = summaryData?.getExpenseSummary;
 	const totalExpenses = summary?.totalExpenses ?? 0;
 	const byCategory = summary?.byCategory ?? [];
 	const maxCategoryTotal = Math.max(...byCategory.map((c) => c.total), 1);
 
-	// Unique categories in current data
 	const availableCategories = useMemo(() => {
 		const cats = [...new Set(expenses.map((e) => e.category))];
 		return cats;
 	}, [expenses]);
 
-	// Filter expenses
 	const filtered = useMemo(() => {
 		let result = expenses;
 		if (search.trim()) {
@@ -253,7 +254,6 @@ const ExpensesView = ({ storeId }) => {
 		return result;
 	}, [expenses, search, categoryFilter]);
 
-	// Handlers
 	const handleEdit = (expense) => {
 		setEditExpense(expense);
 		setModalOpen(true);
@@ -293,22 +293,12 @@ const ExpensesView = ({ storeId }) => {
 
 				<div className="flex items-center gap-2 flex-wrap">
 					{/* Period selector */}
-					<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main">
-						{PERIODS.map((p) => (
-							<button
-								key={p.key}
-								onClick={() => setPeriod(p.key)}
-								className={[
-									"px-3 h-8 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer whitespace-nowrap",
-									period === p.key
-										? "bg-second text-main shadow-sm"
-										: "text-first/40 hover:text-first/70",
-								].join(" ")}
-							>
-								{p.label}
-							</button>
-						))}
-					</div>
+					<PeriodSelector
+						period={periodConfig.period}
+						startDate={periodConfig.startDate}
+						endDate={periodConfig.endDate}
+						onChange={setPeriodConfig}
+					/>
 
 					<Button
 						size="sm"
@@ -388,7 +378,6 @@ const ExpensesView = ({ storeId }) => {
 
 			{/* ── Filters ── */}
 			<div className="flex flex-col sm:flex-row gap-3">
-				{/* Search */}
 				<div className="relative flex items-center flex-1">
 					<span className="absolute left-3 text-first/35 pointer-events-none">
 						<BsSearch className="w-4 h-4" />
@@ -410,7 +399,6 @@ const ExpensesView = ({ storeId }) => {
 					)}
 				</div>
 
-				{/* Category filter */}
 				{availableCategories.length > 1 && (
 					<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main shrink-0 overflow-x-auto">
 						<button
@@ -467,7 +455,6 @@ const ExpensesView = ({ storeId }) => {
 					className="rounded-2xl border border-first/10 bg-main px-4 overflow-hidden"
 					style={{ animation: "fadeUp 0.4s ease both" }}
 				>
-					{/* List header */}
 					<div className="flex items-center justify-between py-3 border-b border-first/8">
 						<p className="text-xs text-first/35 tabular-nums">
 							{filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
@@ -502,7 +489,7 @@ const ExpensesView = ({ storeId }) => {
 				<ExpenseForm
 					storeId={storeId}
 					expense={editExpense}
-					period={period === "all" ? null : period}
+					period={periodConfig.period === "all" ? null : periodConfig.period}
 					onSuccess={handleModalClose}
 					onCancel={handleModalClose}
 				/>

@@ -4,7 +4,7 @@ import AuthView from "./views/AuthView";
 import HomeView from "./views/HomeView";
 import AdminView from "./views/AdminView";
 import CartView from "./views/CartView";
-import OrderView from "./views/OrderView";
+import OrderView from "./views/OrderViewV2";
 import OrdersView from "./views/OrdersView";
 import ProductView from "./views/ProductView";
 import EntityView from "./views/EntityView";

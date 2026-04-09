@@ -53,7 +53,12 @@ const storeDefs = gql`
 		getMyStore: Store
 		getStoreProducts(storeId: ID!): [StoreProduct]
 		getStores: [Store]
-		getDashboardStats(storeId: ID!, period: String): DashboardStats
+		getDashboardStats(
+			storeId: ID!
+			period: String
+			startDate: String
+			endDate: String
+		): DashboardStats
 	}
 
 	type Mutation {

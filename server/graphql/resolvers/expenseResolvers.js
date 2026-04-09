@@ -1,19 +1,42 @@
 import Expense from "../../models/Expense.js";
 import Store from "../../models/Store.js";
 
-const getDateFilter = (period) => {
+export const getDateFilter = (period) => {
 	const now = new Date();
+
+	if (period === "day") {
+		const start = new Date(now);
+		start.setDate(now.getDate() - 1);
+	}
+
 	if (period === "week") {
 		const start = new Date(now);
 		start.setDate(now.getDate() - 7);
 		return { $gte: start };
 	}
+
 	if (period === "month") {
 		return { $gte: new Date(now.getFullYear(), now.getMonth(), 1) };
 	}
+
 	if (period === "year") {
 		return { $gte: new Date(now.getFullYear(), 0, 1) };
 	}
+
+	if (period === "custom" && startDate && endDate) {
+		const start = new Date(startDate);
+		start.setHours(0, 0, 0, 0);
+		const end = new Date(endDate);
+		end.setHours(23, 59, 59, 999);
+		return { $gte: start, $lte: end };
+	}
+
+	if (period === "custom" && startDate) {
+		const start = new Date(startDate);
+		start.setHours(0, 0, 0, 0);
+		return { $gte: start };
+	}
+
 	return null;
 };
 

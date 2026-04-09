@@ -1,8 +1,18 @@
 import gql from "graphql-tag";
 
 export const GET_EXPENSES = gql`
-	query GetExpenses($storeId: ID!, $period: String) {
-		getExpenses(storeId: $storeId, period: $period) {
+	query GetExpenses(
+		$storeId: ID!
+		$period: String
+		$startDate: String
+		$endDate: String
+	) {
+		getExpenses(
+			storeId: $storeId
+			period: $period
+			startDate: $startDate
+			endDate: $endDate
+		) {
 			id
 			store
 			amount
@@ -16,8 +26,18 @@ export const GET_EXPENSES = gql`
 `;
 
 export const GET_EXPENSE_SUMMARY = gql`
-	query GetExpenseSummary($storeId: ID!, $period: String) {
-		getExpenseSummary(storeId: $storeId, period: $period) {
+	query GetExpenseSummary(
+		$storeId: ID!
+		$period: String
+		$startDate: String
+		$endDate: String
+	) {
+		getExpenseSummary(
+			storeId: $storeId
+			period: $period
+			startDate: $startDate
+			endDate: $endDate
+		) {
 			totalExpenses
 			byCategory {
 				category

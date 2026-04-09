@@ -79,8 +79,18 @@ export const GET_STORES = gql`
 `;
 
 export const GET_DASHBOARD_STATS = gql`
-	query GetDashboardStats($storeId: ID!, $period: String) {
-		getDashboardStats(storeId: $storeId, period: $period) {
+	query GetDashboardStats(
+		$storeId: ID!
+		$period: String
+		$startDate: String
+		$endDate: String
+	) {
+		getDashboardStats(
+			storeId: $storeId
+			period: $period
+			startDate: $startDate
+			endDate: $endDate
+		) {
 			totalRequests
 			confirmedSales
 			closingRate

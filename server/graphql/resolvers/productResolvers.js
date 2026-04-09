@@ -9,9 +9,6 @@ import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 
 const productResolvers = {
 	Query: {
-		// isDecant: true  → solo decants
-		// isDecant: false → solo perfumes
-		// sin argumento   → todos
 		getProducts: async (_, args = {}) => {
 			const filter =
 				args.isDecant !== undefined ? { isDecant: args.isDecant } : {};
@@ -74,6 +71,10 @@ const productResolvers = {
 					`Ya existe un ${productArgs.isDecant ? "decant" : "perfume"} con ese nombre, marca y tamaño`,
 				);
 
+			if (productArgs.size && !/ml$/i.test(productArgs.size.trim())) {
+				productArgs.size = productArgs.size.trim() + "ml";
+			}
+
 			// Crear el perfume padre (o decant si se pasa isDecant: true)
 			const newProduct = await Product.create({
 				...productArgs,
@@ -92,7 +93,10 @@ const productResolvers = {
 					description: newProduct.description,
 					price: d.price,
 					stock: d.stock ?? 0,
-					size: d.size,
+					size:
+						d.size && !/ml$/i.test(d.size.trim())
+							? d.size.trim() + "ml"
+							: d.size,
 					isDecant: true,
 					linkedProduct: newProduct._id,
 					notes: newProduct.notes,

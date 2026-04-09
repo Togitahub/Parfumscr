@@ -86,10 +86,7 @@ import {
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 
 import { GET_ALL_ORDERS } from "../graphql/order/OrderQueries";
-import {
-	DELETE_ORDER,
-	UPDATE_ORDER_STATUS,
-} from "../graphql/order/OrderMutations";
+import { DELETE_ORDER } from "../graphql/order/OrderMutations";
 
 // Components
 import { Modal, ConfirmDialog } from "../components/interface/Modal";
@@ -107,7 +104,7 @@ import StoreCatalog from "../components/forms/StoreCatalog";
 import OrderList from "../lists/OrderList";
 
 // Views
-import POSView from "./POSview";
+import POSView from "./POSViewV2";
 import ExpensesView from "./ExpensesView";
 import DashboardView from "./DashboardView";
 
@@ -612,7 +609,10 @@ const OrdersSection = ({ myStoreId }) => {
 	const toast = useToast();
 	const [deleteTarget, setDeleteTarget] = useState(null);
 
-	const { data, loading } = useQuery(GET_ALL_ORDERS);
+	const { data, loading } = useQuery(GET_ALL_ORDERS, {
+		fetchPolicy: "network-only",
+		nextFetchPolicy: "cache-first",
+	});
 
 	const updateDashboard = [
 		{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
@@ -634,13 +634,6 @@ const OrdersSection = ({ myStoreId }) => {
 		},
 	];
 
-	const [updateStatus] = useMutation(UPDATE_ORDER_STATUS, {
-		refetchQueries: [
-			{ query: GET_ALL_ORDERS },
-			...(myStoreId ? updateDashboard : []),
-		],
-	});
-
 	const [deleteOrder, { loading: deleting }] = useMutation(DELETE_ORDER, {
 		refetchQueries: [
 			{ query: GET_ALL_ORDERS },
@@ -649,15 +642,6 @@ const OrdersSection = ({ myStoreId }) => {
 	});
 
 	const orders = data?.getAllOrders ?? [];
-
-	const handleStatusChange = async (id, status) => {
-		try {
-			await updateStatus({ variables: { id, status } });
-			toast.success("Estado actualizado");
-		} catch (err) {
-			toast.error("Error", { description: err.message });
-		}
-	};
 
 	const handleConfirmDelete = async () => {
 		// agregar
@@ -683,9 +667,7 @@ const OrdersSection = ({ myStoreId }) => {
 			<OrderList
 				orders={orders}
 				loading={loading}
-				onStatusChange={handleStatusChange}
 				onDelete={(order) => setDeleteTarget(order)}
-				showStatusChange
 			/>
 			<ConfirmDialog
 				isOpen={Boolean(deleteTarget)}
