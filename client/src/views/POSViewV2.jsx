@@ -564,7 +564,8 @@ const POSView = ({ storeId }) => {
 	// ── Render ────────────────────────────────────────────────────────────
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+		<div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start">
+			<CartSummary />
 			<div className="flex flex-col gap-4">
 				{/* Header */}
 				<div className="flex flex-col gap-1">
@@ -616,7 +617,6 @@ const POSView = ({ storeId }) => {
 					</div>
 				)}
 			</div>
-			<CartSummary />
 		</div>
 	);
 };
