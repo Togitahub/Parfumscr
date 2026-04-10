@@ -28,7 +28,8 @@ const normalizeFinalPrice = (value) =>
 	value === undefined || value === null ? null : Number(value);
 
 const canRestoreStockOnCancellation = (order) =>
-	order.purchaseMode !== PURCHASE_MODES.INSTALLMENTS;
+	order.purchaseMode !== PURCHASE_MODES.INSTALLMENTS &&
+	order.status !== "COMPLETADO";
 
 const orderResolvers = {
 	Installment: {
@@ -95,7 +96,10 @@ const orderResolvers = {
 		},
 
 		updateOrderStatus: async (_, { id, status, finalPrice }, context) => {
-			if (!context.user || !["ADMIN", "SUPER_ADMIN"].includes(context.user.role)) {
+			if (
+				!context.user ||
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
+			) {
 				throw new Error("Not authorized");
 			}
 
@@ -241,7 +245,8 @@ const orderResolvers = {
 			if (!installment) throw new Error("Cuota no encontrada.");
 
 			installment.paidAmount = Number(paidAmount) || 0;
-			if (paymentMethod !== undefined) installment.paymentMethod = paymentMethod;
+			if (paymentMethod !== undefined)
+				installment.paymentMethod = paymentMethod;
 			if (note !== undefined) installment.note = note;
 
 			recalculateOrderState(order);
@@ -323,7 +328,10 @@ const orderResolvers = {
 		},
 
 		deleteOrder: async (_, { id }, context) => {
-			if (!context.user || !["ADMIN", "SUPER_ADMIN"].includes(context.user.role)) {
+			if (
+				!context.user ||
+				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
+			) {
 				throw new Error("Not authorized");
 			}
 
