@@ -1,15 +1,21 @@
+// ── React ─────────────────────────────────────────
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@apollo/client/react";
+
+// ── Icons ─────────────────────────────────────────
+
 import {
 	BsArrowLeft,
-	BsBoxSeam,
 	BsCheckCircle,
 	BsClock,
 	BsReceipt,
 	BsWhatsapp,
 	BsXCircle,
 } from "react-icons/bs";
+
+// ── GraphQL ─────────────────────────────────────────
 
 import {
 	ADD_LAYAWAY_PAYMENT,
@@ -19,18 +25,28 @@ import {
 	UPDATE_LAYAWAY_PAYMENT,
 	UPDATE_ORDER_STATUS,
 } from "../graphql/order/OrderMutations";
+
 import {
 	GET_ALL_ORDERS,
 	GET_MY_ORDERS,
 	GET_ORDER_BY_ID,
 } from "../graphql/order/OrderQueries";
+
+// ── Context ─────────────────────────────────────────
+
 import { useAuth } from "../hooks/AuthContext";
 import { useToast } from "../hooks/ToastContext";
+
+// ── Components ─────────────────────────────────────────
+
 import Badge from "../components/common/Badge";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import Select from "../components/common/Select";
 import { Spinner } from "../components/interface/LoadingUi";
+
+// ── Utils ─────────────────────────────────────────
+
 import {
 	formatDate,
 	formatPrice,
@@ -41,6 +57,13 @@ import {
 	PURCHASE_MODE_OPTIONS,
 	unwrapMutationResult,
 } from "../utils/orderUtils";
+import {
+	GET_DASHBOARD_STATS,
+	GET_MY_STORE,
+	GET_STORE_PRODUCTS,
+} from "../graphql/store/StoreQueries";
+
+// ── Aux ─────────────────────────────────────────
 
 const ORDER_STEP_INDEX = {
 	SOLICITADO_WS: 0,
@@ -55,8 +78,34 @@ const TIMELINE_STEPS = [
 	{ key: "COMPLETADO", label: "Completado" },
 ];
 
-const buildRefetchQueries = (order) => {
-	const queries = [{ query: GET_ALL_ORDERS }, { query: GET_ORDER_BY_ID, variables: { id: order?.id } }];
+// ── Auxiliary Functions ─────────────────────────────────────────
+
+const buildRefetchQueries = (order, myStoreId) => {
+	const queries = [
+		{ query: GET_ALL_ORDERS },
+		{ query: GET_ORDER_BY_ID, variables: { id: order?.id } },
+		{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "day" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "week" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "month" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "year" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: null },
+		},
+	];
 
 	if (order?.user) {
 		queries.push({ query: GET_MY_ORDERS, variables: { userId: order.user } });
@@ -79,7 +128,8 @@ const buildInstallmentDrafts = (order) => {
 	for (const installment of order.installments ?? []) {
 		nextInstallments[installment.id] = {
 			paidAmount: String(installment.paidAmount ?? 0),
-			paymentMethod: installment.paymentMethod || order.paymentMethod || "EFECTIVO",
+			paymentMethod:
+				installment.paymentMethod || order.paymentMethod || "EFECTIVO",
 			note: installment.note || "",
 		};
 	}
@@ -190,14 +240,18 @@ const OrderItemRow = ({ item }) => (
 			<span
 				className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
 				style={{
-					background: "color-mix(in srgb, var(--color-second) 12%, transparent)",
+					background:
+						"color-mix(in srgb, var(--color-second) 12%, transparent)",
 					color: "var(--color-second)",
-					border: "1px solid color-mix(in srgb, var(--color-second) 25%, transparent)",
+					border:
+						"1px solid color-mix(in srgb, var(--color-second) 25%, transparent)",
 				}}
 			>
 				{item.quantity}
 			</span>
-			<span className="text-sm font-medium text-first truncate">{item.name}</span>
+			<span className="text-sm font-medium text-first truncate">
+				{item.name}
+			</span>
 		</div>
 
 		<div className="flex flex-col items-end gap-0.5 shrink-0">
@@ -215,18 +269,22 @@ const OrderItemRow = ({ item }) => (
 
 const PurchaseManager = ({ order, refreshQueries }) => {
 	const toast = useToast();
+
 	const orderTotal = getOrderDisplayTotal(order);
 	const isNormalOrder = order.purchaseMode === "NORMAL";
 
 	const [config, setConfig] = useState(() => buildConfigState(order));
+
 	const [layawayPaymentForm, setLayawayPaymentForm] = useState(() => ({
 		amount: "",
 		paymentMethod: order.paymentMethod || "EFECTIVO",
 		note: "",
 	}));
+
 	const [installmentDrafts, setInstallmentDrafts] = useState(() =>
 		buildInstallmentDrafts(order),
 	);
+
 	const [layawayDrafts, setLayawayDrafts] = useState(() =>
 		buildLayawayDrafts(order),
 	);
@@ -245,18 +303,16 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 		UPDATE_ORDER_STATUS,
 		mutationOptions,
 	);
-	const [updateInstallmentPayment, { loading: savingInstallment }] = useMutation(
-		UPDATE_INSTALLMENT_PAYMENT,
-		mutationOptions,
-	);
+	const [updateInstallmentPayment, { loading: savingInstallment }] =
+		useMutation(UPDATE_INSTALLMENT_PAYMENT, mutationOptions);
+
 	const [addLayawayPayment, { loading: addingLayawayPayment }] = useMutation(
 		ADD_LAYAWAY_PAYMENT,
 		mutationOptions,
 	);
-	const [updateLayawayPayment, { loading: updatingLayawayPayment }] = useMutation(
-		UPDATE_LAYAWAY_PAYMENT,
-		mutationOptions,
-	);
+	const [updateLayawayPayment, { loading: updatingLayawayPayment }] =
+		useMutation(UPDATE_LAYAWAY_PAYMENT, mutationOptions);
+
 	const [setLayawayPickedUp, { loading: togglingPickup }] = useMutation(
 		SET_LAYAWAY_PICKED_UP,
 		mutationOptions,
@@ -277,7 +333,9 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 							? Number(config.layawayDays)
 							: undefined,
 					initialPayment:
-						config.initialPayment === "" ? undefined : Number(config.initialPayment),
+						config.initialPayment === ""
+							? undefined
+							: Number(config.initialPayment),
 					paymentMethod: config.paymentMethod,
 					note: config.note || undefined,
 				},
@@ -349,7 +407,11 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 				},
 			});
 			unwrapMutationResult(response, "addLayawayPayment");
-			setLayawayPaymentForm((current) => ({ ...current, amount: "", note: "" }));
+			setLayawayPaymentForm((current) => ({
+				...current,
+				amount: "",
+				note: "",
+			}));
 			toast.success("Pago registrado");
 		} catch (error) {
 			toast.error("No se pudo registrar el pago", {
@@ -384,102 +446,105 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 			<div className="flex flex-col gap-1">
 				<h2 className="text-lg font-semibold text-first">Gestión interna</h2>
 				<p className="text-sm text-first/45">
-					Solo el admin de la tienda puede configurar cuotas, apartado y registrar pagos.
+					Solo el admin de la tienda puede configurar cuotas, apartado y
+					registrar pagos.
 				</p>
 			</div>
 
-			{isNormalOrder && order.status !== "COMPLETADO" && order.status !== "CANCELADO" && (
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-2xl border border-first/8 p-4">
-					<Select
-						label="Modalidad"
-						value={config.purchaseMode}
-						onChange={(event) =>
-							setConfig((current) => ({
-								...current,
-								purchaseMode: event.target.value,
-							}))
-						}
-						options={PURCHASE_MODE_OPTIONS}
-					/>
-					<Select
-						label="Método de pago"
-						value={config.paymentMethod}
-						onChange={(event) =>
-							setConfig((current) => ({
-								...current,
-								paymentMethod: event.target.value,
-							}))
-						}
-						options={PAYMENT_METHOD_OPTIONS}
-					/>
-
-					{config.purchaseMode === "INSTALLMENTS" && (
-						<Input
-							label="Cantidad de cuotas"
-							type="number"
-							min="1"
-							value={config.installmentCount}
+			{isNormalOrder &&
+				order.status !== "COMPLETADO" &&
+				order.status !== "CANCELADO" && (
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-2xl border border-first/8 p-4">
+						<Select
+							label="Modalidad"
+							value={config.purchaseMode}
 							onChange={(event) =>
 								setConfig((current) => ({
 									...current,
-									installmentCount: event.target.value,
+									purchaseMode: event.target.value,
 								}))
 							}
+							options={PURCHASE_MODE_OPTIONS}
 						/>
-					)}
-
-					{config.purchaseMode === "LAYAWAY" && (
-						<Input
-							label="Tiempo máximo (días)"
-							type="number"
-							min="1"
-							value={config.layawayDays}
+						<Select
+							label="Método de pago"
+							value={config.paymentMethod}
 							onChange={(event) =>
 								setConfig((current) => ({
 									...current,
-									layawayDays: event.target.value,
+									paymentMethod: event.target.value,
 								}))
 							}
+							options={PAYMENT_METHOD_OPTIONS}
 						/>
-					)}
 
-					{config.purchaseMode !== "NORMAL" && (
-						<>
+						{config.purchaseMode === "INSTALLMENTS" && (
 							<Input
-								label="Pago inicial opcional"
+								label="Cantidad de cuotas"
 								type="number"
-								min="0"
-								max={orderTotal}
-								value={config.initialPayment}
+								min="1"
+								value={config.installmentCount}
 								onChange={(event) =>
 									setConfig((current) => ({
 										...current,
-										initialPayment: event.target.value,
+										installmentCount: event.target.value,
 									}))
 								}
-								placeholder="0"
 							/>
-							<Input
-								label="Nota opcional"
-								value={config.note}
-								onChange={(event) =>
-									setConfig((current) => ({
-										...current,
-										note: event.target.value,
-									}))
-								}
-								placeholder="Detalle interno"
-							/>
-						</>
-					)}
+						)}
 
-					<div className="md:col-span-2 flex justify-end">
-						<Button loading={configuring} onClick={handleConfigure}>
-							Aplicar modalidad
-						</Button>
+						{config.purchaseMode === "LAYAWAY" && (
+							<Input
+								label="Tiempo máximo (días)"
+								type="number"
+								min="1"
+								value={config.layawayDays}
+								onChange={(event) =>
+									setConfig((current) => ({
+										...current,
+										layawayDays: event.target.value,
+									}))
+								}
+							/>
+						)}
+
+						{config.purchaseMode !== "NORMAL" && (
+							<>
+								<Input
+									label="Pago inicial opcional"
+									type="number"
+									min="0"
+									max={orderTotal}
+									value={config.initialPayment}
+									onChange={(event) =>
+										setConfig((current) => ({
+											...current,
+											initialPayment: event.target.value,
+										}))
+									}
+									placeholder="0"
+								/>
+								<Input
+									label="Nota opcional"
+									value={config.note}
+									onChange={(event) =>
+										setConfig((current) => ({
+											...current,
+											note: event.target.value,
+										}))
+									}
+									placeholder="Detalle interno"
+								/>
+							</>
+						)}
+
+						<div className="md:col-span-2 flex justify-end">
+							<Button loading={configuring} onClick={handleConfigure}>
+								Aplicar modalidad
+							</Button>
+						</div>
 					</div>
-				</div>
-			)}
+				)}
 
 			{order.purchaseMode === "NORMAL" && (
 				<div className="flex flex-wrap gap-2">
@@ -652,11 +717,11 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 								onClick={async () => {
 									try {
 										const response = await setLayawayPickedUp({
-										variables: {
-											id: order.id,
-											pickedUp: !order.layawayPickedUp,
-										},
-									});
+											variables: {
+												id: order.id,
+												pickedUp: !order.layawayPickedUp,
+											},
+										});
 										unwrapMutationResult(response, "setLayawayPickedUp");
 										toast.success(
 											order.layawayPickedUp
@@ -721,7 +786,10 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 							}
 							placeholder="Opcional"
 						/>
-						<Button loading={addingLayawayPayment} onClick={handleAddLayawayPayment}>
+						<Button
+							loading={addingLayawayPayment}
+							onClick={handleAddLayawayPayment}
+						>
 							Registrar pago
 						</Button>
 					</div>
@@ -806,10 +874,15 @@ const PurchaseManager = ({ order, refreshQueries }) => {
 
 const OrderView = () => {
 	const { id } = useParams();
-	const navigate = useNavigate();
 	const { user } = useAuth();
+	const navigate = useNavigate();
+
 	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
 	const isStoreAdmin = user?.role === "ADMIN";
+
+	const { data: myStoreData } = useQuery(GET_MY_STORE);
+
+	const myStoreId = myStoreData?.getMyStore?.id;
 
 	const { data, loading, error } = useQuery(GET_ORDER_BY_ID, {
 		variables: { id },
@@ -835,7 +908,11 @@ const OrderView = () => {
 				<p className="text-first/40 text-sm text-center">
 					{error ? "Error al cargar la orden." : "Orden no encontrada."}
 				</p>
-				<Button variant="outline" size="sm" onClick={() => navigate("/store/orders")}>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => navigate("/store/orders")}
+				>
 					Ver órdenes
 				</Button>
 			</div>
@@ -845,8 +922,11 @@ const OrderView = () => {
 	const statusInfo = getOrderStatusMeta(order.status);
 	const purchaseInfo = getPurchaseModeMeta(order.purchaseMode);
 	const orderTotal = getOrderDisplayTotal(order);
-	const refreshQueries = buildRefetchQueries(order);
-	const totalItemCount = order.orderItems.reduce((acc, item) => acc + item.quantity, 0);
+	const refreshQueries = buildRefetchQueries(order, myStoreId);
+	const totalItemCount = order.orderItems.reduce(
+		(acc, item) => acc + item.quantity,
+		0,
+	);
 
 	const handleWhatsApp = () => {
 		const message = encodeURIComponent(
@@ -906,7 +986,8 @@ const OrderView = () => {
 					<div
 						className="h-px"
 						style={{
-							background: "linear-gradient(to right, var(--color-second), transparent)",
+							background:
+								"linear-gradient(to right, var(--color-second), transparent)",
 							opacity: 0.3,
 						}}
 					/>
@@ -916,17 +997,25 @@ const OrderView = () => {
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div className="rounded-2xl border border-first/10 bg-main p-5">
-						<p className="text-xs uppercase tracking-wider text-first/35">Total real</p>
-						<p className="text-2xl font-bold text-first mt-2">{formatPrice(orderTotal)}</p>
+						<p className="text-xs uppercase tracking-wider text-first/35">
+							Total real
+						</p>
+						<p className="text-2xl font-bold text-first mt-2">
+							{formatPrice(orderTotal)}
+						</p>
 					</div>
 					<div className="rounded-2xl border border-first/10 bg-main p-5">
-						<p className="text-xs uppercase tracking-wider text-first/35">Pagado</p>
+						<p className="text-xs uppercase tracking-wider text-first/35">
+							Pagado
+						</p>
 						<p className="text-2xl font-bold text-first mt-2">
 							{formatPrice(order.amountPaid)}
 						</p>
 					</div>
 					<div className="rounded-2xl border border-first/10 bg-main p-5">
-						<p className="text-xs uppercase tracking-wider text-first/35">Saldo</p>
+						<p className="text-xs uppercase tracking-wider text-first/35">
+							Saldo
+						</p>
 						<p className="text-2xl font-bold text-first mt-2">
 							{formatPrice(order.balanceDue)}
 						</p>
@@ -937,7 +1026,8 @@ const OrderView = () => {
 					<div className="flex items-center gap-2">
 						<BsReceipt className="w-4 h-4 text-second/60" />
 						<p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-first/35">
-							Productos — {totalItemCount} {totalItemCount === 1 ? "artículo" : "artículos"}
+							Productos — {totalItemCount}{" "}
+							{totalItemCount === 1 ? "artículo" : "artículos"}
 						</p>
 						<div className="flex-1 h-px bg-first/6" />
 					</div>
@@ -986,7 +1076,12 @@ const OrderView = () => {
 						>
 							Consultar por WhatsApp
 						</Button>
-						<Button fullWidth variant="ghost" size="md" onClick={() => navigate("/")}>
+						<Button
+							fullWidth
+							variant="ghost"
+							size="md"
+							onClick={() => navigate("/")}
+						>
 							Seguir comprando
 						</Button>
 					</div>
@@ -996,9 +1091,12 @@ const OrderView = () => {
 					<div className="rounded-2xl border border-first/10 bg-main p-5 flex items-start gap-3">
 						<BsClock className="w-5 h-5 text-first/35 mt-0.5" />
 						<div>
-							<p className="text-sm font-medium text-first">Vista de solo lectura</p>
+							<p className="text-sm font-medium text-first">
+								Vista de solo lectura
+							</p>
 							<p className="text-sm text-first/45">
-								La configuración de cuotas y apartado está reservada para el admin dueño de la tienda.
+								La configuración de cuotas y apartado está reservada para el
+								admin dueño de la tienda.
 							</p>
 						</div>
 					</div>

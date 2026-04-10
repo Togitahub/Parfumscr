@@ -82,9 +82,10 @@ const OrderList = ({
 	onDelete,
 	className = "",
 }) => {
-	const [search, setSearch] = useState("");
-	const [statusFilter, setStatusFilter] = useState("ALL");
 	const [page, setPage] = useState(1);
+	const [search, setSearch] = useState("");
+	const [dateFilter, setDateFilter] = useState("");
+	const [statusFilter, setStatusFilter] = useState("ALL");
 
 	const isCompact = variant === "compact";
 
@@ -106,8 +107,24 @@ const OrderList = ({
 			result = result.filter((o) => o.status === statusFilter);
 		}
 
+		if (dateFilter.trim()) {
+			result = result.filter((o) => {
+				if (!o.createdAt) return false;
+				const d = new Date(
+					isNaN(Number(o.createdAt)) ? o.createdAt : Number(o.createdAt),
+				);
+				return d
+					.toLocaleDateString("es-CR", {
+						day: "2-digit",
+						month: "numeric",
+						year: "numeric",
+					})
+					.includes(dateFilter.trim());
+			});
+		}
+
 		return result;
-	}, [orders, search, statusFilter]);
+	}, [orders, search, statusFilter, dateFilter]);
 
 	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const safePage = Math.min(page, totalPages);
@@ -142,6 +159,16 @@ const OrderList = ({
 						onChange={(e) => handleSearch(e.target.value)}
 						placeholder="Buscar por ID o producto..."
 						className="w-full h-10 pl-9 pr-9 rounded-xl border border-first/15 bg-main text-sm text-first placeholder:text-first/30 focus:outline-none focus:ring-2 focus:ring-second/30 focus:border-second transition-all duration-150"
+					/>
+					<input
+						type="text"
+						value={dateFilter}
+						onChange={(e) => {
+							setDateFilter(e.target.value);
+							setPage(1);
+						}}
+						placeholder="Fecha: 5/4/2026"
+						className="h-10 px-3 rounded-xl border border-first/15 bg-main text-sm text-first placeholder:text-first/30 focus:outline-none focus:ring-2 focus:ring-second/30 focus:border-second transition-all duration-150 w-40 shrink-0"
 					/>
 					{search && (
 						<button

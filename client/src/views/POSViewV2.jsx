@@ -88,6 +88,7 @@ const POSView = ({ storeId }) => {
 
 	const dashboardQueries = [
 		{ query: GET_STORE_PRODUCTS, variables: { storeId } },
+		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "day" } },
 		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "week" } },
 		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "month" } },
 		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "year" } },

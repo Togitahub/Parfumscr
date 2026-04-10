@@ -618,6 +618,10 @@ const OrdersSection = ({ myStoreId }) => {
 		{ query: GET_STORE_PRODUCTS, variables: { storeId: myStoreId } },
 		{
 			query: GET_DASHBOARD_STATS,
+			variables: { storeId: myStoreId, period: "day" },
+		},
+		{
+			query: GET_DASHBOARD_STATS,
 			variables: { storeId: myStoreId, period: "week" },
 		},
 		{
