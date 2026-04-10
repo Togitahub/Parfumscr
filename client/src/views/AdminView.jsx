@@ -731,10 +731,18 @@ const AdminView = () => {
 	const renderContent = () => {
 		switch (activeTab) {
 			case "pos":
-				return myStoreId ? <POSView storeId={myStoreId} /> : null;
+				return myStoreId ? (
+					<FilterProvider pageSize={9}>
+						<POSView storeId={myStoreId} />
+					</FilterProvider>
+				) : null;
 
 			case "catalog":
-				return myStoreId ? <StoreCatalog storeId={myStoreId} /> : null;
+				return myStoreId ? (
+					<FilterProvider pageSize={9}>
+						<StoreCatalog storeId={myStoreId} />
+					</FilterProvider>
+				) : null;
 
 			case "products":
 				return <ProductsSection myStoreId={myStoreId} />;

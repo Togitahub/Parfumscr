@@ -14,13 +14,16 @@ import { GET_STORE_PRODUCTS } from "../../graphql/store/StoreQueries";
 import { Spinner } from "../interface/LoadingUi";
 import Button from "../common/Button";
 import Badge from "../common/Badge";
+import { useFilters } from "../../hooks/FilterContext";
+import Pagination from "../functional/Pagination";
 
 // import { getOptimizedUrl } from "../../utils/ImageUtils";
 
 const StoreCatalog = ({ storeId }) => {
-	const toast = useToast();
-	const [search, setSearch] = useState("");
 	const [editing, setEditing] = useState({});
+
+	const toast = useToast();
+	const { search, setSearch, setPage, applyFilters } = useFilters();
 
 	const { data: storeData, loading: loadingStore } = useQuery(
 		GET_STORE_PRODUCTS,
@@ -53,6 +56,12 @@ const StoreCatalog = ({ storeId }) => {
 				sp.product.brand?.name?.toLowerCase().includes(q),
 		);
 	}, [storeProducts, search]);
+
+	const {
+		totalPages,
+		currentPage,
+		items: filteredItems,
+	} = applyFilters(filtered);
 
 	const handleRemove = async (productId) => {
 		try {
@@ -121,8 +130,8 @@ const StoreCatalog = ({ storeId }) => {
 					</p>
 				</div>
 			) : (
-				<div className="flex flex-col lg:flex-row gap-3">
-					{filtered.map((sp) => {
+				<div className="grid lg:grid-cols-3 gap-3">
+					{filteredItems.map((sp) => {
 						const editValues = getEditing(sp);
 						const product = sp.product;
 
@@ -286,6 +295,16 @@ const StoreCatalog = ({ storeId }) => {
 							</div>
 						);
 					})}
+				</div>
+			)}
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<div className="mt-6 flex justify-center">
+					<Pagination
+						currentPage={currentPage} // Aquí es donde se usa el estado del context
+						totalPages={totalPages}
+						onPageChange={setPage}
+					/>
 				</div>
 			)}
 		</div>

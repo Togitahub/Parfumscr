@@ -1,9 +1,7 @@
 import Button from "../common/Button";
 
 import { useEffect, useRef } from "react";
-import { useQuery } from "@apollo/client/react";
 import { useStore } from "../../hooks/StoreContext";
-import { GET_PERFUMES } from "../../graphql/product/ProductQueries";
 
 const DEFAULTS = {
 	tagline: "100%",
@@ -35,13 +33,9 @@ const SplitText = ({ text, baseDelay = 0, className = "" }) => (
 	</span>
 );
 
-const Hero = () => {
+const Hero = ({ storeProductsQty }) => {
 	const canvasRef = useRef(null);
 	const { store } = useStore();
-
-	const { data: perfumesData } = useQuery(GET_PERFUMES);
-
-	const perfumes = perfumesData?.getProducts || [];
 
 	const storeName = store?.storeName ?? "Parfums";
 	const tagline = store?.heroTagline || DEFAULTS.tagline;
@@ -239,7 +233,7 @@ const Hero = () => {
 						/>
 
 						<p
-							className="hero-body max-w-md leading-relaxed"
+							className="hero-body max-w-xl leading-relaxed"
 							style={{
 								color:
 									"color-mix(in srgb, var(--color-first) 55%, transparent)",
@@ -276,7 +270,10 @@ const Hero = () => {
 							}}
 						>
 							{[
-								{ value: perfumes.length, label: "Perfumes" },
+								{
+									value: storeProductsQty,
+									label: storeProductsQty === 1 ? "Perfume" : "Perfumes",
+								},
 								{ value: "Decants", label: "Disponibles" },
 							].map((stat, i) => (
 								<div key={i} className="flex flex-col gap-0.5">

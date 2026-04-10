@@ -103,7 +103,7 @@ const StoreView = () => {
 
 	return (
 		<div>
-			<Hero />
+			<Hero storeProductsQty={storeProducts.length} />
 			<div
 				id="catalog"
 				className="px-4 py-16 md:px-8 lg:px-12"
@@ -117,7 +117,7 @@ const StoreView = () => {
 						</p>
 					</div>
 
-					<FilterProvider pageSize={12}>
+					<FilterProvider pageSize={9}>
 						<ProductList
 							products={products}
 							loading={loadingProducts || loadingStore}
