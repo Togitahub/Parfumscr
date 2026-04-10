@@ -53,6 +53,7 @@ import {
 	PURCHASE_MODE_OPTIONS,
 	unwrapMutationResult,
 } from "../utils/orderUtils";
+import Badge from "../components/common/Badge";
 
 // ── Aux ────────────────────────────────────────────────────────────
 
@@ -116,6 +117,7 @@ const POSView = ({ storeId }) => {
 			...sp.product,
 			price: sp.price ?? sp.product.price,
 			stock: sp.stock ?? sp.product.stock ?? 0,
+			discount: sp.discount != null ? String(sp.discount) : "",
 			originalData: sp,
 		}));
 	}, [data]);
@@ -134,8 +136,17 @@ const POSView = ({ storeId }) => {
 
 	// ── Auxiliary Functions ────────────────────────────────────────────────────────────
 
+	const getDiscountedPrice = (price, discount) => {
+		const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
+
+		return discountedPrice;
+	};
+
 	const addToCart = (storeProduct) => {
-		const price = storeProduct.price ?? storeProduct.product.price;
+		const price = getDiscountedPrice(
+			storeProduct.product.price,
+			storeProduct.discount,
+		);
 		const stock = storeProduct.stock ?? storeProduct.product.stock ?? 0;
 
 		setCart((current) => {
@@ -319,7 +330,7 @@ const POSView = ({ storeId }) => {
 					return (
 						<button
 							key={product.id}
-							onClick={() => !outOfStock && addToCart(product.originalData)} // Usamos la data original aquí
+							onClick={() => !outOfStock && addToCart(product.originalData)}
 							disabled={outOfStock}
 							className={[
 								"flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-150",
@@ -332,18 +343,33 @@ const POSView = ({ storeId }) => {
 						>
 							<div className="flex-1 min-w-0">
 								<p className="text-sm font-medium text-first truncate">
-									{product.name}
+									{product.name}{" "}
+									{product.discount > 0 && (
+										<span className="ms-2">
+											<Badge
+												variant="success"
+												children={`-${product.discount}%`}
+											/>
+										</span>
+									)}
 								</p>
 								<p className="text-xs text-first/40 truncate">
 									{product.brand?.name} {product.size && ` · ${product.size}`}
 								</p>
 								<div className="flex items-center justify-between mt-1">
-									<span
-										className="text-sm font-bold"
-										style={{ color: "var(--color-second)" }}
-									>
-										{formatPrice(product.price)}
-									</span>
+									<div className="flex gap-1">
+										<span
+											className="text-sm font-bold"
+											style={{ color: "var(--color-second)" }}
+										>
+											{formatPrice(
+												getDiscountedPrice(product.price, product.discount),
+											)}
+										</span>
+										<span className="text-[10px] line-through">
+											{product.discount && formatPrice(product.price)}
+										</span>
+									</div>
 									<span className="text-[10px]">Stock: {product.stock}</span>
 								</div>
 							</div>
