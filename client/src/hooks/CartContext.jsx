@@ -83,7 +83,6 @@ export const CartProvider = ({ children }) => {
 		const guestItems = guestCart.items;
 		if (guestItems.length === 0) return;
 
-		// Fire-and-forget: add each guest item to the server cart
 		const mergeCart = async () => {
 			for (const item of guestItems) {
 				try {
@@ -103,16 +102,16 @@ export const CartProvider = ({ children }) => {
 		};
 
 		mergeCart();
-		// We only want this to run once right after login, not on every render
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isAuthenticated, user?.id]);
 
 	// ── Derived server cart data ──────────────────────────────────────────────
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const serverItems = data?.getUserCart?.items ?? [];
-	const serverTotalItems = serverItems.reduce((acc, i) => acc + i.quantity, 0);
+	const serverTotalItems = serverItems.reduce((acc, i) => acc + i?.quantity, 0);
 	const serverTotalPrice = serverItems.reduce(
-		(acc, i) => acc + i.product.price * i.quantity,
+		(acc, i) => acc + i?.product.price * i?.quantity,
 		0,
 	);
 
@@ -121,14 +120,30 @@ export const CartProvider = ({ children }) => {
 	const addItem = useCallback(
 		async (product, quantity = 1) => {
 			if (isGuest) {
+				const currentItems = guestCart.items;
+				const existing = currentItems.find((i) => i.product.id === product.id);
+				const currentQty = existing?.quantity ?? 0;
+				if (currentQty + quantity > (product.stock ?? 0)) {
+					throw new Error(
+						`Stock insuficiente. Solo hay ${product.stock} unidad${product.stock !== 1 ? "es" : ""} disponible${product.stock !== 1 ? "s" : ""}.`,
+					);
+				}
 				guestCart.addItem(product, quantity);
 			} else {
+				const currentItems = serverItems;
+				const existing = currentItems.find((i) => i.product.id === product.id);
+				const currentQty = existing?.quantity ?? 0;
+				if (currentQty + quantity > (product.stock ?? 0)) {
+					throw new Error(
+						`Stock insuficiente. Solo hay ${product.stock} unidad${product.stock !== 1 ? "es" : ""} disponible${product.stock !== 1 ? "s" : ""}.`,
+					);
+				}
 				await addItemMutation({
 					variables: { userId: user.id, productId: product.id, quantity },
 				});
 			}
 		},
-		[isGuest, guestCart, addItemMutation, user?.id],
+		[isGuest, guestCart, addItemMutation, user?.id, serverItems],
 	);
 
 	const removeItem = useCallback(

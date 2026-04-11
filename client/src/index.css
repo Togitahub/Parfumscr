@@ -18,6 +18,7 @@
 	--color-second: var(--color-second);
 
 	--color-error: #dd1616;
+	--color-warning: #d6a811;
 	--color-success: #16dd16;
 }
 

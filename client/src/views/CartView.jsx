@@ -248,10 +248,10 @@ const CartView = () => {
 
 	const cartItems = rawCartItems.map((item) => {
 		const storeProduct = storeProductsData?.getStoreProducts?.find(
-			(sp) => sp.product.id === item.product.id,
+			(sp) => sp?.product.id === item?.product.id,
 		);
-		const basePrice = storeProduct?.price ?? item.product.price;
-		const discount = storeProduct?.discount ?? item.product.discount ?? 0;
+		const basePrice = storeProduct?.price ?? item?.product.price;
+		const discount = storeProduct?.discount ?? item?.product.discount ?? 0;
 		const effectivePrice =
 			discount > 0 ? basePrice * (1 - discount / 100) : basePrice;
 
@@ -267,7 +267,7 @@ const CartView = () => {
 	});
 
 	const totalPrice = cartItems.reduce(
-		(acc, i) => acc + i.product.price * i.quantity,
+		(acc, i) => acc + i?.product.price * i?.quantity,
 		0,
 	);
 
@@ -334,6 +334,14 @@ const CartView = () => {
 					className="flex flex-col gap-2"
 					style={{ animation: "fadeUp 0.4s ease both" }}
 				>
+					<button
+						onClick={() => navigate(-1)}
+						className="flex items-center gap-1.5 text-sm text-first/40 hover:text-first/70 transition-colors w-fit cursor-pointer"
+						style={{ animation: "fadeUp 0.4s ease both" }}
+					>
+						<BsArrowLeft className="w-3.5 h-3.5" />
+						Volver
+					</button>
 					<p
 						className="text-[10px] font-semibold uppercase tracking-[0.3em]"
 						style={{
@@ -437,14 +445,14 @@ const CartView = () => {
 							<div className="sm:hidden mt-4 flex flex-col gap-2 px-1">
 								{cartItems.map((item) => (
 									<div
-										key={item.product.id}
+										key={item?.product.id}
 										className="flex items-center justify-between text-xs text-first/40"
 									>
 										<span className="truncate max-w-[60%]">
-											{item.product.name}
+											{item?.product.name}
 										</span>
 										<span className="tabular-nums font-medium text-first/60">
-											{formatPrice(item.product.price * item.quantity)}
+											{formatPrice(item?.product.price * item?.quantity)}
 										</span>
 									</div>
 								))}

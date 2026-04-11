@@ -1,5 +1,6 @@
 // React
 import { useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client/react";
 
@@ -22,6 +23,7 @@ import {
 
 // Context
 import { useAuth } from "../hooks/AuthContext";
+import { useCart } from "../hooks/CartContext";
 import { useToast } from "../hooks/ToastContext";
 import { useStore } from "../hooks/StoreContext";
 
@@ -31,7 +33,6 @@ import {
 	REMOVE_FAVORITE,
 } from "../graphql/favorites/FavoritesMutations";
 import { GET_PRODUCT } from "../graphql/product/ProductQueries";
-import { ADD_ITEM_TO_CART } from "../graphql/cart/CartMutations";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
 import { REGISTER_PRODUCT_VIEW } from "../graphql/store/StoreMutations";
 import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
@@ -44,15 +45,20 @@ import { Spinner } from "../components/interface/LoadingUi";
 // Utils
 
 import { getOptimizedUrl } from "../utils/ImageUtils";
-import { useEffect } from "react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const formatPrice = (price) =>
 	`₡${price?.toLocaleString("es-CR", { minimumFractionDigits: 0 }) ?? "0"}`;
 
-const discountedPrice = (discount, displayPrice) =>
-	discount > 0 ? displayPrice * (1 - discount / 100) : displayPrice;
+const discountedPrice = (discount, displayPrice, qty) => {
+	const hasQty = qty ? qty : 1;
+	const realPrice =
+		discount > 0
+			? displayPrice * (1 - discount / 100) * hasQty
+			: displayPrice * hasQty;
+	return realPrice;
+};
 
 // ── Image gallery ─────────────────────────────────────────────────────────────
 
@@ -188,6 +194,7 @@ const ProductView = () => {
 	const { id } = useParams();
 
 	const { store } = useStore();
+	const { addItem } = useCart();
 	const { user, isAuthenticated } = useAuth();
 
 	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
@@ -224,10 +231,9 @@ const ProductView = () => {
 
 	// ── Mutations ─────────────────────────────────────────────────────────────
 
-	const [addFavorite, { loading: togglingFav }] = useMutation(ADD_FAVORITE);
 	const [removeFavorite] = useMutation(REMOVE_FAVORITE);
-	const [addToCart, { loading: addingCart }] = useMutation(ADD_ITEM_TO_CART);
 	const [registerView] = useMutation(REGISTER_PRODUCT_VIEW);
+	const [addFavorite, { loading: togglingFav }] = useMutation(ADD_FAVORITE);
 
 	// ── Derived data ──────────────────────────────────────────────────────────
 
@@ -236,6 +242,7 @@ const ProductView = () => {
 	const storeProductIds = new Set(
 		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
 	);
+
 	const storeProduct = storeProductsData?.getStoreProducts?.find(
 		(sp) => sp.product.id === id,
 	);
@@ -297,17 +304,20 @@ const ProductView = () => {
 	};
 
 	const handleAddToCart = async () => {
-		if (!isAuthenticated) {
-			toast.info("Inicia sesión para agregar al carrito");
-			return;
-		}
-		const productId = selectedDecant?.id ?? id;
 		try {
-			await addToCart({
-				variables: { userId: user.id, productId, quantity: qty },
-			});
+			const productToAdd = {
+				id: selectedDecant ? selectedDecant.id : product.id,
+				name: product.name,
+				brand: product.brand,
+				images: product.images,
+				size: selectedDecant?.size ?? product.size,
+				isDecant: selectedDecant ? true : product.isDecant,
+				price: displayPrice,
+				stock: storeStock,
+			};
+			await addItem(productToAdd, qty, storeStock);
 			toast.success("Agregado al carrito", {
-				description: `${product.name}${selectedDecant?.size ? ` · ${selectedDecant.size}` : ""} × ${qty}`,
+				description: `${product.name}${productToAdd.size ? ` · ${productToAdd.size}` : ""} × ${qty}`,
 			});
 		} catch (err) {
 			toast.error("Error al agregar", { description: err.message });
@@ -414,7 +424,7 @@ const ProductView = () => {
 											{discount}% Descuento
 										</Badge>
 									)}
-									{isOutOfStock && !hasDecants && (
+									{isOutOfStock && (
 										<Badge variant="neutral" size="sm">
 											Agotado
 										</Badge>
@@ -470,44 +480,42 @@ const ProductView = () => {
 										fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)",
 									}}
 								>
-									{formatPrice(discountedPrice(discount, displayPrice))}
+									{formatPrice(discountedPrice(discount, displayPrice, qty))}
 								</span>
 								{hasDiscount && (
 									<span className="text-base text-first/30 line-through tabular-nums">
-										{formatPrice(displayPrice)}
+										{formatPrice(displayPrice * qty)}
 									</span>
 								)}
 							</div>
 
 							{/* Stock indicator — perfume (no decants) */}
-							{!hasDecants && (
-								<div className="flex items-center gap-2 text-xs">
-									{isOutOfStock ? (
-										<>
-											<BsXCircle className="w-3.5 h-3.5 text-error/60" />
-											<span className="text-error/60">
-												Sin stock disponible
-											</span>
-										</>
-									) : (
-										<>
-											<BsCheckCircle className="w-3.5 h-3.5 text-success" />
-											<span className="text-first/40">
-												{storeStock <= 5
-													? `Solo ${storeStock} disponible${storeStock !== 1 ? "s" : ""}`
-													: "En stock"}
-											</span>
-										</>
-									)}
-								</div>
-							)}
+							<div className="flex items-center gap-2 text-xs">
+								{isOutOfStock ? (
+									<>
+										<BsXCircle className="w-3.5 h-3.5 text-error/60" />
+										<span className="text-error/60">Sin stock disponible</span>
+									</>
+								) : (
+									<>
+										<BsCheckCircle
+											className={`w-3.5 h-3.5 text-${storeStock < 5 ? "warning" : "success"}`}
+										/>
+										<span className="text-first/40">
+											{storeStock <= 5
+												? `Solo ${storeStock} disponible${storeStock !== 1 ? "s" : ""}`
+												: "En stock"}
+										</span>
+									</>
+								)}
+							</div>
 						</div>
 
 						{/* Quantity + CTA */}
 						{!isAdmin && (
 							<div className="flex flex-col gap-3">
 								{/* Qty row */}
-								{!hasDecants && !isOutOfStock && (
+								{!isOutOfStock && (
 									<div className="flex items-center gap-3">
 										<span className="text-xs text-first/40 font-medium uppercase tracking-wider">
 											Cantidad
@@ -524,7 +532,7 @@ const ProductView = () => {
 											</span>
 											<button
 												onClick={() =>
-													setQty((q) => Math.min(product.stock, q + 1))
+													setQty((q) => Math.min(storeStock, q + 1))
 												}
 												className="w-6 h-6 flex items-center justify-center text-first/40 hover:text-first transition-colors cursor-pointer text-lg leading-none"
 											>
@@ -541,7 +549,6 @@ const ProductView = () => {
 										size="lg"
 										icon={<BsCart3 />}
 										onClick={handleAddToCart}
-										loading={addingCart}
 										disabled={isOutOfStock}
 									>
 										Agregar al carrito
