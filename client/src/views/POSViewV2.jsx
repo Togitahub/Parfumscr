@@ -118,7 +118,7 @@ const POSView = ({ storeId }) => {
 			...sp.product,
 			price: sp.price ?? sp.product.price,
 			stock: sp.stock ?? sp.product.stock ?? 0,
-			discount: sp.discount != null ? String(sp.discount) : "",
+			discount: sp.discount ?? 0,
 			originalData: sp,
 		}));
 	}, [data]);
@@ -145,7 +145,7 @@ const POSView = ({ storeId }) => {
 
 	const addToCart = (storeProduct) => {
 		const price = getDiscountedPrice(
-			storeProduct.product.price,
+			storeProduct.price ?? storeProduct.product.price,
 			storeProduct.discount,
 		);
 		const stock = storeProduct.stock ?? storeProduct.product.stock ?? 0;
@@ -368,7 +368,7 @@ const POSView = ({ storeId }) => {
 											)}
 										</span>
 										<span className="text-[10px] line-through">
-											{product.discount && formatPrice(product.price)}
+											{product.discount > 0 && formatPrice(product.price)}
 										</span>
 									</div>
 									<span className="text-[10px]">Stock: {product.stock}</span>

@@ -23,7 +23,7 @@ const StoreCatalog = ({ storeId }) => {
 	const [editing, setEditing] = useState({});
 
 	const toast = useToast();
-	const { search, setSearch, setPage, applyFilters } = useFilters();
+	const { search, setSearch, page, pageSize, setPage } = useFilters();
 
 	const { data: storeData, loading: loadingStore } = useQuery(
 		GET_STORE_PRODUCTS,
@@ -57,11 +57,13 @@ const StoreCatalog = ({ storeId }) => {
 		);
 	}, [storeProducts, search]);
 
-	const {
-		totalPages,
-		currentPage,
-		items: filteredItems,
-	} = applyFilters(filtered);
+	const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+	const safePage = Math.min(page, totalPages);
+	const filteredItems = filtered.slice(
+		(safePage - 1) * pageSize,
+		safePage * pageSize,
+	);
+	const currentPage = safePage;
 
 	const handleRemove = async (productId) => {
 		try {
