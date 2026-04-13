@@ -24,9 +24,25 @@ if (!process.env.MONGO_URI) {
 
 const cors = require("cors");
 
+const whitelist = ["https://parfumssoft.com", "https://www.parfumssoft.com"];
+
 const corsOptions = {
-	origin: "https://obc-portfolio.vercel.app",
-	optionsSuccessStatus: 200, // Para compatibilidad con navegadores antiguos
+	origin: function (origin, callback) {
+		if (!origin) return callback(null, true);
+
+		const isMainDomain = whitelist.includes(origin);
+
+		const isOwnSubdomain = origin.endsWith(".parfumssoft.com");
+
+		if (isMainDomain || isOwnSubdomain) {
+			callback(null, true);
+		} else {
+			callback(new Error("Dominio no autorizado por CORS"));
+		}
+	},
+	credentials: true,
+	methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
