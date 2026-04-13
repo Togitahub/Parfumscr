@@ -24,7 +24,8 @@ if (!process.env.MONGO_URI) {
 
 const whitelist = [
 	"https://parfumssoft.com",
-	"https://www.parfumssoft.com, https://parfumscr-mauve.vercel.app",
+	"https://www.parfumssoft.com",
+	"https://parfumscr-mauve.vercel.app",
 ];
 
 const corsOptions = {
