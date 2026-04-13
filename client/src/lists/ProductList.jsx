@@ -25,8 +25,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 
 import {
-	BsGrid3X3Gap,
-	BsList,
 	BsBoxSeam,
 	BsPencil,
 	BsTrash,
@@ -34,7 +32,7 @@ import {
 	BsShop,
 } from "react-icons/bs";
 
-import ProductCard from "../components/cards/ProductCard";
+import ProductCard from "../components/Cards/ProductCard";
 import Filters from "../components/functional/Filters";
 import SearchBar from "../components/functional/SearchBar";
 import Pagination from "../components/functional/Pagination";

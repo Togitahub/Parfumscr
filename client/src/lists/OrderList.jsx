@@ -13,7 +13,7 @@
 
 import { useState, useMemo } from "react";
 import { BsSearch, BsX, BsReceipt } from "react-icons/bs";
-import OrderCard from "../components/cards/OrderCardV2";
+import OrderCard from "../components/Cards/OrderCardV2";
 import EmptyState from "../components/interface/EmptyState";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
