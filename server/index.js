@@ -23,8 +23,8 @@ if (!process.env.MONGO_URI) {
 }
 
 const whitelist = [
-	"https://parfumssoft.com",
-	"https://www.parfumssoft.com",
+	"https://parfumsoft.com",
+	"https://www.parfumsoft.com",
 	"https://parfumscr-mauve.vercel.app",
 ];
 
@@ -34,7 +34,7 @@ const corsOptions = {
 
 		const isMainDomain = whitelist.includes(origin);
 
-		const isOwnSubdomain = origin.endsWith(".parfumssoft.com");
+		const isOwnSubdomain = origin.endsWith(".parfumsoft.com");
 
 		if (isMainDomain || isOwnSubdomain) {
 			callback(null, true);
