@@ -22,8 +22,6 @@ if (!process.env.MONGO_URI) {
 	process.exit(1);
 }
 
-const cors = require("cors");
-
 const whitelist = ["https://parfumssoft.com", "https://www.parfumssoft.com"];
 
 const corsOptions = {
