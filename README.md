@@ -1,4 +1,4 @@
-# Parfums 🌸
+# Parfumsoft 🌸
 
 **Plataforma multi-tienda de perfumería con catálogo, pedidos por WhatsApp y panel de administración.**
 
@@ -6,7 +6,7 @@
 
 ## Descripción
 
-Parfums es una plataforma SaaS que permite a distribuidores de perfumes crear su propia tienda online personalizada. Cada vendedor (ADMIN) obtiene un subdominio o dominio propio, configura sus colores, logo y catálogo, y recibe pedidos directamente por WhatsApp. El sistema es multi-tenant: un único backend sirve a múltiples tiendas independientes.
+Parfumsoft es una plataforma SaaS que permite a distribuidores de perfumes crear su propia tienda online personalizada. Cada vendedor (ADMIN) obtiene un subdominio o dominio propio, configura sus colores, logo y catálogo, y recibe pedidos directamente por WhatsApp. El sistema es multi-tenant: un único backend sirve a múltiples tiendas independientes.
 
 ---
 

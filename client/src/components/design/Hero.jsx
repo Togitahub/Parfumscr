@@ -37,7 +37,7 @@ const Hero = ({ storeProductsQty }) => {
 	const canvasRef = useRef(null);
 	const { store } = useStore();
 
-	const storeName = store?.storeName ?? "Parfums";
+	const storeName = store?.storeName ?? "Parfumsoft";
 	const tagline = store?.heroTagline || DEFAULTS.tagline;
 	const description = store?.heroDescription || DEFAULTS.description;
 	const badge1 = store?.heroBadge1 || DEFAULTS.badge1;

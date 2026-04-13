@@ -54,7 +54,7 @@ const Footer = () => {
 							className="text-2xl font-light tracking-[0.18em] text-first"
 							style={{ fontFamily: "'Cormorant Garamond', serif" }}
 						>
-							{store ? store?.storeName : "Parfumscr"}
+							{store ? store?.storeName : "Parfumsoft"}
 						</span>
 						<span
 							className="text-[9px] tracking-[0.3em] uppercase"
@@ -113,7 +113,7 @@ const Footer = () => {
 						className="text-xs text-first/25 tracking-widest"
 						style={{ fontFamily: "'Cinzel', serif" }}
 					>
-						© {year} Parfumscr — Todos los derechos reservados
+						© {year} Parfumsoft — Todos los derechos reservados
 					</p>
 
 					<p

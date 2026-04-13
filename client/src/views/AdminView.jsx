@@ -723,7 +723,7 @@ const AdminView = () => {
 	const copyMyStoreLink = () => {
 		const link = myStoreExists?.customDomain
 			? `https://${myStoreExists?.customDomain}`
-			: `https://${myStoreExists.slug}.parfumscr.com`;
+			: `https://${myStoreExists.slug}.parfumsoft.com`;
 
 		navigator.clipboard
 			.writeText(link)
@@ -774,7 +774,7 @@ const AdminView = () => {
 									onClick={() =>
 										(window.location.href = myStoreExists?.customDomain
 											? `https://${myStoreExists?.customDomain}`
-											: `https://${myStoreExists.slug}.parfumscr.com`)
+											: `https://${myStoreExists.slug}.parfumsoft.com`)
 									}
 								>
 									Ver Tienda

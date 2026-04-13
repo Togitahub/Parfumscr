@@ -38,7 +38,7 @@ export const StoreProvider = ({ children }) => {
 
 				if (!res.ok) {
 					setStoreNotFound(true);
-					document.title = "Parfumscr";
+					document.title = "Parfumsoft";
 					return;
 				}
 
@@ -58,7 +58,7 @@ export const StoreProvider = ({ children }) => {
 				);
 
 				setStore(data);
-				document.title = data.storeName ?? "Parfumscr";
+				document.title = data.storeName ?? "Parfumsoft";
 
 				if (data.logo) setFavicon(data.logo);
 			} catch (err) {

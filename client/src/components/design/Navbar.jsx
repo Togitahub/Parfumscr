@@ -357,7 +357,7 @@ const NavBar = () => {
 									P
 								</div>
 								<span className="nav-logo-text font-semibold text-base text-first tracking-tight hidden sm:block">
-									Parfumscr
+									Parfumsoft
 								</span>
 							</>
 						)}

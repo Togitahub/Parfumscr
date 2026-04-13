@@ -76,7 +76,7 @@ const PLANS = [
 			"Punto de venta presencial",
 			"Registro y gestión de gastos",
 			"Reporte de utilidad neta (Inrgesos - Gastos)",
-			"Integración de dominio propio (ej. parfums.com)",
+			"Integración de dominio propio (ej. parfumsoft.com)",
 		],
 	},
 	{
@@ -174,7 +174,7 @@ const FAQS = [
 	},
 	{
 		q: "¿Puedo usar mi propio dominio?",
-		a: "Sí, desde el plan EDP en adelante puedes conectar tu dominio propio. Todos los planes incluyen al menos un subdominio gratuito como tutienda.parfumscr.com.",
+		a: "Sí, desde el plan EDP en adelante puedes conectar tu dominio propio. Todos los planes incluyen al menos un subdominio gratuito como tutienda.parfumsoft.com.",
 	},
 	{
 		q: "¿Puedo cambiar de plan en cualquier momento?",
@@ -241,7 +241,7 @@ const StoreCard = ({ store, i }) => {
 				navigate(
 					(window.location.href = store.customDomain
 						? `https://${store.customDomain}`
-						: `https://${store.slug}.parfumscr.com`),
+						: `https://${store.slug}.parfumsoft.com`),
 				)
 			}
 			className="group flex items-center gap-4 p-5 rounded-2xl border-2 border-second/50 text-left transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
@@ -257,7 +257,7 @@ const StoreCard = ({ store, i }) => {
 					{store.storeName}
 				</p>
 				<p className="text-xs text-first/35 truncate">
-					{store.slug}.parfumscr.com
+					{store.slug}.parfumsoft.com
 				</p>
 				<p className="text-xs text-first/35 truncate">
 					{storeProductsLength}{" "}
@@ -346,7 +346,7 @@ const PlanCard = ({ plan, index }) => {
 	const wsNumber = import.meta.env.VITE_SUPER_ADMIN_WS;
 
 	const message = encodeURIComponent(
-		`Hola! Me interesa el Plan ${plan.name} de Parfums (${plan.price}${plan.period}). ¿Me puedes dar más información?`,
+		`Hola! Me interesa el Plan ${plan.name} de Parfumsoft (${plan.price}${plan.period}). ¿Me puedes dar más información?`,
 	);
 	const wsUrl = `https://wa.me/${wsNumber}?text=${message}`;
 
@@ -835,7 +835,7 @@ const CallToAction = () => {
 						color: "color-mix(in srgb, var(--color-first) 45%, transparent)",
 					}}
 				>
-					Únete a las tiendas que ya venden con Parfumscr. Sin comisiones, sin
+					Únete a las tiendas que ya venden con Parfumsoft. Sin comisiones, sin
 					complicaciones.
 				</p>
 				<div className="flex flex-col items-center gap-3 mt-2">

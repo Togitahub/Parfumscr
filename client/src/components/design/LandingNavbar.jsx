@@ -20,7 +20,7 @@ const LandingNavbar = () => {
 						P
 					</div>
 					<span className="font-semibold text-base text-first tracking-tight hidden sm:block">
-						Parfumscr
+						Parfumsoft
 					</span>
 				</NavLink>
 
