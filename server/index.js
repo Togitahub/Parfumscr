@@ -22,7 +22,10 @@ if (!process.env.MONGO_URI) {
 	process.exit(1);
 }
 
-const whitelist = ["https://parfumssoft.com", "https://www.parfumssoft.com"];
+const whitelist = [
+	"https://parfumssoft.com",
+	"https://www.parfumssoft.com, https://parfumscr-mauve.vercel.app",
+];
 
 const corsOptions = {
 	origin: function (origin, callback) {
