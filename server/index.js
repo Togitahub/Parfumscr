@@ -22,7 +22,15 @@ if (!process.env.MONGO_URI) {
 	process.exit(1);
 }
 
-app.use(cors());
+const cors = require("cors");
+
+const corsOptions = {
+	origin: "https://obc-portfolio.vercel.app",
+	optionsSuccessStatus: 200, // Para compatibilidad con navegadores antiguos
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
