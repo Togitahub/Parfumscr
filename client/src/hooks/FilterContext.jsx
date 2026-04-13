@@ -51,6 +51,12 @@ const DEFAULT_FILTERS = {
 	isDecant: null,
 };
 
+const getDiscountedPrice = (price, discount) => {
+	const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
+
+	return discountedPrice;
+};
+
 export const FilterProvider = ({ children, pageSize = 12 }) => {
 	const [search, setSearchRaw] = useState("");
 	const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -165,15 +171,21 @@ export const FilterProvider = ({ children, pageSize = 12 }) => {
 
 			// 7. Precio mínimo
 			if (mergedFilters.priceMin !== "") {
-				result = result.filter(
-					(p) => p.price >= parseFloat(mergedFilters.priceMin),
+				result = result.filter((p) =>
+					p.discount
+						? getDiscountedPrice(p.price, p.discount) >=
+							parseFloat(mergedFilters.priceMin)
+						: p.price >= parseFloat(mergedFilters.priceMin),
 				);
 			}
 
 			// 8. Precio máximo
 			if (mergedFilters.priceMax !== "") {
-				result = result.filter(
-					(p) => p.price <= parseFloat(mergedFilters.priceMax),
+				result = result.filter((p) =>
+					p.discount
+						? getDiscountedPrice(p.price, p.discount) <=
+							parseFloat(mergedFilters.priceMax)
+						: p.price <= parseFloat(mergedFilters.priceMax),
 				);
 			}
 

@@ -17,8 +17,8 @@
 	--color-first: var(--color-first);
 	--color-second: var(--color-second);
 
+	--color-warning: #ffec40;
 	--color-error: #dd1616;
-	--color-warning: #d6a811;
 	--color-success: #16dd16;
 }
 

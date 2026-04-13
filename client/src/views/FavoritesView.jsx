@@ -159,10 +159,9 @@ const FavoritesView = () => {
 	const rawFavoriteProducts = favoritesData?.getUserFavorites?.products ?? [];
 
 	const storeProductsMap = Object.fromEntries(
-		(storeProductsData?.getStoreProducts ?? []).map((sp) => [
-			sp.product.id,
-			sp,
-		]),
+		(storeProductsData?.getStoreProducts ?? [])
+			.filter((sp) => sp?.product)
+			.map((sp) => [sp.product.id, sp]),
 	);
 
 	const favoriteProducts = rawFavoriteProducts
@@ -232,6 +231,15 @@ const FavoritesView = () => {
 					className="flex flex-col gap-2"
 					style={{ animation: "fadeUp 0.4s ease both" }}
 				>
+					<button
+						onClick={() => navigate(-1)}
+						className="flex items-center gap-1.5 mb-4 text-first/40 hover:text-first/70 transition-colors w-fit cursor-pointer"
+						style={{ animation: "fadeUp 0.4s ease both" }}
+					>
+						<BsArrowLeft className="w-4 h-4" />
+						Volver
+					</button>
+
 					{/* Eyebrow */}
 					<p
 						className="text-[10px] font-semibold uppercase tracking-[0.3em]"

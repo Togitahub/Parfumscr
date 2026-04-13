@@ -23,9 +23,16 @@ const CATEGORY_OPTIONS = [
 ];
 
 const toDateInput = (dateStr) => {
-	if (!dateStr) return new Date().toISOString().split("T")[0];
-	const d = new Date(isNaN(Number(dateStr)) ? dateStr : Number(dateStr));
-	return d.toISOString().split("T")[0];
+	if (!dateStr) {
+		const now = new Date();
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+	}
+	const raw = isNaN(Number(dateStr)) ? dateStr : Number(dateStr);
+	const d = new Date(raw);
+	const y = d.getUTCFullYear();
+	const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+	const day = String(d.getUTCDate()).padStart(2, "0");
+	return `${y}-${m}-${day}`;
 };
 
 const buildInitialForm = (expense) => ({

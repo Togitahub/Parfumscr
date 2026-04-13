@@ -121,7 +121,9 @@ const EntityView = ({ type }) => {
 		favoritesData?.getUserFavorites?.products?.map((p) => p.id) ?? [];
 
 	const storeProductIds = new Set(
-		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
+		storeProductsData?.getStoreProducts
+			?.filter((sp) => sp?.product)
+			.map((sp) => sp.product.id) ?? [],
 	);
 
 	const allEntityProducts = entity?.products ?? [];

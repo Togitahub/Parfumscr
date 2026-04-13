@@ -364,7 +364,9 @@ const ProductsSection = ({ myStoreId }) => {
 	const notes = notesData?.getNotes ?? [];
 
 	const storeProductIds = new Set(
-		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
+		storeProductsData?.getStoreProducts
+			?.filter((sp) => sp?.product)
+			.map((sp) => sp.product.id) ?? [],
 	);
 
 	const handleEdit = (product) => {

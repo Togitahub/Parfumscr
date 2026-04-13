@@ -198,16 +198,6 @@ const Hero = ({ storeProductsQty }) => {
 					<div className="lg:col-span-7 flex flex-col gap-8">
 						<div className="flex flex-col gap-1">
 							<h1
-								className="hero-display font-light leading-none"
-								style={{
-									fontSize: "clamp(3.5rem, 8vw, 7.5rem)",
-									letterSpacing: "-0.02em",
-								}}
-							>
-								<SplitText text={storeName} baseDelay={200} />
-							</h1>
-
-							<div
 								style={{
 									animation: "heroFadeUp 1s ease both",
 									animationDelay: "600ms",
@@ -216,7 +206,7 @@ const Hero = ({ storeProductsQty }) => {
 								<span
 									className="hero-italic font-light block"
 									style={{
-										fontSize: "clamp(2rem, 5vw, 5rem)",
+										fontSize: "clamp(2.5rem, 5vw, 5rem)",
 										color: "var(--color-second)",
 										lineHeight: 1.1,
 										letterSpacing: "0.01em",
@@ -224,7 +214,7 @@ const Hero = ({ storeProductsQty }) => {
 								>
 									{tagline}
 								</span>
-							</div>
+							</h1>
 						</div>
 
 						<div

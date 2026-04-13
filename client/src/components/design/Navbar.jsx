@@ -20,12 +20,14 @@ import { useAuth } from "../../hooks/AuthContext";
 import { useCart } from "../../hooks/CartContext";
 import { useStore } from "../../hooks/StoreContext";
 
-import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
-import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
-import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
 import { GET_NOTES } from "../../graphql/note/NoteQueries";
+import { GET_BRANDS } from "../../graphql/brand/BrandQueries";
+import { GET_SEGMENTS } from "../../graphql/segment/SegmentQueries";
+import { GET_CATEGORIES } from "../../graphql/category/CategoryQueries";
+import { GET_USER_FAVORITES } from "../../graphql/favorites/FavoritesQueries";
 
 import Button from "../common/Button";
+import { Spinner } from "../interface/LoadingUi";
 
 // ── Hook: cierra al hacer click fuera ────────────────────────────────────────
 
@@ -244,27 +246,39 @@ const IconLink = ({ to, icon, label, badge }) => (
 // ── NavBar principal ─────────────────────────────────────────────────────────
 
 const NavBar = () => {
+	const navigate = useNavigate();
+
 	const { store } = useStore();
 	const { totalItems } = useCart();
 	const { user, isAuthenticated, logout } = useAuth();
 
-	const [mobileOpen, setMobileOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
-
-	const navigate = useNavigate();
+	const [mobileOpen, setMobileOpen] = useState(false);
 
 	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
 
+	const { data: notesData, loading: loadingNotes } = useQuery(GET_NOTES);
 	const { data: brandsData, loading: loadingBrands } = useQuery(GET_BRANDS);
+	const { data: segmentsData, loading: loadingSegs } = useQuery(GET_SEGMENTS);
+
+	const { data: favsData, loading: loadingFavs } = useQuery(
+		GET_USER_FAVORITES,
+		{
+			variables: { userId: user?.id },
+			skip: !isAuthenticated,
+		},
+	);
+
 	const { data: categoriesData, loading: loadingCats } =
 		useQuery(GET_CATEGORIES);
-	const { data: segmentsData, loading: loadingSegs } = useQuery(GET_SEGMENTS);
-	const { data: notesData, loading: loadingNotes } = useQuery(GET_NOTES);
 
-	const brands = brandsData?.getBrands ?? [];
-	const categories = categoriesData?.getCategories ?? [];
-	const segments = segmentsData?.getSegments ?? [];
 	const notes = notesData?.getNotes ?? [];
+	const brands = brandsData?.getBrands ?? [];
+	const favs = favsData?.getUserFavorites ?? [];
+	const segments = segmentsData?.getSegments ?? [];
+	const categories = categoriesData?.getCategories ?? [];
+
+	const favsQty = favs?.products?.length;
 
 	useEffect(() => {
 		const onScroll = () => setScrolled(window.scrollY > 12);
@@ -434,11 +448,16 @@ const NavBar = () => {
 							<>
 								{!isAdmin && (
 									<>
-										<IconLink
-											to="/store/favorites"
-											icon={<BsHeart className="w-4 h-4" />}
-											label="Favoritos"
-										/>
+										{loadingFavs ? (
+											<Spinner />
+										) : (
+											<IconLink
+												to="/store/favorites"
+												icon={<BsHeart className="w-4 h-4" />}
+												label="Favoritos"
+												badge={favsQty}
+											/>
+										)}
 										<IconLink
 											to="/store/orders"
 											icon={<BsReceipt className="w-4 h-4" />}

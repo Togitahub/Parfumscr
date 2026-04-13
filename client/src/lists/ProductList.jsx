@@ -45,29 +45,12 @@ import { useFilters } from "../hooks/FilterContext";
 
 // ── Shimmer skeleton ──────────────────────────────────────────────────────────
 
-const ProductSkeleton = ({ variant = "grid" }) => (
-	<div
-		className={[
-			"rounded-2xl border border-first/8 overflow-hidden",
-			variant === "list" ? "flex gap-4 p-4" : "",
-		].join(" ")}
-	>
+const ProductSkeleton = () => (
+	<div className="rounded-2xl border border-first/8 overflow-hidden">
 		{/* Image */}
-		<div
-			className={[
-				"bg-first/5 shimmer",
-				variant === "list"
-					? "w-24 h-24 rounded-xl shrink-0"
-					: "aspect-4/3 w-full",
-			].join(" ")}
-		/>
+		<div className="bg-first/5 shimmer aspect-4/3 w-full" />
 		{/* Content */}
-		<div
-			className={[
-				"flex flex-col gap-3 flex-1",
-				variant === "list" ? "" : "p-4",
-			].join(" ")}
-		>
+		<div className="flex flex-col gap-3 flex-1 p-4">
 			<div className="h-2.5 w-1/3 bg-first/8 rounded-full shimmer" />
 			<div className="h-4 w-2/3 bg-first/8 rounded-full shimmer" />
 			<div className="h-3 w-1/2 bg-first/8 rounded-full shimmer" />
@@ -112,7 +95,6 @@ const ProductList = ({
 	className = "",
 }) => {
 	const { applyFilters, activeFilterCount, search, filterKey } = useFilters();
-	const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const prevKeyRef = useRef("");
 
@@ -136,34 +118,6 @@ const ProductList = ({
 			<div className="flex items-center gap-3">
 				<SearchBar className="flex-1" />
 
-				{/* View mode toggle */}
-				<div className="flex items-center gap-1 p-1 rounded-xl border border-first/10 bg-main shrink-0">
-					<button
-						onClick={() => setViewMode("grid")}
-						className={[
-							"w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer",
-							viewMode === "grid"
-								? "bg-second text-main shadow-sm"
-								: "text-first/35 hover:text-first/70",
-						].join(" ")}
-						aria-label="Vista grilla"
-					>
-						<BsGrid3X3Gap className="w-3.5 h-3.5" />
-					</button>
-					<button
-						onClick={() => setViewMode("list")}
-						className={[
-							"w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer",
-							viewMode === "list"
-								? "bg-second text-main shadow-sm"
-								: "text-first/35 hover:text-first/70",
-						].join(" ")}
-						aria-label="Vista lista"
-					>
-						<BsList className="w-4 h-4" />
-					</button>
-				</div>
-
 				{/* Filter toggle (mobile / sidebar trigger) */}
 				{showFilters && (
 					<button
@@ -185,17 +139,24 @@ const ProductList = ({
 				)}
 			</div>
 
+			{/* ── Mobile filters drawer ── */}
+			{showFilters && filtersOpen && (
+				<div className="lg:hidden">
+					<Filters
+						locked={locked}
+						brands={brands}
+						categories={categories}
+						segments={segments}
+						notes={notes}
+					/>
+				</div>
+			)}
+
 			{/* ── Layout: sidebar + content ── */}
 			<div className="flex gap-6 items-start">
 				{/* ── Filters sidebar ── */}
 				{showFilters && (
-					<aside
-						className={[
-							"shrink-0 w-60",
-							// En mobile se muestra/oculta; en desktop siempre visible
-							"hidden lg:block",
-						].join(" ")}
-					>
+					<aside className={["shrink-0 w-60", "hidden lg:block"].join(" ")}>
 						<Filters
 							locked={locked}
 							brands={brands}
@@ -204,44 +165,6 @@ const ProductList = ({
 							notes={notes}
 						/>
 					</aside>
-				)}
-
-				{/* ── Mobile filters drawer ── */}
-				{showFilters && filtersOpen && (
-					<div className="lg:hidden fixed inset-0 z-40 flex">
-						{/* Overlay */}
-						<div
-							className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-							onClick={() => setFiltersOpen(false)}
-							style={{ animation: "fadeIn 0.2s ease both" }}
-						/>
-						{/* Panel */}
-						<div
-							className="relative ml-auto w-72 h-full bg-main overflow-y-auto border-l border-first/10"
-							style={{ animation: "fadeUp 0.25s ease both" }}
-						>
-							<div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-first/10 bg-main z-10">
-								<span className="text-sm font-semibold text-first">
-									Filtros
-								</span>
-								<button
-									onClick={() => setFiltersOpen(false)}
-									className="w-8 h-8 rounded-lg flex items-center justify-center text-first/40 hover:text-first/70 hover:bg-first/8 transition-all cursor-pointer"
-								>
-									✕
-								</button>
-							</div>
-							<div className="p-4">
-								<Filters
-									locked={locked}
-									brands={brands}
-									categories={categories}
-									segments={segments}
-									notes={notes}
-								/>
-							</div>
-						</div>
-					</div>
 				)}
 
 				{/* ── Product grid / list ── */}
@@ -260,15 +183,9 @@ const ProductList = ({
 
 					{/* Loading skeletons */}
 					{loading && (
-						<div
-							className={[
-								viewMode === "grid"
-									? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-									: "flex flex-col gap-3",
-							].join(" ")}
-						>
+						<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
 							{Array.from({ length: skeletonCount }).map((_, i) => (
-								<ProductSkeleton key={i} variant={viewMode} />
+								<ProductSkeleton key={i} />
 							))}
 						</div>
 					)}
@@ -289,18 +206,14 @@ const ProductList = ({
 					{!loading && items.length > 0 && (
 						<div
 							key={animKey}
-							className={[
-								viewMode === "grid"
-									? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-									: "flex flex-col gap-3",
-							].join(" ")}
+							className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
 						>
 							{items.map((product, i) => (
 								<AnimatedCard key={product.id} index={i}>
 									<div className="relative group/item">
 										<ProductCard
 											product={product}
-											variant={viewMode === "list" ? "compact" : "default"}
+											variant={"default"}
 											isFavorite={favorites.includes(product.id)}
 											onToggleFavorite={onToggleFavorite}
 											onAddToCart={onAddToCart}
@@ -338,7 +251,7 @@ const ProductList = ({
 													iconOnly
 													size="xs"
 													variant="ghost"
-													icon={<BsDroplet />} // ← agregar
+													icon={<BsDroplet />}
 													onClick={(e) => {
 														e.stopPropagation();
 														onAddDecant?.(product);

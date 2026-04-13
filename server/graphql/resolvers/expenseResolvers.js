@@ -1,12 +1,13 @@
 import Expense from "../../models/Expense.js";
 import Store from "../../models/Store.js";
 
-export const getDateFilter = (period) => {
+export const getDateFilter = (period, startDate, endDate) => {
 	const now = new Date();
 
 	if (period === "day") {
 		const start = new Date(now);
-		start.setDate(now.getDate() - 1);
+		start.setHours(0, 0, 0, 0);
+		return { $gte: start };
 	}
 
 	if (period === "week") {
@@ -23,18 +24,19 @@ export const getDateFilter = (period) => {
 		return { $gte: new Date(now.getFullYear(), 0, 1) };
 	}
 
-	if (period === "custom" && startDate && endDate) {
-		const start = new Date(startDate);
-		start.setHours(0, 0, 0, 0);
-		const end = new Date(endDate);
-		end.setHours(23, 59, 59, 999);
-		return { $gte: start, $lte: end };
-	}
-
-	if (period === "custom" && startDate) {
-		const start = new Date(startDate);
-		start.setHours(0, 0, 0, 0);
-		return { $gte: start };
+	if (period === "custom") {
+		if (startDate && endDate) {
+			const [sy, sm, sd] = startDate.split("-").map(Number);
+			const [ey, em, ed] = endDate.split("-").map(Number);
+			const start = new Date(sy, sm - 1, sd, 0, 0, 0, 0);
+			const end = new Date(ey, em - 1, ed, 23, 59, 59, 999);
+			return { $gte: start, $lte: end };
+		}
+		if (startDate) {
+			const [sy, sm, sd] = startDate.split("-").map(Number);
+			const start = new Date(sy, sm - 1, sd, 0, 0, 0, 0);
+			return { $gte: start };
+		}
 	}
 
 	return null;
@@ -42,23 +44,31 @@ export const getDateFilter = (period) => {
 
 const expenseResolvers = {
 	Query: {
-		getExpenses: async (_, { storeId, period }, { user }) => {
+		getExpenses: async (
+			_,
+			{ storeId, period, startDate, endDate },
+			{ user },
+		) => {
 			if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role))
 				throw new Error("Unauthorized");
 
 			const filter = { store: storeId };
-			const dateFilter = getDateFilter(period);
+			const dateFilter = getDateFilter(period, startDate, endDate);
 			if (dateFilter) filter.date = dateFilter;
 
 			return await Expense.find(filter).sort({ date: -1 });
 		},
 
-		getExpenseSummary: async (_, { storeId, period }, { user }) => {
+		getExpenseSummary: async (
+			_,
+			{ storeId, period, startDate, endDate },
+			{ user },
+		) => {
 			if (!user || !["ADMIN", "SUPER_ADMIN"].includes(user.role))
 				throw new Error("Unauthorized");
 
 			const filter = { store: storeId };
-			const dateFilter = getDateFilter(period);
+			const dateFilter = getDateFilter(period, startDate, endDate);
 			if (dateFilter) filter.date = dateFilter;
 
 			const expenses = await Expense.find(filter);
@@ -103,7 +113,12 @@ const expenseResolvers = {
 				amount,
 				category,
 				description,
-				date: date ? new Date(date) : new Date(),
+				date: date
+					? (() => {
+							const [y, m, d] = date.split("-").map(Number);
+							return new Date(y, m - 1, d, 12, 0, 0, 0);
+						})()
+					: new Date(),
 				notes: notes || null,
 			});
 		},
@@ -126,7 +141,10 @@ const expenseResolvers = {
 			if (amount !== undefined) update.amount = amount;
 			if (category !== undefined) update.category = category;
 			if (description !== undefined) update.description = description;
-			if (date !== undefined) update.date = new Date(date);
+			if (date !== undefined) {
+				const [y, m, d] = date.split("-").map(Number);
+				update.date = new Date(y, m - 1, d, 12, 0, 0, 0);
+			}
 			if (notes !== undefined) update.notes = notes || null;
 
 			return await Expense.findByIdAndUpdate(id, update, { new: true });

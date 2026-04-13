@@ -16,8 +16,11 @@
  */
 
 import { useState } from "react";
+
 import { BsSliders, BsX, BsChevronDown, BsChevronUp } from "react-icons/bs";
+
 import Button from "../common/Button";
+
 import { useFilters } from "../../hooks/FilterContext";
 
 // ── Collapsible section ───────────────────────────────────────────────────────
@@ -136,7 +139,7 @@ const Filters = ({
 			</div>
 
 			{/* ── Filter sections ── */}
-			<div className="flex flex-col px-4 overflow-y-auto">
+			<div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col px-4 gap-x-4 overflow-y-auto">
 				{/* Tipo: Perfume / Decant — oculto si locked.isDecant está definido */}
 				{locked.isDecant === undefined && (
 					<Section title="Tipo">
@@ -268,25 +271,27 @@ const Filters = ({
 
 				{/* Acordes olfativos — chips multi-select */}
 				{notes.length > 0 && (
-					<Section title="Acordes olfativos" defaultOpen={false}>
-						<div className="flex flex-wrap gap-1.5 pt-1">
-							{notes.map((n) => (
-								<ChipOption
-									key={n.id}
-									label={n.name}
-									active={filters.noteIds.includes(n.id)}
-									onClick={() => toggleNote(n.id)}
-								/>
-							))}
-						</div>
-						{filters.noteIds.length > 0 && (
-							<p className="text-xs text-first/35 mt-1">
-								Mostrando perfumes con{" "}
-								<span className="text-second font-medium">todos</span> los
-								acordes seleccionadas
-							</p>
-						)}
-					</Section>
+					<div className="col-span-full lg:col-auto">
+						<Section title="Acordes olfativos" defaultOpen={false}>
+							<div className="flex flex-wrap gap-1.5 pt-1">
+								{notes.map((n) => (
+									<ChipOption
+										key={n.id}
+										label={n.name}
+										active={filters.noteIds.includes(n.id)}
+										onClick={() => toggleNote(n.id)}
+									/>
+								))}
+							</div>
+							{filters.noteIds.length > 0 && (
+								<p className="text-xs text-first/35 mt-1">
+									Mostrando perfumes con{" "}
+									<span className="text-second font-medium">todos</span> los
+									acordes seleccionadas
+								</p>
+							)}
+						</Section>
+					</div>
 				)}
 			</div>
 		</div>

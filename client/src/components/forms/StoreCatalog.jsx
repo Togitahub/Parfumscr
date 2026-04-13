@@ -133,18 +133,20 @@ const StoreCatalog = ({ storeId }) => {
 				</div>
 			) : (
 				<div className="grid lg:grid-cols-3 gap-3">
-					{filteredItems.map((sp) => {
-						const editValues = getEditing(sp);
-						const product = sp.product;
+					{filteredItems
+						.filter((sp) => sp?.product)
+						.map((sp) => {
+							const editValues = getEditing(sp);
+							const product = sp.product;
 
-						return (
-							<div
-								key={product.id}
-								className="flex flex-col gap-3 px-4 py-3 rounded-xl border border-second/30 bg-second/4"
-							>
-								{/* Product header */}
-								<div className="flex items-center gap-3">
-									{/* {product.images?.[0] && (
+							return (
+								<div
+									key={product.id}
+									className="flex flex-col gap-3 px-4 py-3 rounded-xl border border-second/30 bg-second/4"
+								>
+									{/* Product header */}
+									<div className="flex items-center gap-3">
+										{/* {product.images?.[0] && (
 										<div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
 											<img
 												src={getOptimizedUrl(product.images[0], "thumb")}
@@ -153,150 +155,152 @@ const StoreCatalog = ({ storeId }) => {
 											/>
 										</div>
 									)} */}
-									<div className="flex-1 min-w-0">
-										<p className="text-sm font-medium text-first truncate">
-											{product.name}{" "}
-											{product.isDecant ? (
-												<Badge children={"Decant"} variant="warning" />
-											) : (
-												<Badge children={"Perfume"} variant="success" />
-											)}
-										</p>
-										<p className="text-xs text-first/40">
-											{product.brand?.name}
-											{product.size && ` · ${product.size}`}
-											{product.isDecant ? " · Decant" : " · Perfume"}
-										</p>
+										<div className="flex-1 min-w-0">
+											<p className="text-sm font-medium text-first truncate">
+												{product.name}{" "}
+												{product.isDecant ? (
+													<Badge children={"Decant"} variant="warning" />
+												) : (
+													<Badge children={"Perfume"} variant="success" />
+												)}
+											</p>
+											<p className="text-xs text-first/40">
+												{product.brand?.name}
+												{product.size && ` · ${product.size}`}
+												{product.isDecant ? " · Decant" : " · Perfume"}
+											</p>
+										</div>
+										<Button
+											iconOnly
+											size="sm"
+											variant="ghost"
+											icon={<BsTrash />}
+											onClick={() => handleRemove(product.id)}
+											disabled={removing}
+											className="hover:text-error!"
+										/>
 									</div>
-									<Button
-										iconOnly
-										size="sm"
-										variant="ghost"
-										icon={<BsTrash />}
-										onClick={() => handleRemove(product.id)}
-										disabled={removing}
-										className="hover:text-error!"
-									/>
-								</div>
 
-								{/* Price / stock / discount override */}
-								<div className="flex gap-3">
-									<div className="flex flex-col gap-1 flex-1">
-										<label className="text-xs text-first/40">Precio (₡)</label>
-										<input
-											type="number"
-											placeholder={`Base: ${sp.price ?? product.price}`}
-											value={editValues.price}
-											onChange={(e) =>
-												setEditing((prev) => ({
-													...prev,
-													[product.id]: {
-														...editValues,
-														price: e.target.value,
-													},
-												}))
-											}
-											onBlur={() => {
-												if (editValues.price !== "") {
-													updateStoreProduct({
-														variables: {
-															productId: product.id,
-															price: parseFloat(editValues.price),
-															stock:
-																editValues.stock !== ""
-																	? parseInt(editValues.stock)
-																	: undefined,
-															discount:
-																editValues.discount !== ""
-																	? parseFloat(editValues.discount)
-																	: undefined,
+									{/* Price / stock / discount override */}
+									<div className="flex gap-3">
+										<div className="flex flex-col gap-1 flex-1">
+											<label className="text-xs text-first/40">
+												Precio (₡)
+											</label>
+											<input
+												type="number"
+												placeholder={`Base: ${sp.price ?? product.price}`}
+												value={editValues.price}
+												onChange={(e) =>
+													setEditing((prev) => ({
+														...prev,
+														[product.id]: {
+															...editValues,
+															price: e.target.value,
 														},
-													});
+													}))
 												}
-											}}
-											className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
-										/>
-									</div>
-									<div className="flex flex-col gap-1 flex-1">
-										<label className="text-xs text-first/40">Stock</label>
-										<input
-											type="number"
-											placeholder={`Base: ${sp.stock ?? product.stock}`}
-											value={editValues.stock}
-											onChange={(e) =>
-												setEditing((prev) => ({
-													...prev,
-													[product.id]: {
-														...editValues,
-														stock: e.target.value,
-													},
-												}))
-											}
-											onBlur={() => {
-												if (editValues.stock !== "") {
-													updateStoreProduct({
-														variables: {
-															productId: product.id,
-															price:
-																editValues.price !== ""
-																	? parseFloat(editValues.price)
-																	: undefined,
-															stock: parseInt(editValues.stock),
-															discount:
-																editValues.discount !== ""
-																	? parseFloat(editValues.discount)
-																	: undefined,
+												onBlur={() => {
+													if (editValues.price !== "") {
+														updateStoreProduct({
+															variables: {
+																productId: product.id,
+																price: parseFloat(editValues.price),
+																stock:
+																	editValues.stock !== ""
+																		? parseInt(editValues.stock)
+																		: undefined,
+																discount:
+																	editValues.discount !== ""
+																		? parseFloat(editValues.discount)
+																		: undefined,
+															},
+														});
+													}
+												}}
+												className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
+											/>
+										</div>
+										<div className="flex flex-col gap-1 flex-1">
+											<label className="text-xs text-first/40">Stock</label>
+											<input
+												type="number"
+												placeholder={`Base: ${sp.stock ?? product.stock}`}
+												value={editValues.stock}
+												onChange={(e) =>
+													setEditing((prev) => ({
+														...prev,
+														[product.id]: {
+															...editValues,
+															stock: e.target.value,
 														},
-													});
+													}))
 												}
-											}}
-											className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
-										/>
-									</div>
-									<div className="flex flex-col gap-1 flex-1">
-										<label className="text-xs text-first/40">
-											Descuento (%)
-										</label>
-										<input
-											type="number"
-											min="0"
-											max="100"
-											placeholder={`Base: ${sp.discount ?? 0}%`}
-											value={editValues.discount}
-											onChange={(e) =>
-												setEditing((prev) => ({
-													...prev,
-													[product.id]: {
-														...editValues,
-														discount: e.target.value,
-													},
-												}))
-											}
-											onBlur={() => {
-												if (editValues.discount !== "") {
-													updateStoreProduct({
-														variables: {
-															productId: product.id,
-															price:
-																editValues.price !== ""
-																	? parseFloat(editValues.price)
-																	: undefined,
-															stock:
-																editValues.stock !== ""
-																	? parseInt(editValues.stock)
-																	: undefined,
-															discount: parseFloat(editValues.discount),
+												onBlur={() => {
+													if (editValues.stock !== "") {
+														updateStoreProduct({
+															variables: {
+																productId: product.id,
+																price:
+																	editValues.price !== ""
+																		? parseFloat(editValues.price)
+																		: undefined,
+																stock: parseInt(editValues.stock),
+																discount:
+																	editValues.discount !== ""
+																		? parseFloat(editValues.discount)
+																		: undefined,
+															},
+														});
+													}
+												}}
+												className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
+											/>
+										</div>
+										<div className="flex flex-col gap-1 flex-1">
+											<label className="text-xs text-first/40">
+												Descuento (%)
+											</label>
+											<input
+												type="number"
+												min="0"
+												max="100"
+												placeholder={`Base: ${sp.discount ?? 0}%`}
+												value={editValues.discount}
+												onChange={(e) =>
+													setEditing((prev) => ({
+														...prev,
+														[product.id]: {
+															...editValues,
+															discount: e.target.value,
 														},
-													});
+													}))
 												}
-											}}
-											className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
-										/>
+												onBlur={() => {
+													if (editValues.discount !== "") {
+														updateStoreProduct({
+															variables: {
+																productId: product.id,
+																price:
+																	editValues.price !== ""
+																		? parseFloat(editValues.price)
+																		: undefined,
+																stock:
+																	editValues.stock !== ""
+																		? parseInt(editValues.stock)
+																		: undefined,
+																discount: parseFloat(editValues.discount),
+															},
+														});
+													}
+												}}
+												className="w-full h-8 px-2 rounded-lg border border-first/15 bg-main text-first text-xs focus:outline-none focus:ring-2 focus:ring-second/30"
+											/>
+										</div>
 									</div>
 								</div>
-							</div>
-						);
-					})}
+							);
+						})}
 				</div>
 			)}
 			{/* Pagination */}

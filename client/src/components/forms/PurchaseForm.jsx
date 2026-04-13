@@ -300,9 +300,21 @@ const PurchaseForm = ({
 
 					<div className="flex flex-col gap-2 w-full pt-2">
 						{!isGuest ? (
-							<Button fullWidth onClick={handleClose}>
-								Ver mis órdenes
-							</Button>
+							<>
+								<Button fullWidth onClick={handleClose}>
+									Ver mis órdenes
+								</Button>
+								<Button
+									fullWidth
+									onClick={() => {
+										setDone(false);
+										onClose();
+										navigate("/store");
+									}}
+								>
+									Seguir explorando
+								</Button>
+							</>
 						) : (
 							<Button
 								fullWidth
@@ -315,17 +327,6 @@ const PurchaseForm = ({
 								Seguir explorando
 							</Button>
 						)}
-						<Button
-							fullWidth
-							variant="ghost"
-							onClick={() => {
-								setDone(false);
-								onClose();
-								navigate("/store");
-							}}
-						>
-							Seguir comprando
-						</Button>
 					</div>
 				</div>
 			</Modal>

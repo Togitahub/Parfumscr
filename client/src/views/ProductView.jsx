@@ -19,6 +19,7 @@ import {
 	BsCheckCircle,
 	BsXCircle,
 	BsChevronRight,
+	BsInfoCircle,
 } from "react-icons/bs";
 
 // Context
@@ -240,7 +241,9 @@ const ProductView = () => {
 	const product = data?.getProduct;
 
 	const storeProductIds = new Set(
-		storeProductsData?.getStoreProducts?.map((sp) => sp.product.id) ?? [],
+		storeProductsData?.getStoreProducts
+			?.filter((sp) => sp?.product)
+			.map((sp) => sp.product.id) ?? [],
 	);
 
 	const storeProduct = storeProductsData?.getStoreProducts?.find(
@@ -327,7 +330,7 @@ const ProductView = () => {
 	const handleWhatsApp = () => {
 		const item = selectedDecant ?? product;
 		const msg = encodeURIComponent(
-			`Hola! Me interesa este perfume:\n\n*${product.name}*${item?.size ? ` (${item.size})` : ""}\nPrecio: ${formatPrice(discountedPrice)}\n\n¿Está disponible?`,
+			`Hola! Me interesa este perfume:\n\n*${product.name} ${product.brand.name}*${item?.size ? ` (${item.size})` : ""}\nPrecio: ${formatPrice(discountedPrice(product.discount, product.price))}`,
 		);
 		window.open(`https://wa.me/?text=${msg}`, "_blank");
 	};
@@ -495,16 +498,18 @@ const ProductView = () => {
 									<>
 										<BsXCircle className="w-3.5 h-3.5 text-error/60" />
 										<span className="text-error/60">Sin stock disponible</span>
+										<span>Encargalo por WhatsApp</span>
+									</>
+								) : storeStock > 5 ? (
+									<>
+										<BsCheckCircle className={`w-3.5 h-3.5 text-success`} />
+										<span className="text-first/40">En Stock</span>
 									</>
 								) : (
 									<>
-										<BsCheckCircle
-											className={`w-3.5 h-3.5 text-${storeStock < 5 ? "warning" : "success"}`}
-										/>
+										<BsInfoCircle className={`w-3.5 h-3.5 text-warning`} />
 										<span className="text-first/40">
-											{storeStock <= 5
-												? `Solo ${storeStock} disponible${storeStock !== 1 ? "s" : ""}`
-												: "En stock"}
+											Solo {storeStock} disp.{" "}
 										</span>
 									</>
 								)}
@@ -610,7 +615,7 @@ const ProductView = () => {
 								to={`/store/segment/${product.segment?.id}`}
 								navigate={navigate}
 							/>
-							{product.size && !hasDecants && (
+							{product.size && (
 								<InfoRow
 									icon={<BsBoxSeam className="w-3.5 h-3.5" />}
 									label="Tamaño"

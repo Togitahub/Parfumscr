@@ -114,13 +114,15 @@ const POSView = ({ storeId }) => {
 	// ── Filters Config ────────────────────────────────────────────────────────────
 
 	const adaptedProducts = useMemo(() => {
-		return (data?.getStoreProducts ?? []).map((sp) => ({
-			...sp.product,
-			price: sp.price ?? sp.product.price,
-			stock: sp.stock ?? sp.product.stock ?? 0,
-			discount: sp.discount ?? 0,
-			originalData: sp,
-		}));
+		return (data?.getStoreProducts ?? [])
+			.filter((sp) => sp?.product)
+			.map((sp) => ({
+				...sp.product,
+				price: sp.price ?? sp.product.price,
+				stock: sp.stock ?? sp.product.stock ?? 0,
+				discount: sp.discount ?? 0,
+				originalData: sp,
+			}));
 	}, [data]);
 
 	const {

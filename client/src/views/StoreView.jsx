@@ -51,12 +51,15 @@ const StoreView = () => {
 	const [removeFavorite] = useMutation(REMOVE_FAVORITE);
 
 	const storeProducts = storeProductsData?.getStoreProducts ?? [];
-	const products = storeProducts.map((sp) => ({
-		...sp.product,
-		price: sp.price ?? sp.product.price,
-		stock: sp.stock ?? sp.product.stock,
-		discount: sp.discount ?? sp.product.discount ?? 0,
-	}));
+
+	const products = storeProducts
+		.filter((sp) => sp?.product)
+		.map((sp) => ({
+			...sp.product,
+			price: sp.price ?? sp.product.price,
+			stock: sp.stock ?? sp.product.stock,
+			discount: sp.discount ?? sp.product.discount ?? 0,
+		}));
 
 	const brands = brandsData?.getBrands ?? [];
 	const categories = categoriesData?.getCategories ?? [];
