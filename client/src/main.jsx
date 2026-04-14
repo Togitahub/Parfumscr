@@ -13,11 +13,8 @@ import { ToastProvider } from "./hooks/ToastContext.jsx";
 import { StoreProvider } from "./hooks/StoreContext.jsx";
 import { CartProvider } from "./hooks/CartContext.jsx";
 
-import { SpeedInsights } from "@vercel/speed-insights/react";
-
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
-		<SpeedInsights />
 		<ApolloProvider client={client}>
 			<BrowserRouter>
 				<AuthProvider>

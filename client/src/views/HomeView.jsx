@@ -13,7 +13,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 
-import { GET_STORE_PRODUCTS, GET_STORES } from "../graphql/store/StoreQueries";
+import { GET_STORES } from "../graphql/store/StoreQueries";
+import { getOptimizedUrl } from "../utils/ImageUtils";
 
 const FEATURES = [
 	{
@@ -229,12 +230,6 @@ const Hero = () => {
 const StoreCard = ({ store, i }) => {
 	const navigate = useNavigate();
 
-	const { data: storeProductsData } = useQuery(GET_STORE_PRODUCTS, {
-		variables: { storeId: store.id },
-	});
-	const storeProducts = storeProductsData?.getStoreProducts ?? [];
-	const storeProductsLength = storeProducts.length ?? 0;
-
 	return (
 		<button
 			onClick={() =>
@@ -244,7 +239,7 @@ const StoreCard = ({ store, i }) => {
 						: `https://${store.slug}.parfumsoft.com`),
 				)
 			}
-			className="group flex items-center gap-4 p-5 rounded-2xl border-2 border-second/50 text-left transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
+			className="w-50 lg:w-60 p-5 rounded-2xl border-2 border-second/50 transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
 			style={{
 				background: "var(--color-main)",
 				animation: "fadeUp 0.5s ease both",
@@ -252,22 +247,7 @@ const StoreCard = ({ store, i }) => {
 			}}
 		>
 			{/* Info */}
-			<div className="flex flex-col gap-1 flex-1 min-w-0">
-				<p className="text-base font-semibold text-first truncate group-hover:text-second transition-colors duration-200">
-					{store.storeName}
-				</p>
-				<p className="text-xs text-first/35 truncate">
-					{store.slug}.parfumsoft.com
-				</p>
-				<p className="text-xs text-first/35 truncate">
-					{storeProductsLength}{" "}
-					{storeProductsLength > 1 ? "Productos" : "Producto"}
-				</p>
-			</div>
-
-			<span className="text-first/20 group-hover:text-second transition-colors duration-200 shrink-0">
-				→
-			</span>
+			<img src={getOptimizedUrl(store.logo, "card")} alt={store.name} />
 		</button>
 	);
 };

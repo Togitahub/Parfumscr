@@ -23,6 +23,7 @@ if (!process.env.MONGO_URI) {
 }
 
 const whitelist = [
+	"http://localhost:5173",
 	"https://parfumsoft.com",
 	"https://www.parfumsoft.com",
 	"https://parfumscr-mauve.vercel.app",
