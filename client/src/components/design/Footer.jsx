@@ -3,12 +3,9 @@ import { BsInstagram, BsWhatsapp, BsHeart, BsFacebook } from "react-icons/bs";
 import { useStore } from "../../hooks/StoreContext";
 
 import OrnamentalDivider from "./OrnamentalDivider";
-import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
 	const { store } = useStore();
-
-	const navigate = useNavigate();
 
 	const SOCIAL = [
 		{
@@ -112,14 +109,12 @@ const Footer = () => {
 
 				{/* ── Bottom bar ── */}
 				<div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-					<button className="cursor-pointer" onClick={() => navigate("/")}>
-						<p
-							className="text-xs text-first/25 tracking-widest"
-							style={{ fontFamily: "'Cinzel', serif" }}
-						>
-							© {year} Parfumsoft — Todos los derechos reservados
-						</p>
-					</button>
+					<p
+						className="text-xs text-first/25 tracking-widest"
+						style={{ fontFamily: "'Cinzel', serif" }}
+					>
+						© {year} Parfumsoft — Todos los derechos reservados
+					</p>
 
 					<p
 						className="text-[11px] text-first/20 flex items-center gap-1.5 tracking-wide"
