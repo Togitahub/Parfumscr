@@ -52,7 +52,7 @@ const userResolvers = {
 			const token = jwt.sign(
 				{ id: user._id, role: user.role },
 				process.env.JWT_SECRET,
-				{ expiresIn: "2h" },
+				{ expiresIn: "30s" },
 			);
 
 			return { token, user, isDefaultAdmin };
