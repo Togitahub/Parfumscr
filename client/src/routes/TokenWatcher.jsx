@@ -37,7 +37,7 @@ const TokenWatcher = () => {
 		};
 
 		check();
-		const interval = setInterval(check, 20 * 1000);
+		const interval = setInterval(check, 5 * 60 * 1000);
 		return () => clearInterval(interval);
 	}, [isAuthenticated, logout, refreshAccessToken, navigate]);
 
