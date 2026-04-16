@@ -9,6 +9,10 @@ import crypto from "crypto";
 import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 
 import { sendResetPasswordEmail } from "../../config/nodemailer.js";
+import {
+	clearRefreshTokenCookieOptions,
+	refreshTokenCookieOptions,
+} from "../../config/cookieConfig.js";
 
 const userResolvers = {
 	Query: {
@@ -40,49 +44,36 @@ const userResolvers = {
 		},
 
 		login: async (_, { email, password }, { res }) => {
-			console.log("Login attempt:", email);
 			const user = await User.findOne({ email: email.toLowerCase() });
-			console.log("User found:", !!user);
 			if (!user) throw new Error("Invalid credentials");
+
 			const valid = await bcrypt.compare(password, user.password);
 			if (!valid) throw new Error("Invalid credentials");
 			if (!user.active) throw new Error("Account suspended");
 
 			const isDefaultAdmin =
-				user.role === "SUPER_ADMIN" && email === process.env.ADMIN_EMAIL;
+				user.role === "SUPER_ADMIN" &&
+				email.toLowerCase() === process.env.SUPER_ADMIN_EMAIL.toLowerCase();
 
 			const token = jwt.sign(
 				{ id: user._id, role: user.role },
 				process.env.JWT_SECRET,
-				{ expiresIn: "30s" },
+				{ expiresIn: "60s" },
 			);
 
-			res.cookie(
-				"refreshToken",
-				jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
-					expiresIn: "7d",
-				}),
-				{
-					httpOnly: true,
-					secure: process.env.NODE_ENV === "production",
-					sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-					domain:
-						process.env.NODE_ENV === "production"
-							? ".parfumsoft.com"
-							: undefined,
-					maxAge: 7 * 24 * 60 * 60 * 1000,
-				},
+			const refreshToken = jwt.sign(
+				{ id: user._id },
+				process.env.JWT_REFRESH_SECRET,
+				{ expiresIn: "7d" },
 			);
+
+			res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
 			return { token, user, isDefaultAdmin };
 		},
 
 		logout: async (_, __, { res }) => {
-			res.clearCookie("refreshToken", {
-				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "strict",
-			});
+			res.clearCookie("refreshToken", clearRefreshTokenCookieOptions);
 			return { success: true, message: "Logged out" };
 		},
 

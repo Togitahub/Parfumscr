@@ -13,6 +13,7 @@ import createApolloServer from "./config/apolloServer.js";
 
 import { expressMiddleware } from "@as-integrations/express5";
 import { deleteImage, extractPublicId } from "./config/cloudinary.js";
+import { clearRefreshTokenCookieOptions } from "./config/cookieConfig.js";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -175,6 +176,7 @@ app.get("/api/store-config", async (req, res) => {
 
 app.post("/api/refresh-token", async (req, res) => {
 	const token = req.cookies?.refreshToken;
+
 	if (!token) return res.status(401).json({ error: "No refresh token" });
 
 	try {
@@ -193,7 +195,7 @@ app.post("/api/refresh-token", async (req, res) => {
 
 		res.json({ token: accessToken });
 	} catch {
-		res.clearCookie("refreshToken");
+		res.clearCookie("refreshToken", clearRefreshTokenCookieOptions);
 		res.status(401).json({ error: "Invalid refresh token" });
 	}
 });
