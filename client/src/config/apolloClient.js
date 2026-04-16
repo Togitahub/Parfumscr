@@ -10,6 +10,7 @@ import { Observable } from "@apollo/client/utilities";
 
 const httpLink = new HttpLink({
 	uri: import.meta.env.VITE_SERVER_URI,
+	credentials: "include",
 });
 
 // ── Auth link con refresh automático ─────────────────────────────────────────
