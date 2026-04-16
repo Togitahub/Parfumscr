@@ -44,6 +44,15 @@ export const LOGIN = gql`
 	}
 `;
 
+export const LOGOUT = gql`
+	mutation Logout {
+		logout {
+			success
+			message
+		}
+	}
+`;
+
 export const UPDATE_USER = gql`
 	mutation UpdateUser(
 		$id: ID!
@@ -109,10 +118,13 @@ export const RESET_PASSWORD = gql`
 `;
 
 export const CHANGE_PASSWORD = gql`
-    mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
-        changePassword(currentPassword: $currentPassword, newPassword: $newPassword) {
-            success
-            message
-        }
-    }
+	mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+		changePassword(
+			currentPassword: $currentPassword
+			newPassword: $newPassword
+		) {
+			success
+			message
+		}
+	}
 `;

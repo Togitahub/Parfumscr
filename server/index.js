@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import User from "./models/User.js";
 import Store from "./models/Store.js";
+import cookieParser from "cookie-parser";
 import cloudinary from "./config/cloudinary.js";
 import mongodbConnection from "./config/mongodb.js";
 import createApolloServer from "./config/apolloServer.js";
@@ -52,6 +53,8 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieParser());
 
 const ALLOWED_TYPES = [
 	"image/webp",
@@ -167,6 +170,31 @@ app.get("/api/store-config", async (req, res) => {
 	} catch (error) {
 		console.error("Error fetching store config:", error);
 		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+app.post("/api/refresh-token", async (req, res) => {
+	const token = req.cookies?.refreshToken;
+	if (!token) return res.status(401).json({ error: "No refresh token" });
+
+	try {
+		const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+		const user = await User.findById(decoded.id);
+		if (!user || !user.active) {
+			res.clearCookie("refreshToken");
+			return res.status(401).json({ error: "Unauthorized" });
+		}
+
+		const accessToken = jwt.sign(
+			{ id: user._id, role: user.role },
+			process.env.JWT_SECRET,
+			{ expiresIn: "60s" },
+		);
+
+		res.json({ token: accessToken });
+	} catch {
+		res.clearCookie("refreshToken");
+		res.status(401).json({ error: "Invalid refresh token" });
 	}
 });
 

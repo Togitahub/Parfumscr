@@ -39,7 +39,7 @@ const userResolvers = {
 			return newUser;
 		},
 
-		login: async (_, { email, password }) => {
+		login: async (_, { email, password }, { res }) => {
 			const user = await User.findOne({ email: email.toLowerCase() });
 			if (!user) throw new Error("Invalid credentials");
 			const valid = await bcrypt.compare(password, user.password);
@@ -55,7 +55,33 @@ const userResolvers = {
 				{ expiresIn: "30s" },
 			);
 
+			res.cookie(
+				"refreshToken",
+				jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
+					expiresIn: "7d",
+				}),
+				{
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+					domain:
+						process.env.NODE_ENV === "production"
+							? ".parfumsoft.com"
+							: undefined,
+					maxAge: 7 * 24 * 60 * 60 * 1000,
+				},
+			);
+
 			return { token, user, isDefaultAdmin };
+		},
+
+		logout: async (_, __, { res }) => {
+			res.clearCookie("refreshToken", {
+				httpOnly: true,
+				secure: process.env.NODE_ENV === "production",
+				sameSite: "strict",
+			});
+			return { success: true, message: "Logged out" };
 		},
 
 		updateUser: async (_, { id, ...args }, { user }) => {

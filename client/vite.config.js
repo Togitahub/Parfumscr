@@ -5,4 +5,18 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
+	server: {
+		proxy: {
+			"/graphql": {
+				target: "http://localhost:4000",
+				changeOrigin: true,
+				cookieDomainRewrite: "localhost",
+			},
+			"/api": {
+				target: "http://localhost:4000",
+				changeOrigin: true,
+				cookieDomainRewrite: "localhost",
+			},
+		},
+	},
 });

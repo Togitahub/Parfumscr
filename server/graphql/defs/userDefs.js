@@ -37,6 +37,7 @@ const userDefs = gql`
 			address: String
 		): User!
 		login(email: String!, password: String!): AuthResponse!
+		logout: MessageResponse!
 		updateUser(
 			id: ID!
 			name: String

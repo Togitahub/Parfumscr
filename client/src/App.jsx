@@ -1,4 +1,4 @@
-import { Routes, Route, Router } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import AuthView from "./views/AuthView";
 import HomeView from "./views/HomeView";
@@ -16,6 +16,7 @@ import DashboardView from "./views/DashboardView";
 import NavBar from "./components/design/Navbar";
 import Footer from "./components/design/Footer";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import TokenWatcher from "./routes/TokenWatcher";
 import ScrollToTop from "./routes/ScrollToTop";
 import NotFoundView from "./views/NotFoundView";
 import LandingNavbar from "./components/design/LandingNavbar";
@@ -32,6 +33,7 @@ const App = () => {
 	return (
 		<div className="flex flex-col min-h-screen">
 			<ScrollToTop />
+			<TokenWatcher />
 			{store ? <NavBar /> : <LandingNavbar />}
 
 			<main className="flex-1 px-4 py-8 md:px-8 lg:px-12">

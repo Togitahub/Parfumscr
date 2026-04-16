@@ -4,7 +4,6 @@ import {
 	HttpLink,
 	ApolloLink,
 } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
 import { Observable } from "@apollo/client/utilities";
 
 // ── HTTP link ─────────────────────────────────────────────────────────────────
@@ -13,7 +12,15 @@ const httpLink = new HttpLink({
 	uri: import.meta.env.VITE_SERVER_URI,
 });
 
-// ── Auth + UNAUTHENTICATED handler ────────────────────────────────────────────
+// ── Auth link con refresh automático ─────────────────────────────────────────
+
+let isRefreshing = false;
+let pendingRequests = [];
+
+const resolvePending = (token) => {
+	pendingRequests.forEach((cb) => cb(token));
+	pendingRequests = [];
+};
 
 const requestLink = new ApolloLink((operation, forward) => {
 	const token = localStorage.getItem("authToken");
@@ -25,51 +32,85 @@ const requestLink = new ApolloLink((operation, forward) => {
 	}));
 
 	return new Observable((observer) => {
-		const subscription = forward(operation).subscribe({
-			next: observer.next.bind(observer),
-			error: observer.error.bind(observer),
+		forward(operation).subscribe({
+			next: (result) => {
+				const isUnauthenticated = result.errors?.some(
+					(e) =>
+						e.extensions?.code === "UNAUTHENTICATED" ||
+						e.message === "Not authenticated" ||
+						e.message === "Authentication required",
+				);
+
+				if (!isUnauthenticated) {
+					observer.next(result);
+					return;
+				}
+
+				if (isRefreshing) {
+					// Encolar el request hasta que el refresh termine
+					pendingRequests.push((newToken) => {
+						operation.setContext(({ headers = {} }) => ({
+							headers: { ...headers, authorization: `Bearer ${newToken}` },
+						}));
+						forward(operation).subscribe({
+							next: observer.next.bind(observer),
+							error: observer.error.bind(observer),
+							complete: observer.complete.bind(observer),
+						});
+					});
+					return;
+				}
+
+				isRefreshing = true;
+
+				fetch(`${import.meta.env.VITE_API_URI}/api/refresh-token`, {
+					method: "POST",
+					credentials: "include",
+				})
+					.then((res) => {
+						if (!res.ok) throw new Error("Refresh failed");
+						return res.json();
+					})
+					.then(({ token: newToken }) => {
+						localStorage.setItem("authToken", newToken);
+						isRefreshing = false;
+						resolvePending(newToken);
+
+						operation.setContext(({ headers = {} }) => ({
+							headers: { ...headers, authorization: `Bearer ${newToken}` },
+						}));
+						forward(operation).subscribe({
+							next: observer.next.bind(observer),
+							error: observer.error.bind(observer),
+							complete: observer.complete.bind(observer),
+						});
+					})
+					.catch(() => {
+						isRefreshing = false;
+						pendingRequests = [];
+						localStorage.removeItem("authToken");
+						localStorage.removeItem("user");
+						if (!window.location.pathname.includes("/auth")) {
+							window.location.href = "/auth";
+						}
+						observer.complete();
+					});
+			},
+			error: (error) => {
+				console.error(
+					`[Network error] op: ${operation.operationName} | ${error.message}`,
+				);
+				observer.error(error);
+			},
 			complete: observer.complete.bind(observer),
 		});
-
-		return () => subscription.unsubscribe();
 	});
-});
-
-// ── Global error link ─────────────────────────────────────────────────────────
-
-const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
-	if (graphQLErrors) {
-		graphQLErrors.forEach(({ message, extensions }) => {
-			const code = extensions?.code;
-
-			// Sesión expirada o token inválido → limpiar y redirigir
-			if (code === "UNAUTHENTICATED" || message === "Not authenticated") {
-				localStorage.removeItem("authToken");
-				localStorage.removeItem("user");
-				// Solo redirigir si no estamos ya en /auth
-				if (!window.location.pathname.includes("/auth")) {
-					window.location.href = "/auth";
-				}
-				return;
-			}
-
-			console.error(
-				`[GraphQL error] op: ${operation.operationName} | ${message}`,
-			);
-		});
-	}
-
-	if (networkError) {
-		console.error(
-			`[Network error] op: ${operation.operationName} | ${networkError.message}`,
-		);
-	}
 });
 
 // ── Client ────────────────────────────────────────────────────────────────────
 
 export const client = new ApolloClient({
-	link: ApolloLink.from([errorLink, requestLink, httpLink]),
+	link: ApolloLink.from([requestLink, httpLink]),
 	cache: new InMemoryCache(),
 	defaultOptions: {
 		watchQuery: {

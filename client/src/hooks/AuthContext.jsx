@@ -1,7 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { isTokenExpired } from "../utils/TokenUtils.js";
-import { LOGIN } from "../graphql/user/UserMutations.js";
+
+import { LOGIN, LOGOUT } from "../graphql/user/UserMutations.js";
+
 import { useApolloClient, useMutation } from "@apollo/client/react";
+
 import {
 	useState,
 	createContext,
@@ -19,52 +22,85 @@ export const AuthProvider = ({ children }) => {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 	const [loginMutation] = useMutation(LOGIN);
+	const [logoutMutation] = useMutation(LOGOUT);
 
-	const logout = useCallback(() => {
-		localStorage.clear();
-		setUser(null);
-		setIsAuthenticated(false);
-		client.resetStore();
-		console.log("User logged out successfully");
-	}, [client]);
+	const logout = useCallback(
+		async (shouldCallServer = true) => {
+			if (shouldCallServer) {
+				try {
+					await logoutMutation();
+				} catch {
+					// silencioso, igual limpiamos localmente
+				}
+			}
+			localStorage.removeItem("authToken");
+			localStorage.removeItem("user");
+			setUser(null);
+			setIsAuthenticated(false);
+			client.resetStore();
+		},
+		[client, logoutMutation],
+	);
 
 	useEffect(() => {
 		const token = localStorage.getItem("authToken");
 		const savedUser = localStorage.getItem("user");
-		if (token && !isTokenExpired(token)) {
-			setIsAuthenticated(true);
-			if (savedUser) {
-				setUser(JSON.parse(savedUser)); // Agregar esto
+
+		const init = async () => {
+			if (token && !isTokenExpired(token)) {
+				setIsAuthenticated(true);
+				if (savedUser) setUser(JSON.parse(savedUser));
+			} else if (token) {
+				try {
+					const res = await fetch(
+						`${import.meta.env.VITE_API_URI}/api/refresh-token`,
+						{ method: "POST", credentials: "include" },
+					);
+					if (!res.ok) throw new Error();
+					const { token: newToken } = await res.json();
+					localStorage.setItem("authToken", newToken);
+					if (savedUser) setUser(JSON.parse(savedUser));
+					setIsAuthenticated(true);
+				} catch {
+					localStorage.removeItem("authToken");
+					localStorage.removeItem("user");
+					setIsAuthenticated(false);
+				}
+			} else {
+				setIsAuthenticated(false);
 			}
-		} else {
-			setIsAuthenticated(false);
-			if (token) localStorage.removeItem("authToken");
-		}
-		setLoading(false);
+			setLoading(false);
+		};
+
+		init();
 	}, []);
 
-	useEffect(() => {
-		if (!isAuthenticated) return;
-
-		const interval = setInterval(
-			() => {
-				const token = localStorage.getItem("authToken");
-				if (isTokenExpired(token)) {
-					logout();
-				}
-			},
-			5 * 60 * 1000,
-		);
-
-		return () => clearInterval(interval);
-	}, [isAuthenticated, logout]);
+	const refreshAccessToken = useCallback(async () => {
+		try {
+			const res = await fetch(
+				`${import.meta.env.VITE_API_URI}/api/refresh-token`,
+				{ method: "POST", credentials: "include" },
+			);
+			if (!res.ok) throw new Error("Refresh failed");
+			const { token } = await res.json();
+			localStorage.setItem("authToken", token);
+			return true;
+		} catch {
+			return false;
+		}
+	}, []);
 
 	const login = async (email, password) => {
 		try {
 			setLoading(true);
-			const { data } = await loginMutation({
+			const { data, errors } = await loginMutation({
 				variables: { email, password },
 			});
+			if (!data?.login) {
+				throw new Error(
+					errors?.[0]?.message || "Error de conexión con el servidor",
+				);
+			}
 			const {
 				token: loggedToken,
 				user: loggedUser,
@@ -98,6 +134,7 @@ export const AuthProvider = ({ children }) => {
 		logout,
 		loading,
 		isAuthenticated,
+		refreshAccessToken,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
