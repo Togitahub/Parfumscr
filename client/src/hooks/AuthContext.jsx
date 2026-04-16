@@ -97,6 +97,8 @@ export const AuthProvider = ({ children }) => {
 				variables: { email, password },
 			});
 			if (!data?.login) {
+				console.error("Login data:", JSON.stringify(data));
+				console.error("Login errors:", JSON.stringify(errors));
 				throw new Error(
 					errors?.[0]?.message || "Error de conexión con el servidor",
 				);
@@ -120,7 +122,8 @@ export const AuthProvider = ({ children }) => {
 				role: loggedUser.role,
 			};
 		} catch (error) {
-			console.error("Login error:", error.message);
+			console.error("Login error full:", JSON.stringify(error, null, 2));
+			console.error("Login error message:", error.message);
 			setIsAuthenticated(false);
 			return { success: false, error: error.message };
 		} finally {
