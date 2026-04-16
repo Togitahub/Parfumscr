@@ -120,7 +120,7 @@ export const client = new ApolloClient({
 			errorPolicy: "all",
 		},
 		mutate: {
-			errorPolicy: "all",
+			errorPolicy: "none",
 		},
 	},
 });

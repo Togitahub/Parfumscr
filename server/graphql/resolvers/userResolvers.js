@@ -40,7 +40,9 @@ const userResolvers = {
 		},
 
 		login: async (_, { email, password }, { res }) => {
+			console.log("Login attempt:", email);
 			const user = await User.findOne({ email: email.toLowerCase() });
+			console.log("User found:", !!user);
 			if (!user) throw new Error("Invalid credentials");
 			const valid = await bcrypt.compare(password, user.password);
 			if (!valid) throw new Error("Invalid credentials");
