@@ -63,6 +63,281 @@ const PAYMENT_METHOD_ICONS = {
 	TARJETA: <BsCreditCard className="w-4 h-4" />,
 };
 
+const getDashboardQueries = (storeId) => [
+	{ query: GET_STORE_PRODUCTS, variables: { storeId } },
+	{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "day" } },
+	{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "week" } },
+	{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "month" } },
+	{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "year" } },
+	{ query: GET_DASHBOARD_STATS, variables: { storeId, period: null } },
+];
+
+// ── Auxiliary Components ────────────────────────────────────────────────────────────
+
+const ProductGrid = ({
+	filteredItems,
+	cart,
+	addToCart,
+	getDiscountedPrice,
+}) => {
+	return (
+		<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+			{filteredItems.map((product) => {
+				const inCart = cart.find((item) => item.productId === product.id);
+				const outOfStock = product.stock === 0;
+				return (
+					<button
+						key={product.id}
+						onClick={() => !outOfStock && addToCart(product.originalData)}
+						disabled={outOfStock}
+						className={[
+							"flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-150",
+							outOfStock
+								? "border-first/8 opacity-40"
+								: inCart
+									? "border-second/50 bg-second/5"
+									: "border-first/10",
+						].join(" ")}
+					>
+						<div className="flex-1 min-w-0">
+							<p className="text-sm font-medium text-first truncate">
+								{product.name}{" "}
+								{product.discount > 0 && (
+									<span className="ms-2">
+										<Badge
+											variant="success"
+											children={`-${product.discount}%`}
+										/>
+									</span>
+								)}
+							</p>
+							<p className="text-xs text-first/40 truncate">
+								{product.brand?.name} {product.size && ` · ${product.size}`}
+							</p>
+							<div className="flex items-center justify-between mt-1">
+								<div className="flex gap-1">
+									<span
+										className="text-sm font-bold"
+										style={{ color: "var(--color-second)" }}
+									>
+										{formatPrice(
+											getDiscountedPrice(product.price, product.discount),
+										)}
+									</span>
+									<span className="text-[10px] line-through">
+										{product.discount > 0 && formatPrice(product.price)}
+									</span>
+								</div>
+								<span className="text-[10px]">Stock: {product.stock}</span>
+							</div>
+						</div>
+					</button>
+				);
+			})}
+		</div>
+	);
+};
+
+const ItemsInformation = ({ cart, changeQty, removeFromCart, toast }) => {
+	return (
+		<div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+			{cart.map((item) => (
+				<div
+					key={item.productId}
+					className="flex items-center gap-2 py-2 border-b border-first/6 last:border-0"
+				>
+					<div className="flex-1 min-w-0">
+						<p className="text-xs font-medium text-first truncate">
+							{item.name}
+							{item.size && (
+								<span className="text-first/35"> · {item.size}</span>
+							)}
+						</p>
+						<p className="text-xs text-first/40 tabular-nums">
+							{formatPrice(item.price)} c/u
+						</p>
+					</div>
+					<div className="flex items-center gap-1 shrink-0">
+						<button
+							onClick={() => changeQty(item.productId, -1)}
+							className="w-6 h-6 rounded-md border border-first/12 flex items-center justify-center text-first/40 hover:text-first transition-all cursor-pointer"
+						>
+							<BsDash className="w-3 h-3" />
+						</button>
+						<span className="w-6 text-center text-xs font-bold text-first tabular-nums">
+							{item.qty}
+						</span>
+						<button
+							onClick={() => {
+								if (item.qty >= item.stock) {
+									toast.warning("Sin stock suficiente");
+									return;
+								}
+								changeQty(item.productId, 1);
+							}}
+							className="w-6 h-6 rounded-md border border-first/12 flex items-center justify-center text-first/40 hover:text-first transition-all cursor-pointer"
+						>
+							<BsPlus className="w-3 h-3" />
+						</button>
+					</div>
+					<span className="text-xs font-semibold text-first tabular-nums w-16 text-right shrink-0">
+						{formatPrice(item.price * item.qty)}
+					</span>
+					<button
+						onClick={() => removeFromCart(item.productId)}
+						className="text-first/20 hover:text-error transition-colors cursor-pointer"
+					>
+						<BsTrash className="w-3 h-3" />
+					</button>
+				</div>
+			))}
+		</div>
+	);
+};
+
+const CartSummary = ({
+	cart,
+	total,
+	resolvedTotal,
+	finalPriceOverride,
+	setFinalPriceOverride,
+	saleMode,
+	setSaleMode,
+	paymentMethod,
+	setPaymentMethod,
+	installmentCount,
+	setInstallmentCount,
+	layawayDays,
+	setLayawayDays,
+	initialPayment,
+	setInitialPayment,
+	confirming,
+	handleConfirm,
+	changeQty,
+	removeFromCart,
+	toast,
+}) => {
+	return (
+		<div className="lg:sticky lg:top-24 rounded-2xl border border-first/10 bg-main p-5 flex flex-col gap-4">
+			<p
+				className="text-[10px] font-semibold uppercase tracking-[0.2em] text-first/35"
+				style={{ fontFamily: "'Cinzel', serif" }}
+			>
+				Carrito de venta
+			</p>
+
+			{cart.length === 0 ? (
+				<p className="text-sm text-first/25 italic text-center py-6">
+					Agrega productos desde el catálogo
+				</p>
+			) : (
+				<ItemsInformation
+					cart={cart}
+					changeQty={changeQty}
+					removeFromCart={removeFromCart}
+					toast={toast}
+				/>
+			)}
+
+			{cart.length > 0 && (
+				<>
+					<div className="flex flex-col gap-3 pt-2 border-t border-first/8">
+						<div className="flex items-center justify-between">
+							<span className="text-xs text-first/35">Subtotal</span>
+							<span className="text-sm text-first/50 tabular-nums">
+								{formatPrice(total)}
+							</span>
+						</div>
+
+						<Input
+							label="Precio final"
+							type="number"
+							placeholder={String(total)}
+							value={finalPriceOverride}
+							onChange={(e) => setFinalPriceOverride(e.target.value)}
+						/>
+						<Select
+							label="Modalidad de compra"
+							value={saleMode}
+							onChange={(e) => setSaleMode(e.target.value)}
+							options={PURCHASE_MODE_OPTIONS}
+						/>
+						<Select
+							label="Método de pago"
+							value={paymentMethod}
+							onChange={(e) => setPaymentMethod(e.target.value)}
+							options={PAYMENT_METHOD_OPTIONS}
+						/>
+
+						{saleMode === "INSTALLMENTS" && (
+							<Input
+								label="Cantidad de cuotas"
+								type="number"
+								min="1"
+								value={installmentCount}
+								onChange={(e) => setInstallmentCount(e.target.value)}
+							/>
+						)}
+						{saleMode === "LAYAWAY" && (
+							<Input
+								label="Tiempo máximo del apartado (días)"
+								type="number"
+								min="1"
+								value={layawayDays}
+								onChange={(e) => setLayawayDays(e.target.value)}
+							/>
+						)}
+						{saleMode !== "NORMAL" && (
+							<Input
+								label="Pago inicial opcional"
+								type="number"
+								min="0"
+								max={resolvedTotal}
+								value={initialPayment}
+								onChange={(e) => setInitialPayment(e.target.value)}
+								placeholder="0"
+							/>
+						)}
+					</div>
+
+					<div className="rounded-xl border border-first/8 p-3 flex items-center justify-between gap-3">
+						<div>
+							<p className="text-xs uppercase tracking-wider text-first/35">
+								Resumen
+							</p>
+							<p className="text-sm text-first/55">
+								{saleMode === "NORMAL"
+									? "Se completará de inmediato."
+									: saleMode === "INSTALLMENTS"
+										? "Quedará en proceso y se descontará el stock."
+										: "Quedará en proceso con stock reservado."}
+							</p>
+						</div>
+						<div className="flex items-center gap-2 text-first/55">
+							{PAYMENT_METHOD_ICONS[paymentMethod]}
+							<span className="text-sm font-medium">{paymentMethod}</span>
+						</div>
+					</div>
+
+					<Button
+						fullWidth
+						size="md"
+						loading={confirming}
+						onClick={handleConfirm}
+						icon={<BsCheckCircle />}
+					>
+						{saleMode === "NORMAL"
+							? "Confirmar venta"
+							: saleMode === "INSTALLMENTS"
+								? "Registrar a cuotas"
+								: "Registrar apartado"}
+					</Button>
+				</>
+			)}
+		</div>
+	);
+};
+
 const POSView = ({ storeId }) => {
 	// ── States ────────────────────────────────────────────────────────────
 	const [cart, setCart] = useState([]);
@@ -75,6 +350,11 @@ const POSView = ({ storeId }) => {
 	const [paymentMethod, setPaymentMethod] = useState("EFECTIVO");
 	const [finalPriceOverride, setFinalPriceOverride] = useState("");
 
+	const dashboardQueries = useMemo(
+		() => getDashboardQueries(storeId),
+		[storeId],
+	);
+
 	// ── Context ────────────────────────────────────────────────────────────
 	const toast = useToast();
 	const { search, setSearch, setPage, applyFilters } = useFilters();
@@ -85,15 +365,6 @@ const POSView = ({ storeId }) => {
 		variables: { storeId },
 		skip: !storeId,
 	});
-
-	const dashboardQueries = [
-		{ query: GET_STORE_PRODUCTS, variables: { storeId } },
-		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "day" } },
-		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "week" } },
-		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "month" } },
-		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: "year" } },
-		{ query: GET_DASHBOARD_STATS, variables: { storeId, period: null } },
-	];
 
 	const [createOrder] = useMutation(CREATE_ORDER, {
 		refetchQueries: [{ query: GET_ALL_ORDERS }, ...dashboardQueries],
@@ -321,254 +592,32 @@ const POSView = ({ storeId }) => {
 		);
 	}
 
-	// ── Auxiliary Components ────────────────────────────────────────────────────────────
-
-	const ProductGrid = () => {
-		return (
-			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-				{filteredItems.map((product) => {
-					const inCart = cart.find((item) => item.productId === product.id);
-					const outOfStock = product.stock === 0;
-
-					return (
-						<button
-							key={product.id}
-							onClick={() => !outOfStock && addToCart(product.originalData)}
-							disabled={outOfStock}
-							className={[
-								"flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-150",
-								outOfStock
-									? "border-first/8 opacity-40"
-									: inCart
-										? "border-second/50 bg-second/5"
-										: "border-first/10",
-							].join(" ")}
-						>
-							<div className="flex-1 min-w-0">
-								<p className="text-sm font-medium text-first truncate">
-									{product.name}{" "}
-									{product.discount > 0 && (
-										<span className="ms-2">
-											<Badge
-												variant="success"
-												children={`-${product.discount}%`}
-											/>
-										</span>
-									)}
-								</p>
-								<p className="text-xs text-first/40 truncate">
-									{product.brand?.name} {product.size && ` · ${product.size}`}
-								</p>
-								<div className="flex items-center justify-between mt-1">
-									<div className="flex gap-1">
-										<span
-											className="text-sm font-bold"
-											style={{ color: "var(--color-second)" }}
-										>
-											{formatPrice(
-												getDiscountedPrice(product.price, product.discount),
-											)}
-										</span>
-										<span className="text-[10px] line-through">
-											{product.discount > 0 && formatPrice(product.price)}
-										</span>
-									</div>
-									<span className="text-[10px]">Stock: {product.stock}</span>
-								</div>
-							</div>
-						</button>
-					);
-				})}
-			</div>
-		);
-	};
-
-	const ItemsInformation = () => {
-		return (
-			<div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
-				{cart.map((item) => (
-					<div
-						key={item.productId}
-						className="flex items-center gap-2 py-2 border-b border-first/6 last:border-0"
-					>
-						<div className="flex-1 min-w-0">
-							<p className="text-xs font-medium text-first truncate">
-								{item.name}
-								{item.size && (
-									<span className="text-first/35"> · {item.size}</span>
-								)}
-							</p>
-							<p className="text-xs text-first/40 tabular-nums">
-								{formatPrice(item.price)} c/u
-							</p>
-						</div>
-						<div className="flex items-center gap-1 shrink-0">
-							<button
-								onClick={() => changeQty(item.productId, -1)}
-								className="w-6 h-6 rounded-md border border-first/12 flex items-center justify-center text-first/40 hover:text-first transition-all cursor-pointer"
-							>
-								<BsDash className="w-3 h-3" />
-							</button>
-							<span className="w-6 text-center text-xs font-bold text-first tabular-nums">
-								{item.qty}
-							</span>
-							<button
-								onClick={() => {
-									if (item.qty >= item.stock) {
-										toast.warning("Sin stock suficiente");
-										return;
-									}
-									changeQty(item.productId, 1);
-								}}
-								className="w-6 h-6 rounded-md border border-first/12 flex items-center justify-center text-first/40 hover:text-first transition-all cursor-pointer"
-							>
-								<BsPlus className="w-3 h-3" />
-							</button>
-						</div>
-						<span className="text-xs font-semibold text-first tabular-nums w-16 text-right shrink-0">
-							{formatPrice(item.price * item.qty)}
-						</span>
-						<button
-							onClick={() => removeFromCart(item.productId)}
-							className="text-first/20 hover:text-error transition-colors cursor-pointer"
-						>
-							<BsTrash className="w-3 h-3" />
-						</button>
-					</div>
-				))}
-			</div>
-		);
-	};
-
-	const CartSummary = () => {
-		return (
-			<div className="lg:sticky lg:top-24 rounded-2xl border border-first/10 bg-main p-5 flex flex-col gap-4">
-				{/* Title */}
-				<p
-					className="text-[10px] font-semibold uppercase tracking-[0.2em] text-first/35"
-					style={{ fontFamily: "'Cinzel', serif" }}
-				>
-					Carrito de venta
-				</p>
-
-				{/* Items Information */}
-				{cart.length === 0 ? (
-					<p className="text-sm text-first/25 italic text-center py-6">
-						Agrega productos desde el catálogo
-					</p>
-				) : (
-					<ItemsInformation />
-				)}
-
-				{/* Summary and Payment Options */}
-				{cart.length > 0 && (
-					<>
-						<div className="flex flex-col gap-3 pt-2 border-t border-first/8">
-							<div className="flex items-center justify-between">
-								<span className="text-xs text-first/35">Subtotal</span>
-								<span className="text-sm text-first/50 tabular-nums">
-									{formatPrice(total)}
-								</span>
-							</div>
-
-							<Input
-								label="Precio final"
-								type="number"
-								placeholder={String(total)}
-								value={finalPriceOverride}
-								onChange={(event) => setFinalPriceOverride(event.target.value)}
-							/>
-
-							<Select
-								label="Modalidad de compra"
-								value={saleMode}
-								onChange={(event) => setSaleMode(event.target.value)}
-								options={PURCHASE_MODE_OPTIONS}
-							/>
-
-							<Select
-								label="Método de pago"
-								value={paymentMethod}
-								onChange={(event) => setPaymentMethod(event.target.value)}
-								options={PAYMENT_METHOD_OPTIONS}
-							/>
-
-							{saleMode === "INSTALLMENTS" && (
-								<Input
-									label="Cantidad de cuotas"
-									type="number"
-									min="1"
-									value={installmentCount}
-									onChange={(event) => setInstallmentCount(event.target.value)}
-								/>
-							)}
-
-							{saleMode === "LAYAWAY" && (
-								<Input
-									label="Tiempo máximo del apartado (días)"
-									type="number"
-									min="1"
-									value={layawayDays}
-									onChange={(event) => setLayawayDays(event.target.value)}
-								/>
-							)}
-
-							{saleMode !== "NORMAL" && (
-								<Input
-									label="Pago inicial opcional"
-									type="number"
-									min="0"
-									max={resolvedTotal}
-									value={initialPayment}
-									onChange={(event) => setInitialPayment(event.target.value)}
-									placeholder="0"
-								/>
-							)}
-						</div>
-
-						<div className="rounded-xl border border-first/8 p-3 flex items-center justify-between gap-3">
-							<div>
-								<p className="text-xs uppercase tracking-wider text-first/35">
-									Resumen
-								</p>
-								<p className="text-sm text-first/55">
-									{saleMode === "NORMAL"
-										? "Se completará de inmediato."
-										: saleMode === "INSTALLMENTS"
-											? "Quedará en proceso y se descontará el stock."
-											: "Quedará en proceso con stock reservado."}
-								</p>
-							</div>
-							<div className="flex items-center gap-2 text-first/55">
-								{PAYMENT_METHOD_ICONS[paymentMethod]}
-								<span className="text-sm font-medium">{paymentMethod}</span>
-							</div>
-						</div>
-
-						<Button
-							fullWidth
-							size="md"
-							loading={confirming}
-							onClick={handleConfirm}
-							icon={<BsCheckCircle />}
-						>
-							{saleMode === "NORMAL"
-								? "Confirmar venta"
-								: saleMode === "INSTALLMENTS"
-									? "Registrar a cuotas"
-									: "Registrar apartado"}
-						</Button>
-					</>
-				)}
-			</div>
-		);
-	};
-
 	// ── Render ────────────────────────────────────────────────────────────
 
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start">
-			<CartSummary />
+			<CartSummary
+				cart={cart}
+				total={total}
+				resolvedTotal={resolvedTotal}
+				finalPriceOverride={finalPriceOverride}
+				setFinalPriceOverride={setFinalPriceOverride}
+				saleMode={saleMode}
+				setSaleMode={setSaleMode}
+				paymentMethod={paymentMethod}
+				setPaymentMethod={setPaymentMethod}
+				installmentCount={installmentCount}
+				setInstallmentCount={setInstallmentCount}
+				layawayDays={layawayDays}
+				setLayawayDays={setLayawayDays}
+				initialPayment={initialPayment}
+				setInitialPayment={setInitialPayment}
+				confirming={confirming}
+				handleConfirm={handleConfirm}
+				changeQty={changeQty}
+				removeFromCart={removeFromCart}
+				toast={toast}
+			/>
 			<div className="flex flex-col gap-4">
 				{/* Header */}
 				<div className="flex flex-col gap-1">
@@ -606,7 +655,12 @@ const POSView = ({ storeId }) => {
 						<Spinner size="md" />
 					</div>
 				) : (
-					<ProductGrid />
+					<ProductGrid
+						filteredItems={filteredItems}
+						cart={cart}
+						addToCart={addToCart}
+						getDiscountedPrice={getDiscountedPrice}
+					/>
 				)}
 
 				{/* Pagination */}
