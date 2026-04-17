@@ -21,16 +21,20 @@ import ScrollToTop from "./routes/ScrollToTop";
 import NotFoundView from "./views/NotFoundView";
 import LandingNavbar from "./components/design/LandingNavbar";
 
+import { LoadingOverlay } from "./components/interface/LoadingUi";
+
 import { useAuth } from "./hooks/AuthContext";
 import { useStore } from "./hooks/StoreContext";
 
 const App = () => {
 	const { user } = useAuth();
-	const { store, storeNotFound } = useStore();
+	const { store, storeNotFound, loadingStore } = useStore();
 
 	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
 
 	if (storeNotFound && !store) return <NotFoundView />;
+
+	if (loadingStore) return <LoadingOverlay visible fullScreen />;
 
 	return (
 		<div className="flex flex-col min-h-screen">
