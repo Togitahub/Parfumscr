@@ -26,14 +26,17 @@ import { useStore } from "./hooks/StoreContext";
 
 const App = () => {
 	const { user } = useAuth();
-	const { store } = useStore();
+	const { store, storeNotFound } = useStore();
 
 	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
+
+	if (storeNotFound && !store) return <NotFoundView />;
 
 	return (
 		<div className="flex flex-col min-h-screen">
 			<ScrollToTop />
 			<TokenWatcher />
+
 			{store ? <NavBar /> : <LandingNavbar />}
 
 			<main className="flex-1 px-4 py-8 md:px-8 lg:px-12">
