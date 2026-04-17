@@ -19,6 +19,7 @@ import { GET_USER_FAVORITES } from "../graphql/favorites/FavoritesQueries";
 import Hero from "../components/design/Hero";
 import ProductList from "../lists/ProductList";
 import NotFoundView from "./NotFoundView";
+import { LoadingOverlay } from "../components/interface/LoadingUi";
 
 const StoreView = () => {
 	const { user, isAuthenticated } = useAuth();

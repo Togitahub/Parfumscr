@@ -4,6 +4,7 @@ import {
 	HttpLink,
 	ApolloLink,
 } from "@apollo/client";
+
 import { Observable } from "@apollo/client/utilities";
 
 // ── HTTP link ─────────────────────────────────────────────────────────────────
@@ -13,7 +14,7 @@ const httpLink = new HttpLink({
 	credentials: "include",
 });
 
-// ── Auth link con refresh automático ─────────────────────────────────────────
+// ── Refresh helper ────────────────────────────────────────────────────────────
 
 let isRefreshing = false;
 let pendingRequests = [];
@@ -23,7 +24,40 @@ const resolvePending = (token) => {
 	pendingRequests = [];
 };
 
+const rejectPending = (error) => {
+	pendingRequests.forEach((cb) => cb(null, error));
+	pendingRequests = [];
+};
+
+const doRefresh = () =>
+	fetch(`${import.meta.env.VITE_API_URI}/api/refresh-token`, {
+		method: "POST",
+		credentials: "include",
+	}).then((res) => {
+		if (!res.ok) throw new Error("Refresh failed");
+		return res.json().then(({ token }) => {
+			localStorage.setItem("authToken", token);
+			return token;
+		});
+	});
+
+// ── Retry operation with new token ───────────────────────────────────────────
+
+const retryOperation = (operation, forward, newToken, observer) => {
+	operation.setContext(({ headers = {} }) => ({
+		headers: { ...headers, authorization: `Bearer ${newToken}` },
+	}));
+	forward(operation).subscribe({
+		next: observer.next.bind(observer),
+		error: observer.error.bind(observer),
+		complete: observer.complete.bind(observer),
+	});
+};
+
+// ── Auth link ─────────────────────────────────────────────────────────────────
+
 const requestLink = new ApolloLink((operation, forward) => {
+	// Always read latest token at request time
 	const token = localStorage.getItem("authToken");
 	operation.setContext(({ headers = {} }) => ({
 		headers: {
@@ -42,53 +76,36 @@ const requestLink = new ApolloLink((operation, forward) => {
 						e.message === "Authentication required",
 				);
 
+				// No error — pass through normally
 				if (!isUnauthenticated) {
 					observer.next(result);
 					return;
 				}
 
+				// Token expired — queue or refresh
 				if (isRefreshing) {
-					// Encolar el request hasta que el refresh termine
-					pendingRequests.push((newToken) => {
-						operation.setContext(({ headers = {} }) => ({
-							headers: { ...headers, authorization: `Bearer ${newToken}` },
-						}));
-						forward(operation).subscribe({
-							next: observer.next.bind(observer),
-							error: observer.error.bind(observer),
-							complete: observer.complete.bind(observer),
-						});
+					pendingRequests.push((newToken, err) => {
+						if (err || !newToken) {
+							observer.error(err || new Error("Session expired"));
+							return;
+						}
+						retryOperation(operation, forward, newToken, observer);
 					});
 					return;
 				}
 
 				isRefreshing = true;
 
-				fetch(`${import.meta.env.VITE_API_URI}/api/refresh-token`, {
-					method: "POST",
-					credentials: "include",
-				})
-					.then((res) => {
-						if (!res.ok) throw new Error("Refresh failed");
-						return res.json();
-					})
-					.then(({ token: newToken }) => {
-						localStorage.setItem("authToken", newToken);
+				doRefresh()
+					.then((newToken) => {
 						isRefreshing = false;
 						resolvePending(newToken);
-
-						operation.setContext(({ headers = {} }) => ({
-							headers: { ...headers, authorization: `Bearer ${newToken}` },
-						}));
-						forward(operation).subscribe({
-							next: observer.next.bind(observer),
-							error: observer.error.bind(observer),
-							complete: observer.complete.bind(observer),
-						});
+						// Retry the operation that triggered the refresh
+						retryOperation(operation, forward, newToken, observer);
 					})
-					.catch(() => {
+					.catch((err) => {
 						isRefreshing = false;
-						pendingRequests = [];
+						rejectPending(err);
 						localStorage.removeItem("authToken");
 						localStorage.removeItem("user");
 						if (!window.location.pathname.includes("/auth")) {
@@ -114,14 +131,8 @@ export const client = new ApolloClient({
 	link: ApolloLink.from([requestLink, httpLink]),
 	cache: new InMemoryCache(),
 	defaultOptions: {
-		watchQuery: {
-			errorPolicy: "all",
-		},
-		query: {
-			errorPolicy: "all",
-		},
-		mutate: {
-			errorPolicy: "none",
-		},
+		watchQuery: { errorPolicy: "all" },
+		query: { errorPolicy: "all" },
+		mutate: { errorPolicy: "none" },
 	},
 });

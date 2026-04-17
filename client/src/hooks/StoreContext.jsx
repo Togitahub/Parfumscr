@@ -25,12 +25,17 @@ export const StoreProvider = ({ children }) => {
 		const fetchStoreConfig = async () => {
 			try {
 				const host = window.location.hostname;
-				const subdomain = host.split(".")[0];
-				const slug = subdomain !== "localhost" ? subdomain : null;
+				const parts = host.split(".");
+				const isRootDomain = parts.length <= 2;
+				const subdomain = !isRootDomain ? parts[0] : null;
+				const slug = subdomain ?? import.meta.env.VITE_STORE_SLUG ?? null;
 
-				const url = slug
-					? `${import.meta.env.VITE_SERVER_URI.replace("/graphql", "")}/api/store-config?slug=${slug}`
-					: `${import.meta.env.VITE_SERVER_URI.replace("/graphql", "")}/api/store-config?slug=${import.meta.env.VITE_STORE_SLUG ?? "default"}`;
+				if (!slug) {
+					setLoadingStore(false);
+					return;
+				}
+
+				const url = `${import.meta.env.VITE_SERVER_URI.replace("/graphql", "")}/api/store-config?slug=${slug}`;
 
 				const res = await fetch(url, {
 					headers: { Host: host },
@@ -76,11 +81,12 @@ export const StoreProvider = ({ children }) => {
 		if (
 			!loadingStore &&
 			store &&
+			!storeNotFound &&
 			(location.pathname === "/" || location.pathname === "")
 		) {
 			navigate("/store", { replace: true });
 		}
-	}, [loadingStore, store, location.pathname, navigate]);
+	}, [loadingStore, store, location.pathname, navigate, storeNotFound]);
 
 	return (
 		<StoreContext.Provider value={{ store, loadingStore, storeNotFound }}>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useStore } from "../../hooks/StoreContext";
+
 import {
 	BsHeart,
 	BsHeartFill,
@@ -40,6 +42,9 @@ const ProductCard = ({
 	className = "",
 }) => {
 	const navigate = useNavigate();
+
+	const { store } = useStore();
+
 	const [imgLoaded, setImgLoaded] = useState(false);
 
 	if (!product) return null;
@@ -239,7 +244,16 @@ const ProductCard = ({
 				{notes.length > 0 && (
 					<div className="flex flex-wrap gap-1">
 						{notes.slice(0, 4).map((note) => (
-							<span key={note.name} className="pc-note-chip">
+							<span
+								key={note.name}
+								className="pc-note-chip"
+								onClick={(e) => {
+									if (store) {
+										e.stopPropagation();
+										navigate(`/store/note/${note.id}`);
+									}
+								}}
+							>
 								{note.name}
 							</span>
 						))}

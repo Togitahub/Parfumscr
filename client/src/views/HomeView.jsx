@@ -10,7 +10,6 @@ import {
 } from "react-icons/bs";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 
 import { GET_STORES } from "../graphql/store/StoreQueries";
@@ -228,27 +227,28 @@ const Hero = () => {
 };
 
 const StoreCard = ({ store, i }) => {
-	const navigate = useNavigate();
-
 	return (
-		<button
-			onClick={() =>
-				navigate(
-					(window.location.href = store.customDomain
-						? `https://${store.customDomain}`
-						: `https://${store.slug}.parfumsoft.com`),
-				)
+		<a
+			href={
+				store.customDomain
+					? `https://${store.customDomain}`
+					: `https://${store.slug}.parfumsoft.com`
 			}
-			className="w-50 lg:w-60 p-5 rounded-2xl border-2 border-second/50 transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
+			target="_blank"
+			rel="noopener noreferrer"
+			className="w-40 h-30 border-2 p-3 border-second/50 rounded-2xl lg:w-60 overflow-hidden transition-all duration-300 hover:border-second hover:shadow-lg hover:shadow-black/10 cursor-pointer"
 			style={{
 				background: "var(--color-main)",
 				animation: "fadeUp 0.5s ease both",
 				animationDelay: `${i * 70}ms`,
 			}}
 		>
-			{/* Info */}
-			<img src={getOptimizedUrl(store.logo, "card")} alt={store.name} />
-		</button>
+			<img
+				src={getOptimizedUrl(store.logo, "card")}
+				alt={store.name}
+				className="w-full h-full object-contain"
+			/>
+		</a>
 	);
 };
 
@@ -285,7 +285,7 @@ const StoreList = () => {
 							</h2>
 						</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 							{stores.map((store, i) => (
 								<StoreCard key={store.id} store={store} i={i} />
 							))}

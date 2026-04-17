@@ -349,7 +349,7 @@ const NavBar = () => {
 							<img
 								src={store.logo}
 								alt={store.storeName}
-								className="h-8 w-auto max-w-30 object-contain"
+								className="h-13 lg:h-20 w-auto max-w-30 object-contain"
 							/>
 						) : (
 							<>
