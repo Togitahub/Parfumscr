@@ -70,6 +70,7 @@ const UserList = ({
 	onToggleActive,
 	stores = [],
 	onTogglePos,
+	onToggleHomeShow,
 	className = "",
 }) => {
 	const [search, setSearch] = useState("");
@@ -212,6 +213,7 @@ const UserList = ({
 								onDelete={onDelete}
 								onToggleActive={onToggleActive}
 								onTogglePos={onTogglePos}
+								onToggleHomeShow={onToggleHomeShow}
 								store={stores.find((s) => s.owner === user.id)}
 							/>
 						</AnimatedItem>

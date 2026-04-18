@@ -78,6 +78,7 @@ const UserCard = ({
 	onDelete,
 	onToggleActive,
 	onTogglePos,
+	onToggleHomeShow,
 	store,
 	variant = "default",
 	className = "",
@@ -143,69 +144,90 @@ const UserCard = ({
 
 				{/* Actions */}
 				{hasActions && (
-					<div className="flex items-center gap-1 shrink-0">
-						{onEdit && (
-							<Button
-								iconOnly
-								variant="ghost"
-								size="sm"
-								icon={<BsPencil />}
-								onClick={(e) => {
-									e.stopPropagation();
-									onEdit(user);
-								}}
-								aria-label="Editar usuario"
-							/>
-						)}
-						{onDelete && (
-							<Button
-								iconOnly
-								variant="ghost"
-								size="sm"
-								icon={<BsTrash />}
-								onClick={(e) => {
-									e.stopPropagation();
-									onDelete(user);
-								}}
-								aria-label="Eliminar usuario"
-								className="hover:text-error!"
-							/>
-						)}
-						{onToggleActive && (
-							<Button
-								iconOnly
-								variant="ghost"
-								size="sm"
-								icon={user.active ? <BsSlashCircle /> : <BsCheckCircle />}
-								onClick={(e) => {
-									e.stopPropagation();
-									onToggleActive(user);
-								}}
-								aria-label={
-									user.active ? "Suspender cuenta" : "Reactivar cuenta"
-								}
-								className={
-									user.active ? "hover:text-error!" : "hover:text-success!"
-								}
-							/>
-						)}
-						{onTogglePos && store && user.role === "ADMIN" && (
-							<button
-								onClick={(e) => {
-									e.stopPropagation();
-									onTogglePos(user);
-								}}
-								title={store.posEnabled ? "Desactivar POS" : "Activar POS"}
-								className={[
-									"w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 border text-xs font-bold cursor-pointer",
-									store.posEnabled
-										? "border-second/40 bg-second/10 text-second"
-										: "border-first/15 text-first/30 hover:border-second/30 hover:text-second",
-								].join(" ")}
-							>
-								POS
-							</button>
-						)}
+					<div className="absolute right-2 top-2 p-4 h-full flex flex-col justify-between">
+						<div className="flex items-center gap-1 shrink-0">
+							{onEdit && (
+								<Button
+									iconOnly
+									variant="ghost"
+									size="sm"
+									icon={<BsPencil />}
+									onClick={(e) => {
+										e.stopPropagation();
+										onEdit(user);
+									}}
+									aria-label="Editar usuario"
+								/>
+							)}
+							{onDelete && (
+								<Button
+									iconOnly
+									variant="ghost"
+									size="sm"
+									icon={<BsTrash />}
+									onClick={(e) => {
+										e.stopPropagation();
+										onDelete(user);
+									}}
+									aria-label="Eliminar usuario"
+									className="hover:text-error!"
+								/>
+							)}
+							{onToggleActive && (
+								<Button
+									iconOnly
+									variant="ghost"
+									size="sm"
+									icon={user.active ? <BsSlashCircle /> : <BsCheckCircle />}
+									onClick={(e) => {
+										e.stopPropagation();
+										onToggleActive(user);
+									}}
+									aria-label={
+										user.active ? "Suspender cuenta" : "Reactivar cuenta"
+									}
+									className={
+										user.active ? "hover:text-error!" : "hover:text-success!"
+									}
+								/>
+							)}
+						</div>
+						<div className="flex gap-2">
+							{onTogglePos && store && user.role === "ADMIN" && (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										onTogglePos(user);
+									}}
+									title={store.posEnabled ? "Desactivar POS" : "Activar POS"}
+									className={[
+										"w-full h-8 rounded-lg flex items-center justify-center transition-all duration-150 border text-xs font-bold cursor-pointer",
+										store.posEnabled
+											? "border-second/40 bg-second/10 text-second"
+											: "border-first/15 text-first/30 hover:border-second/30 hover:text-second",
+									].join(" ")}
+								>
+									POS
+								</button>
+							)}
+							{onToggleHomeShow && store && user.role === "ADMIN" && (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										onToggleHomeShow(user);
+									}}
+									title={store.homeShow ? "Desactivar Home" : "Activar Home"}
+									className={[
+										"w-full h-8 rounded-lg flex items-center justify-center transition-all duration-150 border text-xs font-bold cursor-pointer",
+										store.homeShow
+											? "border-second/40 bg-second/10 text-second"
+											: "border-first/15 text-first/30 hover:border-second/30 hover:text-second",
+									].join(" ")}
+								>
+									HOME
+								</button>
+							)}
+						</div>
 					</div>
 				)}
 			</div>

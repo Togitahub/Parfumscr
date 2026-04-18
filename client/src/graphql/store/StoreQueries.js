@@ -74,6 +74,7 @@ export const GET_STORES = gql`
 			logo
 			owner
 			posEnabled
+			homeShow
 		}
 	}
 `;

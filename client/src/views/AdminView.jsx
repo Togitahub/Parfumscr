@@ -81,6 +81,7 @@ import {
 import {
 	ADD_PRODUCT_TO_STORE,
 	REMOVE_PRODUCT_FROM_STORE,
+	TOGGLE_HOME_SHOW,
 	TOGGLE_STORE_POS,
 } from "../graphql/store/StoreMutations";
 import { GET_STORE_PRODUCTS } from "../graphql/store/StoreQueries";
@@ -495,7 +496,12 @@ const UsersSection = () => {
 	const [toggleUserActive] = useMutation(TOGGLE_USER_ACTIVE, {
 		refetchQueries: [{ query: GET_USERS }],
 	});
+
 	const [toggleStorePos] = useMutation(TOGGLE_STORE_POS, {
+		refetchQueries: [{ query: GET_STORES }],
+	});
+
+	const [toggleHomeShow] = useMutation(TOGGLE_HOME_SHOW, {
 		refetchQueries: [{ query: GET_STORES }],
 	});
 
@@ -555,6 +561,17 @@ const UsersSection = () => {
 		}
 	};
 
+	const handleToggleHomeShow = async (user) => {
+		try {
+			await toggleHomeShow({ variables: { ownerId: user.id } });
+			const store = stores.find((s) => s.owner === user.id);
+			toast.success(store?.homeShow ? "Home desactivado" : "Home activado");
+			refetchStores();
+		} catch (err) {
+			toast.error("Error", { description: err.message });
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex items-center justify-between">
@@ -579,6 +596,7 @@ const UsersSection = () => {
 				onDelete={handleDelete}
 				onToggleActive={handleToggleActive}
 				onTogglePos={handleTogglePos}
+				onToggleHomeShow={handleToggleHomeShow}
 			/>
 
 			<Modal

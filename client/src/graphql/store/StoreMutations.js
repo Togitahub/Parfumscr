@@ -151,6 +151,15 @@ export const TOGGLE_STORE_POS = gql`
 	}
 `;
 
+export const TOGGLE_HOME_SHOW = gql`
+	mutation ToggleHomeShow($ownerId: ID!) {
+		toggleHomeShow(ownerId: $ownerId) {
+			id
+			homeShow
+		}
+	}
+`;
+
 export const TOGGLE_STORE_PRODUCT = gql`
 	mutation ToggleStoreProduct($productId: ID!, $active: Boolean!) {
 		toggleStoreProduct(productId: $productId, active: $active) {

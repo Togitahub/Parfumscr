@@ -256,9 +256,11 @@ const StoreList = () => {
 	const { data: storesData } = useQuery(GET_STORES);
 	const stores = storesData?.getStores ?? [];
 
+	const homeShow = stores.filter((s) => s.homeShow === true).length;
+
 	return (
 		<>
-			{stores.length > 0 && (
+			{homeShow > 0 && stores.length > 0 && (
 				<section className="px-6 py-16 md:px-12">
 					<div className="max-w-6xl mx-auto flex flex-col gap-10">
 						<div
@@ -285,10 +287,15 @@ const StoreList = () => {
 							</h2>
 						</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-							{stores.map((store, i) => (
-								<StoreCard key={store.id} store={store} i={i} />
-							))}
+						<div
+							className={`${homeShow === 1 ? "flex justify-center" : "grid grid-cols-2 lg:grid-cols-4 gap-3"}`}
+						>
+							{stores.map(
+								(store, i) =>
+									store?.homeShow && (
+										<StoreCard key={store.id} store={store} i={i} />
+									),
+							)}
 						</div>
 					</div>
 				</section>
@@ -299,19 +306,59 @@ const StoreList = () => {
 
 const FeaturesList = () => {
 	return (
-		<section className="px-6 py-16 md:px-12">
+		<section className="flex flex-col text-center items-center gap-10 px-6 py-16 md:px-12">
+			<p
+				className="text-[10px] font-semibold uppercase tracking-[0.35em]"
+				style={{
+					color: "var(--color-second)",
+					fontFamily: "'Cinzel', serif",
+				}}
+			>
+				FEATURES
+			</p>
+			<h2
+				className="font-light text-first leading-tight"
+				style={{
+					fontFamily: "'Cormorant Garamond', serif",
+					fontSize: "clamp(2rem, 4vw, 3.5rem)",
+				}}
+			>
+				Una parte de lo que ofrecemos
+			</h2>
+			<p
+				className="text-sm font-light max-w-md leading-relaxed"
+				style={{
+					fontFamily: "'Cormorant Garamond', serif",
+					fontSize: "1rem",
+					fontStyle: "italic",
+					color: "color-mix(in srgb, var(--color-first) 45%, transparent)",
+				}}
+			>
+				Tenemos muchos features más que ayudaran a tu negocio de perfumeria a
+				crecer exponencialmente
+			</p>
+
+			{/* Decorative line */}
+			<div
+				className="mt-2 h-px w-20"
+				style={{
+					background:
+						"linear-gradient(to right, transparent, var(--color-second), transparent)",
+					opacity: 0.5,
+				}}
+			/>
 			<div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 				{FEATURES.map((f, i) => (
 					<div
 						key={i}
-						className="flex flex-col gap-3 p-6 rounded-2xl border border-first/8 bg-main"
+						className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-first/8 bg-main"
 						style={{
 							animation: "fadeUp 0.5s ease both",
 							animationDelay: `${i * 80}ms`,
 						}}
 					>
 						<span style={{ color: "var(--color-second)" }}>{f.icon}</span>
-						<p className="text-base font-semibold text-first">{f.title}</p>
+						<p className="font-semibold text-first">{f.title}</p>
 						<p className="text-sm text-first/45 leading-relaxed">
 							{f.description}
 						</p>

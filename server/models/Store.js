@@ -59,6 +59,10 @@ const StoreSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		homeShow: {
+			type: Boolean,
+			default: false,
+		},
 		heroTagline: {
 			type: String,
 			default: null,

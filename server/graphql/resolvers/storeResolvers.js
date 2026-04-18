@@ -247,6 +247,17 @@ const storeResolvers = {
 			);
 		},
 
+		toggleHomeShow: async (_, { ownerId }, { user }) => {
+			if (!user || user.role !== "SUPER_ADMIN") throw new Error("Unauthorized");
+			const store = await Store.findOne({ owner: ownerId });
+			if (!store) throw new Error("Store not found");
+			return await Store.findByIdAndUpdate(
+				store._id,
+				{ homeShow: !store.homeShow },
+				{ new: true },
+			);
+		},
+
 		toggleStoreProduct: async (_, { productId, active }, { user }) => {
 			if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
 
