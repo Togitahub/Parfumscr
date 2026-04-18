@@ -285,6 +285,7 @@ const StoreList = () => {
 							>
 								Explora las tiendas asociadas
 							</h2>
+							<p>(Solo se muestran las tiendas que dieron su consentimiento para estar en el market de exploración de tiendas)</p>
 						</div>
 
 						<div
@@ -298,6 +299,7 @@ const StoreList = () => {
 							)}
 						</div>
 					</div>
+					69e2cbf379886e2331f6abc4
 				</section>
 			)}
 		</>
