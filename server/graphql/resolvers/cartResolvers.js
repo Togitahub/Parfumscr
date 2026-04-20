@@ -1,6 +1,6 @@
 import Cart from "../../models/Cart.js";
 
-import { AuthError } from "./userResolvers";
+import { AuthError } from "./userResolvers.js";
 
 const PRODUCT_POPULATE = {
 	path: "items.product",
