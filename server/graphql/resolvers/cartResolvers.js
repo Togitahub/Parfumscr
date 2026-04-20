@@ -1,5 +1,7 @@
 import Cart from "../../models/Cart.js";
 
+import { AuthError } from "./userResolvers";
+
 const PRODUCT_POPULATE = {
 	path: "items.product",
 	populate: [{ path: "brand" }],
@@ -8,7 +10,7 @@ const PRODUCT_POPULATE = {
 const cartResolvers = {
 	Query: {
 		getUserCart: async (_, { userId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 
 			return await Cart.findOne({ user: userId }).populate(PRODUCT_POPULATE);
 		},
@@ -16,7 +18,7 @@ const cartResolvers = {
 
 	Mutation: {
 		addItemToCart: async (_, { userId, productId, quantity }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			let cart = await Cart.findOne({ user: userId });
 			if (!cart) cart = await Cart.create({ user: userId, items: [] });
 
@@ -34,7 +36,7 @@ const cartResolvers = {
 		},
 
 		removeItemFromCart: async (_, { userId, productId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			const cart = await Cart.findOne({ user: userId });
 			if (!cart) throw new Error("Cart not found");
 			cart.items = cart.items.filter((i) => i.product.toString() !== productId);
@@ -43,7 +45,7 @@ const cartResolvers = {
 		},
 
 		clearCart: async (_, { userId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			await Cart.findOneAndUpdate({ user: userId }, { items: [] });
 			return { success: true, message: "Cart cleared" };
 		},

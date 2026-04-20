@@ -190,7 +190,7 @@ app.post("/api/refresh-token", async (req, res) => {
 		const accessToken = jwt.sign(
 			{ id: user._id, role: user.role },
 			process.env.JWT_SECRET,
-			{ expiresIn: "15m" },
+			{ expiresIn: "30s" },
 		);
 
 		res.json({ token: accessToken });
@@ -221,7 +221,12 @@ app.post("/api/refresh-token", async (req, res) => {
 							if (!user) throw new Error("User not found");
 							return { user, res };
 						} catch (error) {
-							console.error("Authentication error:", error.message);
+							if (error.name === "TokenExpiredError") {
+								const { GraphQLError } = await import("graphql");
+								throw new GraphQLError("Token expired", {
+									extensions: { code: "UNAUTHENTICATED" },
+								});
+							}
 							return { user: null, res };
 						}
 					}

@@ -73,7 +73,8 @@ const requestLink = new ApolloLink((operation, forward) => {
 					(e) =>
 						e.extensions?.code === "UNAUTHENTICATED" ||
 						e.message === "Not authenticated" ||
-						e.message === "Authentication required",
+						e.message === "Authentication required" ||
+						e.message === "Token expired",
 				);
 
 				// No error — pass through normally

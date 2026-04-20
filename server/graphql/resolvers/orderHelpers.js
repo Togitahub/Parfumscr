@@ -1,5 +1,6 @@
 import Store from "../../models/Store.js";
 import StoreProduct from "../../models/StoreProduct.js";
+import { AuthError } from "./userResolvers.js";
 
 export const PURCHASE_MODES = {
 	NORMAL: "NORMAL",
@@ -28,7 +29,10 @@ const sumInstallmentPaid = (installments = []) =>
 
 const sumLayawayPayments = (payments = []) =>
 	roundMoney(
-		payments.reduce((total, payment) => total + (Number(payment.amount) || 0), 0),
+		payments.reduce(
+			(total, payment) => total + (Number(payment.amount) || 0),
+			0,
+		),
 	);
 
 export const splitInstallments = (total, count) => {
@@ -47,7 +51,11 @@ export const splitInstallments = (total, count) => {
 	}));
 };
 
-const distributeInitialPayment = (installments, initialPayment, paymentMethod) => {
+const distributeInitialPayment = (
+	installments,
+	initialPayment,
+	paymentMethod,
+) => {
 	let remaining = roundMoney(initialPayment);
 	if (remaining <= 0) return installments;
 
@@ -60,7 +68,7 @@ const distributeInitialPayment = (installments, initialPayment, paymentMethod) =
 		return {
 			...installment,
 			paidAmount: applicableAmount,
-			paymentMethod: applicableAmount > 0 ? paymentMethod ?? null : null,
+			paymentMethod: applicableAmount > 0 ? (paymentMethod ?? null) : null,
 			status:
 				applicableAmount >= installment.expectedAmount
 					? INSTALLMENT_STATUSES.PAID
@@ -214,7 +222,7 @@ export const ensureAdminOrderAccess = async (context, order) => {
 };
 
 export const ensureOrderAccess = async (context, order) => {
-	if (!context.user) throw new Error("Not authenticated");
+	if (!context.user) throw AuthError();
 
 	if (context.user.role === "SUPER_ADMIN") return null;
 	if (context.user.role === "ADMIN") {

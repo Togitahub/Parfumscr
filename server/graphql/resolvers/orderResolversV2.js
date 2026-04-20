@@ -14,6 +14,7 @@ import {
 	restoreStockIfNeeded,
 	resolveOrderTotal,
 } from "./orderHelpers.js";
+import { AuthError } from "./userResolvers.js";
 
 const getManagedStore = async (context) => {
 	if (!context.user || !["ADMIN", "SUPER_ADMIN"].includes(context.user.role)) {
@@ -42,7 +43,7 @@ const orderResolvers = {
 
 	Query: {
 		getMyOrders: async (_, { userId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			if (
 				context.user.id !== userId &&
 				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)

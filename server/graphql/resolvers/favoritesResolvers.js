@@ -1,4 +1,5 @@
 import Favorites from "../../models/Favorites.js";
+import { AuthError } from "./userResolvers.js";
 
 const PRODUCTS_POPULATE = {
 	path: "products",
@@ -13,7 +14,7 @@ const PRODUCTS_POPULATE = {
 const favoritesResolvers = {
 	Query: {
 		getUserFavorites: async (_, { userId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 
 			return await Favorites.findOne({ user: userId }).populate(
 				PRODUCTS_POPULATE,
@@ -23,7 +24,7 @@ const favoritesResolvers = {
 
 	Mutation: {
 		addToFavorites: async (_, { userId, productId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			let favs = await Favorites.findOne({ user: userId });
 			if (!favs) favs = await Favorites.create({ user: userId, products: [] });
 
@@ -42,7 +43,7 @@ const favoritesResolvers = {
 		},
 
 		removeFromFavorites: async (_, { userId, productId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			const favs = await Favorites.findOne({ user: userId });
 			if (!favs) throw new Error("Favorites not found");
 			favs.products = favs.products.filter((p) => p.toString() !== productId);

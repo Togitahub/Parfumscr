@@ -2,11 +2,12 @@ import Order from "../../models/Order.js";
 import Cart from "../../models/Cart.js";
 import Store from "../../models/Store.js";
 import StoreProduct from "../../models/StoreProduct.js";
+import { AuthError } from "./userResolvers.js";
 
 const orderResolvers = {
 	Query: {
 		getMyOrders: async (_, { userId }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError();
 			if (
 				context.user.id !== userId &&
 				!["ADMIN", "SUPER_ADMIN"].includes(context.user.role)
@@ -16,7 +17,7 @@ const orderResolvers = {
 		},
 
 		getOrderById: async (_, { id }, context) => {
-			if (!context.user) throw new Error("Not authenticated");
+			if (!context.user) throw AuthError;
 			const order = await Order.findById(id);
 			if (!order) throw new Error("Order not found");
 			if (

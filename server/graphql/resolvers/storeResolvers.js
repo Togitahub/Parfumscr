@@ -5,6 +5,8 @@ import StoreProduct from "../../models/StoreProduct.js";
 import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 import { getDateFilter } from "./expenseResolvers.js";
 
+import { AuthError } from "./userResolvers.js";
+
 const PRODUCT_POPULATE = {
 	path: "product",
 	populate: [
@@ -18,7 +20,7 @@ const PRODUCT_POPULATE = {
 const storeResolvers = {
 	Query: {
 		getMyStore: async (_, __, { user }) => {
-			if (!user) throw new Error("Authentication required");
+			if (!user) throw new AuthError();
 			if (!["ADMIN", "SUPER_ADMIN"].includes(user.role))
 				throw new Error("Unauthorized");
 			return await Store.findOne({ owner: user._id });

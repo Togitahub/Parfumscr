@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
+import { GraphQLError } from "graphql";
+
 import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 
 import { sendResetPasswordEmail } from "../../config/nodemailer.js";
@@ -14,10 +16,15 @@ import {
 	refreshTokenCookieOptions,
 } from "../../config/cookieConfig.js";
 
+export const AuthError = () =>
+	new GraphQLError("Not authenticated", {
+		extensions: { code: "UNAUTHENTICATED" },
+	});
+
 const userResolvers = {
 	Query: {
 		getUser: async (_, { id }, { user }) => {
-			if (!user) throw new Error("Authentication required");
+			if (!user) throw AuthError();
 			if (user.role !== "SUPER_ADMIN" && user.id !== id)
 				throw new Error("Unauthorized");
 
@@ -58,7 +65,7 @@ const userResolvers = {
 			const token = jwt.sign(
 				{ id: user._id, role: user.role },
 				process.env.JWT_SECRET,
-				{ expiresIn: "15m" },
+				{ expiresIn: "30s" },
 			);
 
 			const refreshToken = jwt.sign(
@@ -78,7 +85,7 @@ const userResolvers = {
 		},
 
 		updateUser: async (_, { id, ...args }, { user }) => {
-			if (!user) throw new Error("Unauthenticated");
+			if (!user) throw AuthError();
 			const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user.role);
 			if (!isAdmin && user.id !== id) throw new Error("Unauthorized");
 
@@ -171,7 +178,7 @@ const userResolvers = {
 		},
 
 		changePassword: async (_, { currentPassword, newPassword }, { user }) => {
-			if (!user) throw new Error("Not authenticated");
+			if (!user) throw AuthError();
 			const found = await User.findById(user._id);
 			if (!found) throw new Error("User not found");
 			const valid = await bcrypt.compare(currentPassword, found.password);
