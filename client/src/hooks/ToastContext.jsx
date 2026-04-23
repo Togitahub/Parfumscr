@@ -57,7 +57,7 @@ export const ToastProvider = ({ children }) => {
 			{/* Container */}
 			<div
 				aria-live="polite"
-				className="fixed top-5 right-5 z-50 flex flex-col gap-2 items-end"
+				className="fixed top-5 right-5 z-100 flex flex-col gap-2 items-end"
 			>
 				{toasts.map((t) => (
 					<Toast key={t.id} {...t} onClose={remove} />
