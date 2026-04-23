@@ -60,20 +60,20 @@ const productResolvers = {
 
 			// Agregar después de las validaciones de categoryExists y segmentExists:
 			const duplicate = await Product.findOne({
-				name: productArgs.name,
+				name: { $regex: new RegExp(`^${productArgs.name.trim()}$`, "i") },
 				brand: brandDoc._id,
 				size: productArgs.size ?? null,
 				isDecant: productArgs.isDecant === true,
 			});
 
+			if (productArgs.size && !/ml$/i.test(productArgs.size.trim())) {
+				productArgs.size = productArgs.size.trim() + "ml";
+			}
+
 			if (duplicate)
 				throw new Error(
 					`Ya existe un ${productArgs.isDecant ? "decant" : "perfume"} con ese nombre, marca y tamaño`,
 				);
-
-			if (productArgs.size && !/ml$/i.test(productArgs.size.trim())) {
-				productArgs.size = productArgs.size.trim() + "ml";
-			}
 
 			// Crear el perfume padre (o decant si se pasa isDecant: true)
 			const newProduct = await Product.create({
