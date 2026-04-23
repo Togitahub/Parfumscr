@@ -20,6 +20,8 @@
 	--color-warning: #ffec40;
 	--color-error: #dd1616;
 	--color-success: #16dd16;
+	--color-homme: #162add;
+	--color-femme: #dd16bc;
 }
 
 /* 1. Ancho de la barra */
@@ -341,7 +343,6 @@ body {
 
 .pc-root {
 	background: var(--color-main);
-	border: 1px solid color-mix(in srgb, var(--color-first) 8%, transparent);
 	transition:
 		transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
 		box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -398,9 +399,9 @@ body {
 	backdrop-filter: blur(8px);
 }
 .pc-pill--decant {
-	background: color-mix(in srgb, var(--color-second) 50%, transparent);
-	color: var(--color-main);
-	border: 1px solid color-mix(in srgb, var(--color-second) 30%, transparent);
+	background: color-mix(in srgb, var(--color-main) 50%, transparent);
+	color: var(--color-second);
+	border: 2px solid color-mix(in srgb, var(--color-second) 30%, transparent);
 }
 .pc-pill--discount {
 	background: color-mix(in srgb, var(--color-succes) 18%, transparent);

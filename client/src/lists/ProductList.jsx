@@ -248,7 +248,7 @@ const ProductList = ({
 												<Button
 													iconOnly
 													size="xs"
-													variant="ghost"
+													variant="primary"
 													icon={<BsDroplet />}
 													onClick={(e) => {
 														e.stopPropagation();

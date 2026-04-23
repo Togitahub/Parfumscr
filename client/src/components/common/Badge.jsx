@@ -16,6 +16,8 @@ const variants = {
 	warning: "bg-yellow-400/10 text-yellow-500 border border-yellow-400/20",
 	info: "bg-second/10 text-second border border-second/20",
 	neutral: "bg-first/10 text-first/60 border border-first/10",
+	homme: "bg-homme/20 text-homme/75",
+	femme: "bg-femme/20 text-femme/75",
 };
 
 const dotVariants = {

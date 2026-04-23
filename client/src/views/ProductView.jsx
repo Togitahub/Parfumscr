@@ -144,7 +144,7 @@ const InfoRow = ({ icon, label, value, to, navigate, store }) => (
 				onClick={() => {
 					if (store) navigate(to);
 				}}
-				className="flex items-center gap-1 text-sm font-medium text-second hover:opacity-70 transition-opacity cursor-pointer"
+				className="flex items-center gap-1 text-sm font-medium hover:opacity-70 transition-opacity cursor-pointer"
 			>
 				{value}
 				<BsChevronRight className="w-3 h-3" />
@@ -453,7 +453,7 @@ const ProductView = () => {
 
 							{/* Size */}
 							{product.size && (
-								<p className="text-sm text-first/40 tracking-wide">
+								<p className="text-sm text-second tracking-wide">
 									{product.size}
 								</p>
 							)}
@@ -633,7 +633,7 @@ const ProductView = () => {
 
 						{/* Olfactory notes */}
 						{product.notes?.length > 0 && (
-							<div className="flex flex-col gap-2">
+							<div className="flex flex-col gap-4">
 								<p className="text-xs font-semibold uppercase tracking-widest text-first/40 flex items-center gap-2">
 									<BsDroplet className="w-3.5 h-3.5" />
 									Acordes Olfativos
@@ -645,7 +645,7 @@ const ProductView = () => {
 											onClick={() => {
 												if (store) navigate(`/store/note/${note.id}`);
 											}}
-											className="px-2.5 py-1 rounded-full text-xs font-medium border border-first/10 text-first/50 hover:text-second hover:border-second/25 hover:bg-second/6 transition-all duration-150 cursor-pointer"
+											className="px-2.5 py-1 rounded-full text-xs font-medium border-2 border-second/50 text-second hover:text-first hover:border-second/25 hover:bg-second/6 transition-all duration-150 cursor-pointer"
 										>
 											{note.name}
 										</button>

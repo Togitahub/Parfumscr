@@ -54,6 +54,7 @@ const ProductCard = ({
 		name,
 		brand,
 		segment,
+		category,
 		price,
 		stock,
 		images,
@@ -85,7 +86,8 @@ const ProductCard = ({
 		<article
 			onClick={handleCardClick}
 			className={[
-				"pc-root group relative flex flex-col cursor-pointer select-none rounded-2xl overflow-hidden",
+				"pc-root group relative flex flex-col border cursor-pointer select-none rounded-2xl overflow-hidden",
+				category.name === "Hombre" ? "border-homme/50" : category.name === "Mujer" ? "border-femme/50" : "border-warning/50",
 				isFeatured ? "md:flex-row" : "",
 				className,
 			]
@@ -217,9 +219,15 @@ const ProductCard = ({
 						{brand?.name ?? "—"}
 					</span>
 					{segment && !isCompact && (
-						<Badge variant="neutral" size="sm">
-							{segment.name}
-						</Badge>
+						<div className="flex gap-2">
+							<Badge
+								variant={`${category.name === "Hombre" ? "homme" : category.name === "Mujer" ? "femme" : "warning"}`}
+								size="sm"
+							>
+								{category.name}
+							</Badge>
+							<Badge size="sm">{segment.name}</Badge>
+						</div>
 					)}
 				</div>
 
@@ -243,7 +251,7 @@ const ProductCard = ({
 				{/* Olfactory note chips */}
 				{notes.length > 0 && (
 					<div className="flex flex-wrap gap-1">
-						{notes.slice(0, 4).map((note) => (
+						{notes.slice(0, 3).map((note) => (
 							<span
 								key={note.name}
 								className="pc-note-chip"
@@ -257,9 +265,9 @@ const ProductCard = ({
 								{note.name}
 							</span>
 						))}
-						{notes.length > 4 && (
+						{notes.length > 3 && (
 							<span className="pc-note-chip pc-note-chip--more">
-								+{notes.length - 4}
+								+{notes.length - 3}
 							</span>
 						)}
 					</div>
