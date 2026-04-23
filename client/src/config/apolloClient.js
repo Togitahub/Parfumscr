@@ -7,6 +7,17 @@ import {
 
 import { Observable } from "@apollo/client/utilities";
 
+import { persistCache, LocalStorageWrapper } from "apollo3-cache-persist";
+
+const cache = new InMemoryCache();
+
+export const persistCachePromise = persistCache({
+	cache,
+	storage: new LocalStorageWrapper(window.localStorage),
+	maxSize: 2097152,
+	debug: false,
+});
+
 // ── HTTP link ─────────────────────────────────────────────────────────────────
 
 const httpLink = new HttpLink({
@@ -130,7 +141,7 @@ const requestLink = new ApolloLink((operation, forward) => {
 
 export const client = new ApolloClient({
 	link: ApolloLink.from([requestLink, httpLink]),
-	cache: new InMemoryCache(),
+	cache,
 	defaultOptions: {
 		watchQuery: { errorPolicy: "all" },
 		query: { errorPolicy: "all" },
