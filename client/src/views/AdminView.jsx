@@ -14,7 +14,7 @@
  *   - Usuarios (CRUD completo)
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import {
@@ -255,6 +255,10 @@ const EntitySection = ({
 		setEditEntity(null);
 	};
 
+	const sortedItems = useMemo(() => {
+		return [...items].sort((a, b) => a.name.localeCompare(b.name));
+	}, [items]);
+
 	return (
 		<div className="flex flex-col gap-4">
 			{/* Section header */}
@@ -274,7 +278,7 @@ const EntitySection = ({
 
 			{/* Table */}
 			<EntityTable
-				items={items}
+				items={sortedItems}
 				loading={loading}
 				onEdit={isSuperAdmin ? handleEdit : undefined}
 				onDelete={isSuperAdmin ? handleDelete : undefined}

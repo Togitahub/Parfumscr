@@ -15,7 +15,7 @@
  * - className: string
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { BsSliders, BsX, BsChevronDown, BsChevronUp } from "react-icons/bs";
 
@@ -107,6 +107,14 @@ const Filters = ({
 	const freeActiveCount =
 		activeFilterCount -
 		lockedKeys.filter((k) => filters[k] && filters[k] !== "").length;
+
+	const sortedBrands = useMemo(() => {
+		return [...brands].sort((a, b) => a.name.localeCompare(b.name));
+	}, [brands]);
+
+	const sortedNotes = useMemo(() => {
+		return [...notes].sort((a, b) => a.name.localeCompare(b.name));
+	}, [notes]);
 
 	return (
 		<div
@@ -210,7 +218,7 @@ const Filters = ({
 								active={!filters.brandId}
 								onClick={() => setFilter("brandId", "")}
 							/>
-							{brands.map((b) => (
+							{sortedBrands.map((b) => (
 								<RadioOption
 									key={b.id}
 									label={b.name}
@@ -274,7 +282,7 @@ const Filters = ({
 					<div className="col-span-full lg:col-auto">
 						<Section title="Acordes olfativos" defaultOpen={false}>
 							<div className="flex flex-wrap gap-1.5 pt-1">
-								{notes.map((n) => (
+								{sortedNotes.map((n) => (
 									<ChipOption
 										key={n.id}
 										label={n.name}

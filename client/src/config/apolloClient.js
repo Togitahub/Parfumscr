@@ -143,8 +143,8 @@ export const client = new ApolloClient({
 	link: ApolloLink.from([requestLink, httpLink]),
 	cache,
 	defaultOptions: {
-		watchQuery: { errorPolicy: "all" },
-		query: { errorPolicy: "all" },
+		watchQuery: { fetchPolicy: "cache-and-network", errorPolicy: "all" },
+		query: { fetchPolicy: "cache-and-network", errorPolicy: "all" },
 		mutate: { errorPolicy: "none" },
 	},
 });

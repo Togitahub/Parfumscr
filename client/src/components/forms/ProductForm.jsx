@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRef } from "react";
 
 import Button from "../common/Button";
@@ -77,6 +77,10 @@ const BrandCombobox = ({
 }) => {
 	const [brandOpen, setBrandOpen] = useState(false);
 
+	const sortedBrands = useMemo(() => {
+		return [...brandOptions].sort((a, b) => a.label.localeCompare(b.label));
+	}, [brandOptions]);
+
 	return (
 		<>
 			{/* Marca con combobox */}
@@ -108,7 +112,7 @@ const BrandCombobox = ({
 					{brandOpen && brandOptions.length > 0 && (
 						<div className="absolute z-20 top-full mt-1 w-full rounded-xl border border-first/15 bg-main shadow-xl overflow-hidden">
 							<div className="max-h-52 overflow-y-auto">
-								{brandOptions
+								{sortedBrands
 									.filter((b) =>
 										b.label.toLowerCase().includes(form.brand.toLowerCase()),
 									)
@@ -184,6 +188,10 @@ const NotesCombobox = ({ noteOptions, selectedNotes, onToggle, onCreated }) => {
 		}
 	};
 
+	const sortedNotes = useMemo(() => {
+		return [...noteOptions].sort((a, b) => a.label.localeCompare(b.label));
+	}, [noteOptions]);
+
 	return (
 		<div className="flex flex-col gap-2">
 			<label className="text-sm font-medium text-first/80 select-none">
@@ -225,7 +233,7 @@ const NotesCombobox = ({ noteOptions, selectedNotes, onToggle, onCreated }) => {
 
 			{/* Chips */}
 			<div className="flex flex-wrap gap-2">
-				{(search.trim() ? filtered : noteOptions).map((note) => {
+				{(search.trim() ? filtered : sortedNotes).map((note) => {
 					const selected = selectedNotes.includes(note.value);
 					return (
 						<button
