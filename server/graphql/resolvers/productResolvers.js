@@ -58,6 +58,10 @@ const productResolvers = {
 			if (!categoryExists) throw new Error("Category not found");
 			if (!segmentExists) throw new Error("Segment not found");
 
+			if (productArgs.size && !/ml$/i.test(productArgs.size.trim())) {
+				productArgs.size = productArgs.size.trim() + "ml";
+			}
+
 			// Agregar después de las validaciones de categoryExists y segmentExists:
 			const duplicate = await Product.findOne({
 				name: { $regex: new RegExp(`^${productArgs.name.trim()}$`, "i") },
@@ -65,10 +69,6 @@ const productResolvers = {
 				size: productArgs.size ?? null,
 				isDecant: productArgs.isDecant === true,
 			});
-
-			if (productArgs.size && !/ml$/i.test(productArgs.size.trim())) {
-				productArgs.size = productArgs.size.trim() + "ml";
-			}
 
 			if (duplicate)
 				throw new Error(
