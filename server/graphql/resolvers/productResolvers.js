@@ -60,7 +60,7 @@ const productResolvers = {
 
 			// Agregar después de las validaciones de categoryExists y segmentExists:
 			const duplicate = await Product.findOne({
-				name: { $regex: new RegExp(`^${productArgs.name.trim()}$`, "i") },
+				name: productArgs.name,
 				brand: brandDoc._id,
 				size: productArgs.size ?? null,
 				isDecant: productArgs.isDecant === true,
