@@ -64,6 +64,8 @@ const ProductCard = ({
 		notes = [],
 	} = product;
 
+	console.log(category);
+
 	const image = images?.[0] ?? null;
 	const optimizedImage = image ? getOptimizedUrl(image, "card") : null;
 	const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
@@ -87,7 +89,11 @@ const ProductCard = ({
 			onClick={handleCardClick}
 			className={[
 				"pc-root group relative flex flex-col border cursor-pointer select-none rounded-2xl overflow-hidden",
-				category.name === "Hombre" ? "border-homme/50" : category.name === "Mujer" ? "border-femme/50" : "border-warning/50",
+				category?.name === "Hombre"
+					? "border-homme/50"
+					: category?.name === "Mujer"
+						? "border-femme/50"
+						: "border-warning/50",
 				isFeatured ? "md:flex-row" : "",
 				className,
 			]
@@ -221,10 +227,10 @@ const ProductCard = ({
 					{segment && !isCompact && (
 						<div className="flex gap-2">
 							<Badge
-								variant={`${category.name === "Hombre" ? "homme" : category.name === "Mujer" ? "femme" : "warning"}`}
+								variant={`${category?.name === "Hombre" ? "homme" : category?.name === "Mujer" ? "femme" : "warning"}`}
 								size="sm"
 							>
-								{category.name}
+								{category?.name}
 							</Badge>
 							<Badge size="sm">{segment.name}</Badge>
 						</div>

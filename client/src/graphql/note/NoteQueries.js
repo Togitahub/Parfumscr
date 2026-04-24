@@ -28,6 +28,10 @@ export const GET_NOTE = gql`
 					id
 					name
 				}
+				category {
+					id
+					name
+				}
 				notes {
 					id
 					name
