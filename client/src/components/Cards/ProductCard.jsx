@@ -64,8 +64,6 @@ const ProductCard = ({
 		notes = [],
 	} = product;
 
-	console.log(category);
-
 	const image = images?.[0] ?? null;
 	const optimizedImage = image ? getOptimizedUrl(image, "card") : null;
 	const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
