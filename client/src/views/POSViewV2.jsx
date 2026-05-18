@@ -110,6 +110,12 @@ const ProductGrid = ({
 										/>
 									</span>
 								)}
+								<span className="ms-2">
+									<Badge
+										size="sm"
+										children={`${product.isDecant ? "Decant" : "Perfume"}`}
+									/>
+								</span>
 							</p>
 							<p className="text-xs text-first/40 truncate">
 								{product.brand?.name} {product.size && ` · ${product.size}`}
