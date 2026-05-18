@@ -111,7 +111,8 @@ import DashboardView from "./DashboardView";
 
 // Contexts
 
-import { FilterProvider } from "../hooks/FilterContext";
+import { FilterProvider, useFilters } from "../hooks/FilterContext";
+import Pagination from "../components/functional/Pagination";
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 
@@ -321,7 +322,63 @@ const EntitySection = ({
 
 // ── Products section ──────────────────────────────────────────────────────────
 
-const ProductsSection = ({ myStoreId }) => {
+const ProductsSectionInner = ({
+	myStoreId,
+	active,
+	isSuperAdmin,
+	onEdit,
+	onDelete,
+	onAddDecant,
+	onToggleStore,
+	storeProductIds,
+}) => {
+	const { page } = useFilters();
+	const PAGE_SIZE = 9;
+
+	const { data: productsData, loading: loadingProducts } = useQuery(
+		GET_PRODUCTS,
+		{
+			variables: { page, pageSize: PAGE_SIZE },
+			skip: !active,
+		},
+	);
+
+	const { data: brandsData } = useQuery(GET_BRANDS, { skip: !active });
+	const { data: categoriesData } = useQuery(GET_CATEGORIES, { skip: !active });
+	const { data: segmentsData } = useQuery(GET_SEGMENTS, { skip: !active });
+	const { data: notesData } = useQuery(GET_NOTES, { skip: !active });
+
+	const products = productsData?.getProducts?.items ?? [];
+	const total = productsData?.getProducts?.total ?? 0;
+	const totalPages = productsData?.getProducts?.totalPages ?? 1;
+
+	const brands = brandsData?.getBrands ?? [];
+	const categories = categoriesData?.getCategories ?? [];
+	const segments = segmentsData?.getSegments ?? [];
+	const notes = notesData?.getNotes ?? [];
+
+	return (
+		<>
+			<ProductList
+				products={products}
+				loading={loadingProducts}
+				brands={brands}
+				categories={categories}
+				segments={segments}
+				notes={notes}
+				onEdit={isSuperAdmin ? onEdit : undefined}
+				onDelete={isSuperAdmin ? onDelete : undefined}
+				onAddDecant={onAddDecant}
+				onToggleStore={myStoreId ? onToggleStore : undefined}
+				storeProductIds={storeProductIds}
+				showAdminActions
+			/>
+			{totalPages > 1 && <Pagination total={total} totalPages={totalPages} />}
+		</>
+	);
+};
+
+const ProductsSection = ({ myStoreId, active }) => {
 	const toast = useToast();
 	const { user } = useAuth();
 	const [modalOpen, setModalOpen] = useState(false);
@@ -329,15 +386,9 @@ const ProductsSection = ({ myStoreId }) => {
 	const [deleteTarget, setDeleteTarget] = useState(null);
 	const [decantTarget, setDecantTarget] = useState(null);
 
-	const { data: productsData, loading: loadingProducts } =
-		useQuery(GET_PRODUCTS);
-	const { data: brandsData } = useQuery(GET_BRANDS);
-	const { data: categoriesData } = useQuery(GET_CATEGORIES);
-	const { data: segmentsData } = useQuery(GET_SEGMENTS);
-	const { data: notesData } = useQuery(GET_NOTES);
 	const { data: storeProductsData, refetch: refetchStoreProducts } = useQuery(
 		GET_STORE_PRODUCTS,
-		{ variables: { storeId: myStoreId }, skip: !myStoreId },
+		{ variables: { storeId: myStoreId }, skip: !myStoreId || !active },
 	);
 
 	const [deleteProduct, { loading: deleting }] = useMutation(DELETE_PRODUCT, {
@@ -361,12 +412,7 @@ const ProductsSection = ({ myStoreId }) => {
 		],
 	});
 
-	const products = productsData?.getProducts ?? [];
 	const isSuperAdmin = user?.role === "SUPER_ADMIN";
-	const brands = brandsData?.getBrands ?? [];
-	const categories = categoriesData?.getCategories ?? [];
-	const segments = segmentsData?.getSegments ?? [];
-	const notes = notesData?.getNotes ?? [];
 
 	const storeProductIds = new Set(
 		storeProductsData?.getStoreProducts
@@ -418,11 +464,6 @@ const ProductsSection = ({ myStoreId }) => {
 			<div className="flex items-center justify-between">
 				<div>
 					<h2 className="text-base font-semibold text-first">Productos</h2>
-					<p className="text-xs text-first/35 mt-0.5">
-						{loadingProducts
-							? "Cargando..."
-							: `${products.length} producto${products.length !== 1 ? "s" : ""}`}
-					</p>
 				</div>
 				<Button size="sm" icon={<BsPlus />} onClick={handleOpenCreate}>
 					Nuevo Perfume
@@ -430,19 +471,15 @@ const ProductsSection = ({ myStoreId }) => {
 			</div>
 
 			<FilterProvider pageSize={9}>
-				<ProductList
-					products={products}
-					loading={loadingProducts}
-					brands={brands}
-					categories={categories}
-					segments={segments}
-					notes={notes}
-					onEdit={isSuperAdmin ? handleEdit : undefined}
-					onDelete={isSuperAdmin ? handleDelete : undefined}
+				<ProductsSectionInner
+					myStoreId={myStoreId}
+					active={active}
+					isSuperAdmin={isSuperAdmin}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
 					onAddDecant={(product) => setDecantTarget(product)}
-					onToggleStore={myStoreId ? handleToggleStore : undefined}
+					onToggleStore={handleToggleStore}
 					storeProductIds={storeProductIds}
-					showAdminActions
 				/>
 			</FilterProvider>
 
@@ -773,7 +810,12 @@ const AdminView = () => {
 				) : null;
 
 			case "products":
-				return <ProductsSection myStoreId={myStoreId} />;
+				return (
+					<ProductsSection
+						myStoreId={myStoreId}
+						active={activeTab === "products"}
+					/>
+				);
 
 			case "expenses":
 				return myStoreId ? <ExpensesView storeId={myStoreId} /> : null;

@@ -9,12 +9,20 @@ import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 
 const productResolvers = {
 	Query: {
-		getProducts: async (_, args = {}) => {
-			const filter =
-				args.isDecant !== undefined ? { isDecant: args.isDecant } : {};
-			return await Product.find(filter).populate(
-				"brand category segment linkedProduct notes",
-			);
+		getProducts: async (_, { isDecant, page = 1, pageSize = 9 } = {}) => {
+			const filter = isDecant !== undefined ? { isDecant } : {};
+			const skip = (page - 1) * pageSize;
+			const total = await Product.countDocuments(filter);
+			const items = await Product.find(filter)
+				.populate("brand category segment linkedProduct notes")
+				.skip(skip)
+				.limit(pageSize);
+			return {
+				items,
+				total,
+				totalPages: Math.ceil(total / pageSize),
+				currentPage: page,
+			};
 		},
 
 		getProduct: async (_, { id }) =>

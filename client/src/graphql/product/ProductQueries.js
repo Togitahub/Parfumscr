@@ -30,11 +30,16 @@ const PRODUCT_FIELDS = `
 `;
 
 export const GET_PRODUCTS = gql`
-	query GetProducts {
-		getProducts {
-			${PRODUCT_FIELDS}
-		}
-	}
+    query GetProducts($page: Int, $pageSize: Int) {
+        getProducts(page: $page, pageSize: $pageSize) {
+            items {
+                ${PRODUCT_FIELDS}
+            }
+            total
+            totalPages
+            currentPage
+        }
+    }
 `;
 
 // Solo perfumes (isDecant: false)

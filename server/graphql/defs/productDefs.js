@@ -27,8 +27,15 @@ const productDefs = gql`
 	}
 
 	type Query {
-		getProducts(isDecant: Boolean): [Product]
+		getProducts(isDecant: Boolean, page: Int, pageSize: Int): ProductPage
 		getProduct(id: ID!): Product
+	}
+
+	type ProductPage {
+		items: [Product]!
+		total: Int!
+		totalPages: Int!
+		currentPage: Int!
 	}
 
 	type Mutation {
