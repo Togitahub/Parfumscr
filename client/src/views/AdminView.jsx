@@ -392,9 +392,9 @@ const ProductsSectionInner = ({
 
 	return (
 		<>
-			<p className="text-sm text-first/50">Total de productos: {total}</p>
 			<ProductList
 				products={products}
+				totalProductsFound={total}
 				loading={loadingProducts}
 				brands={brands}
 				categories={categories}

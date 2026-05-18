@@ -74,6 +74,7 @@ const AnimatedCard = ({ children, index }) => (
 
 const ProductList = ({
 	products = [],
+	totalProductsFound,
 	loading = false,
 	locked = {},
 	brands = [],
@@ -183,7 +184,7 @@ const ProductList = ({
 						>
 							{total === 0
 								? "Sin resultados"
-								: `${total} producto${total !== 1 ? "s" : ""} encontrado${total !== 1 ? "s" : ""}`}
+								: `${totalProductsFound || total} producto${total !== 1 ? "s" : ""} encontrado${total !== 1 ? "s" : ""}`}
 						</p>
 					)}
 
