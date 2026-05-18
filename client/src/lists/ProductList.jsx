@@ -90,17 +90,25 @@ const ProductList = ({
 	onEdit,
 	onDelete,
 	onAddDecant,
+	disableLocalFiltering = false, // ← nueva prop
 	className = "",
 }) => {
-	const { applyFilters, activeFilterCount, search, filterKey } = useFilters();
+	const { applyFilters, activeFilterCount, search } = useFilters();
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const prevKeyRef = useRef("");
 
-	const { items, total, totalPages } = useMemo(
-		() => applyFilters(products, locked),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[filterKey, products],
-	);
+	const { items, total, totalPages } = useMemo(() => {
+		if (disableLocalFiltering) {
+			// Modo servidor: los productos ya vienen filtrados y paginados
+			return {
+				items: products,
+				total: products.length,
+				totalPages: 1,
+			};
+		}
+		// Modo local: aplicar filtros al array completo
+		return applyFilters(products, locked);
+	}, [disableLocalFiltering, products, applyFilters, locked]);
 
 	// Reset animation key cuando cambian los resultados
 	const animKey = `${search}-${total}-${JSON.stringify(locked)}`;

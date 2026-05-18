@@ -9,14 +9,68 @@ import { deleteImage, extractPublicId } from "../../config/cloudinary.js";
 
 const productResolvers = {
 	Query: {
-		getProducts: async (_, { isDecant, page = 1, pageSize = 9 } = {}) => {
-			const filter = isDecant !== undefined ? { isDecant } : {};
+		getProducts: async (
+			_,
+			{
+				isDecant,
+				page = 1,
+				pageSize = 9,
+				brandId,
+				categoryId,
+				segmentId,
+				noteIds = [],
+				minPrice,
+				maxPrice,
+				inStock,
+				search,
+			},
+		) => {
+			const filter = {};
+
+			// Filtro básico de tipo (perfume/decant)
+			if (isDecant !== undefined) filter.isDecant = isDecant;
+
+			// Filtro por marca
+			if (brandId) filter.brand = brandId;
+
+			// Filtro por categoría
+			if (categoryId) filter.category = categoryId;
+
+			// Filtro por segmento
+			if (segmentId) filter.segment = segmentId;
+
+			// Filtro por acordes olfativos (todos los seleccionados)
+			if (noteIds.length > 0) {
+				filter.notes = { $all: noteIds };
+			}
+
+			// Búsqueda por texto
+			if (search && search.trim()) {
+				const searchRegex = new RegExp(search.trim(), "i");
+				filter.$or = [{ name: searchRegex }, { description: searchRegex }];
+			}
+
+			// Filtro por precio (usando el precio base del producto)
+			if (minPrice !== undefined || maxPrice !== undefined) {
+				filter.price = {};
+				if (minPrice !== undefined) filter.price.$gte = minPrice;
+				if (maxPrice !== undefined) filter.price.$lte = maxPrice;
+			}
+
+			// Filtro por stock (inStock: true = stock > 0)
+			if (inStock === true) {
+				filter.stock = { $gt: 0 };
+			} else if (inStock === false) {
+				filter.stock = 0;
+			}
+
 			const skip = (page - 1) * pageSize;
 			const total = await Product.countDocuments(filter);
 			const items = await Product.find(filter)
 				.populate("brand category segment linkedProduct notes")
 				.skip(skip)
 				.limit(pageSize);
+
 			return {
 				items,
 				total,

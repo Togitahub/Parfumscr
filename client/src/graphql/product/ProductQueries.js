@@ -29,17 +29,43 @@ const PRODUCT_FIELDS = `
 	createdAt
 `;
 
+// Reemplazar GET_PRODUCTS con:
+
 export const GET_PRODUCTS = gql`
-    query GetProducts($page: Int, $pageSize: Int) {
-        getProducts(page: $page, pageSize: $pageSize) {
-            items {
-                ${PRODUCT_FIELDS}
-            }
-            total
-            totalPages
-            currentPage
-        }
+  query GetProducts(
+    $isDecant: Boolean
+    $page: Int
+    $pageSize: Int
+    $brandId: ID
+    $categoryId: ID
+    $segmentId: ID
+    $noteIds: [ID]
+    $minPrice: Float
+    $maxPrice: Float
+    $inStock: Boolean
+    $search: String
+  ) {
+    getProducts(
+      isDecant: $isDecant
+      page: $page
+      pageSize: $pageSize
+      brandId: $brandId
+      categoryId: $categoryId
+      segmentId: $segmentId
+      noteIds: $noteIds
+      minPrice: $minPrice
+      maxPrice: $maxPrice
+      inStock: $inStock
+      search: $search
+    ) {
+      items {
+        ${PRODUCT_FIELDS}
+      }
+      total
+      totalPages
+      currentPage
     }
+  }
 `;
 
 // Solo perfumes (isDecant: false)

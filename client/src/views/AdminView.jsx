@@ -332,13 +332,46 @@ const ProductsSectionInner = ({
 	onToggleStore,
 	storeProductIds,
 }) => {
-	const { page } = useFilters();
+	const { page, filters, search } = useFilters();
 	const PAGE_SIZE = 9;
+
+	const queryVariables = useMemo(() => {
+		const vars = { page, pageSize: PAGE_SIZE };
+
+		// Tipo (perfume/decant)
+		if (filters.isDecant !== null) vars.isDecant = filters.isDecant;
+
+		// Marca
+		if (filters.brandId) vars.brandId = filters.brandId;
+
+		// Categoría
+		if (filters.categoryId) vars.categoryId = filters.categoryId;
+
+		// Segmento
+		if (filters.segmentId) vars.segmentId = filters.segmentId;
+
+		// Acordes (noteIds)
+		if (filters.noteIds.length > 0) vars.noteIds = filters.noteIds;
+
+		// Precio
+		if (filters.priceMin && filters.priceMin !== "")
+			vars.minPrice = parseFloat(filters.priceMin);
+		if (filters.priceMax && filters.priceMax !== "")
+			vars.maxPrice = parseFloat(filters.priceMax);
+
+		// Stock
+		if (filters.inStock !== null) vars.inStock = filters.inStock;
+
+		// Búsqueda
+		if (search && search.trim()) vars.search = search;
+
+		return vars;
+	}, [page, filters, search]);
 
 	const { data: productsData, loading: loadingProducts } = useQuery(
 		GET_PRODUCTS,
 		{
-			variables: { page, pageSize: PAGE_SIZE },
+			variables: queryVariables,
 			skip: !active,
 		},
 	);
@@ -359,6 +392,7 @@ const ProductsSectionInner = ({
 
 	return (
 		<>
+			<p className="text-sm text-first/50">Total de productos: {total}</p>
 			<ProductList
 				products={products}
 				loading={loadingProducts}
@@ -372,6 +406,7 @@ const ProductsSectionInner = ({
 				onToggleStore={myStoreId ? onToggleStore : undefined}
 				storeProductIds={storeProductIds}
 				showAdminActions
+				disableLocalFiltering={true}
 			/>
 			{totalPages > 1 && <Pagination total={total} totalPages={totalPages} />}
 		</>
