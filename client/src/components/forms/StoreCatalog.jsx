@@ -277,7 +277,12 @@ const StoreCatalog = ({ storeId }) => {
 													}))
 												}
 												onBlur={() => {
-													if (editValues.discount !== "") {
+													const discountValue =
+														editValues.discount === ""
+															? 0
+															: parseFloat(editValues.discount);
+
+													if (!isNaN(discountValue)) {
 														updateStoreProduct({
 															variables: {
 																productId: product.id,
@@ -289,7 +294,7 @@ const StoreCatalog = ({ storeId }) => {
 																	editValues.stock !== ""
 																		? parseInt(editValues.stock)
 																		: undefined,
-																discount: parseFloat(editValues.discount),
+																discount: discountValue,
 															},
 														});
 													}

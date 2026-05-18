@@ -262,7 +262,7 @@ const Hero = ({ storeProductsQty }) => {
 							{[
 								{
 									value: storeProductsQty,
-									label: storeProductsQty === 1 ? "Perfume" : "Perfumes",
+									label: storeProductsQty === 1 ? "Producto" : "Productos",
 								},
 								{ value: "Decants", label: "Disponibles" },
 							].map((stat, i) => (
