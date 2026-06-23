@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../hooks/AuthContext";
 import { useStore } from "../../hooks/StoreContext";
 
 import {
@@ -8,6 +9,7 @@ import {
 	BsHeartFill,
 	BsCart3,
 	BsBoxArrowUpRight,
+	BsWhatsapp,
 } from "react-icons/bs";
 
 import Badge from "../common/Badge";
@@ -43,7 +45,10 @@ const ProductCard = ({
 }) => {
 	const navigate = useNavigate();
 
+	const { user } = useAuth();
 	const { store } = useStore();
+
+	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
 
 	const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -62,6 +67,7 @@ const ProductCard = ({
 		isDecant,
 		discount = 0,
 		notes = [],
+		decantAvailable = false,
 	} = product;
 
 	const image = images?.[0] ?? null;
@@ -277,28 +283,38 @@ const ProductCard = ({
 					</div>
 				)}
 
+				{/* Decant disponible banner */}
+				{!isDecant && decantAvailable && (
+					<div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#25D366]/8 border border-[#25D366]/20 text-[10px] text-[#25D366] font-medium">
+						<BsWhatsapp className="w-3 h-3 shrink-0" />
+						Decants disponibles · Consultar por WhatsApp
+					</div>
+				)}
+
 				{/* Price + stock */}
 				<div className="flex items-end justify-between gap-2 mt-auto pt-3 border-t border-first/8">
 					<div className="flex flex-col gap-1">
-						<div className="flex items-baseline gap-2">
-							<span
-								className={[
-									"font-bold text-first tabular-nums",
-									isFeatured ? "text-2xl" : isCompact ? "text-sm" : "text-lg",
-								].join(" ")}
-							>
-								₡
-								{discountedPrice.toLocaleString("es-CR", {
-									minimumFractionDigits: 0,
-								})}
-							</span>
-							{hasDiscount && (
-								<span className="text-xs text-first/30 line-through tabular-nums">
-									₡{price.toLocaleString("es-CR")}
+						{(isAdmin || isDecant) && (
+							<div className="flex items-baseline gap-2">
+								<span
+									className={[
+										"font-bold text-first tabular-nums",
+										isFeatured ? "text-2xl" : isCompact ? "text-sm" : "text-lg",
+									].join(" ")}
+								>
+									₡
+									{discountedPrice.toLocaleString("es-CR", {
+										minimumFractionDigits: 0,
+									})}
 								</span>
-							)}
-						</div>
-						{!isCompact && stock !== undefined && stock !== null && (
+								{hasDiscount && (
+									<span className="text-xs text-first/30 line-through tabular-nums">
+										₡{price.toLocaleString("es-CR")}
+									</span>
+								)}
+							</div>
+						)}
+						{/* {!isCompact && stock !== undefined && stock !== null && (
 							<div className="flex items-center gap-1.5">
 								<span
 									className={[
@@ -318,7 +334,7 @@ const ProductCard = ({
 											: "Agotado"}
 								</span>
 							</div>
-						)}
+						)} */}
 					</div>
 
 					{/* Detail arrow */}

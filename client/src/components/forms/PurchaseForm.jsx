@@ -23,6 +23,7 @@ import {
 	GET_MY_ORDERS,
 } from "../../graphql/order/OrderQueries";
 import { CREATE_ORDER } from "../../graphql/order/OrderMutations";
+import { useAuth } from "../../hooks/AuthContext";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -62,6 +63,9 @@ const buildWhatsAppMessage = ({
 const OrderItemRow = ({ item, index }) => {
 	const { product, quantity } = item;
 	const subtotal = product.price * quantity;
+
+	const { user } = useAuth();
+	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
 
 	return (
 		<div
@@ -104,16 +108,18 @@ const OrderItemRow = ({ item, index }) => {
 				</div>
 			</div>
 
-			<div className="flex flex-col items-end gap-0.5 shrink-0">
-				<span className="text-sm font-semibold text-first tabular-nums">
-					{formatPrice(subtotal)}
-				</span>
-				{quantity > 1 && (
-					<span className="text-[11px] text-first/35 tabular-nums">
-						{quantity} × {formatPrice(product.price)}
+			{(isAdmin || product.isDecant) && (
+				<div className="flex flex-col items-end gap-0.5 shrink-0">
+					<span className="text-sm font-semibold text-first tabular-nums">
+						{formatPrice(subtotal)}
 					</span>
-				)}
-			</div>
+					{quantity > 1 && (
+						<span className="text-[11px] text-first/35 tabular-nums">
+							{quantity} × {formatPrice(product.price)}
+						</span>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };
@@ -365,7 +371,7 @@ const PurchaseForm = ({
 						)}
 					</div>
 
-					<div className="flex items-center justify-between mt-3 px-1">
+					{/* <div className="flex items-center justify-between mt-3 px-1">
 						<span className="text-xs text-first/40 uppercase tracking-wider font-medium">
 							Total estimado
 						</span>
@@ -375,7 +381,7 @@ const PurchaseForm = ({
 						>
 							{formatPrice(totalPrice)}
 						</span>
-					</div>
+					</div> */}
 				</div>
 
 				{/* ── Datos del cliente ── */}

@@ -32,6 +32,10 @@ const StoreProductSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
+		decantAvailable: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true },
 );

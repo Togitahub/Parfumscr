@@ -284,6 +284,7 @@ const ProductView = () => {
 		: storePrice;
 
 	const discount = storeProduct?.discount ?? product?.discount ?? 0;
+	const decantAvailable = storeProduct?.decantAvailable ?? false;
 
 	const hasDiscount = discount > 0;
 
@@ -479,25 +480,27 @@ const ProductView = () => {
 
 						{/* Price block */}
 						<div className="flex flex-col gap-1">
-							<div className="flex items-baseline gap-3">
-								<span
-									className="font-semibold text-first tabular-nums"
-									style={{
-										fontFamily: "'Cinzel', serif",
-										fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)",
-									}}
-								>
-									{formatPrice(discountedPrice(discount, displayPrice, qty))}
-								</span>
-								{hasDiscount && (
-									<span className="text-base text-first/30 line-through tabular-nums">
-										{formatPrice(displayPrice * qty)}
+							{(isAdmin || product.isDecant) && (
+								<div className="flex items-baseline gap-3">
+									<span
+										className="font-semibold text-first tabular-nums"
+										style={{
+											fontFamily: "'Cinzel', serif",
+											fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)",
+										}}
+									>
+										{formatPrice(discountedPrice(discount, displayPrice, qty))}
 									</span>
-								)}
-							</div>
+									{hasDiscount && (
+										<span className="text-base text-first/30 line-through tabular-nums">
+											{formatPrice(displayPrice * qty)}
+										</span>
+									)}
+								</div>
+							)}
 
 							{/* Stock indicator — perfume (no decants) */}
-							<div className="flex items-center gap-2 text-xs">
+							{/* <div className="flex items-center gap-2 text-xs">
 								{isOutOfStock ? (
 									<>
 										<BsXCircle className="w-3.5 h-3.5 text-error/60" />
@@ -517,7 +520,29 @@ const ProductView = () => {
 										</span>
 									</>
 								)}
-							</div>
+							</div> */}
+
+							{/* Decant disponible banner */}
+							{!product.isDecant && decantAvailable && (
+								<a
+									href={`https://wa.me/${store?.whatsapp?.replace(/\D/g, "") ?? ""}?text=${encodeURIComponent(
+										`Hola! Me interesa consultar por decants de: ${product.name} ${product.brand?.name}`,
+									)}`}
+									target="_blank"
+									rel="noreferrer"
+									className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-[#25D366]/8 border border-[#25D366]/25 hover:bg-[#25D366]/12 transition-colors"
+								>
+									<BsWhatsapp className="w-4 h-4 text-[#25D366] shrink-0" />
+									<div className="flex flex-col">
+										<span className="text-sm font-semibold text-[#25D366]">
+											Decants disponibles
+										</span>
+										<span className="text-xs text-first/50">
+											Consultar por WhatsApp
+										</span>
+									</div>
+								</a>
+							)}
 						</div>
 
 						{/* Quantity + CTA */}

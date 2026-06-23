@@ -32,6 +32,7 @@ export const GET_STORE_PRODUCTS = gql`
 			price
 			stock
 			discount
+			decantAvailable
 			product {
 				id
 				name

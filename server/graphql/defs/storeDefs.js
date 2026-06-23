@@ -33,6 +33,7 @@ const storeDefs = gql`
 		discount: Float
 		active: Boolean!
 		views: Int
+		decantAvailable: Boolean
 	}
 
 	type ProductStat {
@@ -106,6 +107,7 @@ const storeDefs = gql`
 			price: Float
 			stock: Int
 			discount: Float
+			decantAvailable: Boolean
 		): StoreProduct!
 		toggleStorePos(ownerId: ID!): Store!
 		toggleHomeShow(ownerId: ID!): Store!

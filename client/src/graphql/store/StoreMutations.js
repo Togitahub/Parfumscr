@@ -114,17 +114,20 @@ export const UPDATE_STORE_PRODUCT = gql`
 		$price: Float
 		$stock: Int
 		$discount: Float
+		$decantAvailable: Boolean
 	) {
 		updateStoreProduct(
 			productId: $productId
 			price: $price
 			stock: $stock
 			discount: $discount
+			decantAvailable: $decantAvailable
 		) {
 			id
 			price
 			stock
 			discount
+			decantAvailable
 			product {
 				id
 				name

@@ -23,6 +23,7 @@ import { Spinner } from "../components/interface/LoadingUi";
 import { ConfirmDialog } from "../components/interface/Modal";
 import PurchaseForm from "../components/forms/PurchaseForm";
 import { getOptimizedUrl } from "../utils/ImageUtils";
+import Badge from "../components/common/Badge";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -111,6 +112,10 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 	const { product, quantity } = item;
 	const subtotal = product.price * quantity;
 
+	const { user } = useAuth();
+
+	const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(user?.role);
+
 	return (
 		<div
 			className="group flex items-center gap-4 py-4 border-b border-first/8 last:border-0"
@@ -172,9 +177,11 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 						</>
 					)}
 				</div>
-				<p className="text-xs text-first/35 mt-1 tabular-nums">
-					{formatPrice(product.price)} c/u
-				</p>
+				{(isAdmin || product.isDecant) && (
+					<p className="text-xs text-first/35 mt-1 tabular-nums">
+						{formatPrice(product.price)} c/u
+					</p>
+				)}
 			</div>
 
 			{/* Qty controls */}
@@ -202,9 +209,11 @@ const CartItemRow = ({ item, onIncrease, onDecrease, onRemove, index }) => {
 
 			{/* Subtotal */}
 			<div className="flex items-center gap-3 shrink-0">
-				<span className="text-base font-bold text-first tabular-nums w-24 text-right hidden sm:block">
-					{formatPrice(subtotal)}
-				</span>
+				{isAdmin && (
+					<span className="text-base font-bold text-first tabular-nums w-24 text-right hidden sm:block">
+						{formatPrice(subtotal)}
+					</span>
+				)}
 				<button
 					onClick={() => onRemove(product.id)}
 					className="w-7 h-7 rounded-lg flex items-center justify-center text-first/25 hover:text-error hover:bg-error/8 transition-all duration-150 cursor-pointer"
@@ -442,7 +451,7 @@ const CartView = () => {
 							</div>
 
 							{/* Mobile subtotals */}
-							<div className="sm:hidden mt-4 flex flex-col gap-2 px-1">
+							{/* <div className="sm:hidden mt-4 flex flex-col gap-2 px-1">
 								{cartItems.map((item) => (
 									<div
 										key={item?.product.id}
@@ -452,11 +461,11 @@ const CartView = () => {
 											{item?.product.name}
 										</span>
 										<span className="tabular-nums font-medium text-first/60">
-											{formatPrice(item?.product.price * item?.quantity)}
+											{isAdmin ? formatPrice(item?.product.price * item?.quantity) : item?.isDecant ? <Badge/> : null}
 										</span>
 									</div>
 								))}
-							</div>
+							</div> */}
 						</div>
 
 						{/* ── Order summary sidebar ── */}
@@ -467,7 +476,7 @@ const CartView = () => {
 								animationDelay: "100ms",
 							}}
 						>
-							<p
+							{/* <p
 								className="text-[10px] font-semibold uppercase tracking-[0.2em] text-first/35"
 								style={{ fontFamily: "'Cinzel', serif" }}
 							>
@@ -505,7 +514,7 @@ const CartView = () => {
 								>
 									{formatPrice(totalPrice)}
 								</span>
-							</div>
+							</div> */}
 
 							<Button
 								fullWidth

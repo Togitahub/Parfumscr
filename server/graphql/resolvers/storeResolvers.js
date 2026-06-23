@@ -205,7 +205,7 @@ const storeResolvers = {
 
 		updateStoreProduct: async (
 			_,
-			{ productId, price, stock, discount },
+			{ productId, price, stock, discount, decantAvailable },
 			{ user },
 		) => {
 			if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
@@ -215,7 +215,12 @@ const storeResolvers = {
 
 			const storeProduct = await StoreProduct.findOneAndUpdate(
 				{ store: store._id, product: productId },
-				{ price, stock, discount },
+				{
+					price,
+					stock,
+					discount,
+					...(decantAvailable !== undefined && { decantAvailable }),
+				},
 				{ new: true },
 			);
 

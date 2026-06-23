@@ -1,7 +1,13 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 
-import { BsSearch, BsX, BsTrash } from "react-icons/bs";
+import {
+	BsSearch,
+	BsX,
+	BsTrash,
+	BsCheck,
+	BsCheck2Circle,
+} from "react-icons/bs";
 
 import { useToast } from "../../hooks/ToastContext";
 
@@ -79,6 +85,7 @@ const StoreCatalog = ({ storeId }) => {
 			price: sp.price != null ? String(sp.price) : "",
 			stock: sp.stock != null ? String(sp.stock) : "",
 			discount: sp.discount != null ? String(sp.discount) : "",
+			decantAvailable: sp.decantAvailable ?? false,
 		};
 
 	if (loadingStore) {
@@ -170,15 +177,52 @@ const StoreCatalog = ({ storeId }) => {
 												{product.isDecant ? " · Decant" : " · Perfume"}
 											</p>
 										</div>
-										<Button
-											iconOnly
-											size="sm"
-											variant="ghost"
-											icon={<BsTrash />}
-											onClick={() => handleRemove(product.id)}
-											disabled={removing}
-											className="hover:text-error!"
-										/>
+										<div className="flex items-center gap-2">
+											<p>Decants</p>
+											<input
+												type="checkbox"
+												id={`decant-${product.id}`}
+												checked={editValues.decantAvailable}
+												onChange={(e) => {
+													const val = e.target.checked;
+													setEditing((prev) => ({
+														...prev,
+														[product.id]: {
+															...editValues,
+															decantAvailable: val,
+														},
+													}));
+													updateStoreProduct({
+														variables: {
+															productId: product.id,
+															price:
+																editValues.price !== ""
+																	? parseFloat(editValues.price)
+																	: undefined,
+															stock:
+																editValues.stock !== ""
+																	? parseInt(editValues.stock)
+																	: undefined,
+															discount:
+																editValues.discount !== ""
+																	? parseFloat(editValues.discount)
+																	: undefined,
+															decantAvailable: val,
+														},
+													});
+												}}
+												className="accent-second w-4 h-4 cursor-pointer"
+											/>
+											<Button
+												iconOnly
+												size="sm"
+												variant="ghost"
+												icon={<BsTrash />}
+												onClick={() => handleRemove(product.id)}
+												disabled={removing}
+												className="hover:text-error!"
+											/>
+										</div>
 									</div>
 
 									{/* Price / stock / discount override */}
